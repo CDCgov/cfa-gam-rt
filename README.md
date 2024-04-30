@@ -6,11 +6,11 @@
 ## Overview
 
 This project is an in-development R package for $R_t$ estimation using generalized additive models (GAMs).
-Over the last few years, GAMs have been used with some success to estimate epidemic growth rates and nowcast cases.
+Over the last few years, GAMs have been used with some success to estimate epidemic growth rates and nowcast cases (see [Ward, 2021](https://doi.org/10.1136/bmjopen-2021-056636) and [Mellor, 2023](https://doi.org/10.1038/s43856-023-00424-4) for an overview of methods).
 The [R package `{mgcv}`](https://cran.r-project.org/web/packages/mgcv/index.html) provides a flexible, fast, and robust interface to fit penalized-spline based models.
 However, the substantial research effort into spline-based approaches has not been unified into a shared R package.
 
-This R package aims to become an opinionated implementation of the literature, with reasonable defaults for real-time epidemic modeling.
+This R package aims to become an opinionated re-implementation of the literature methods, with reasonable defaults for real-time epidemic modeling.
 Development effort is optimized around real-time use-cases, with potential for right-truncation, noisy reporting, and uncertain data-generating processes.
 It is meant to be a simple drop-in tool to be run alongside more computationally intensive implementations like [`{EpiNow2}`](https://github.com/epiforecasts/EpiNow2).
 
