@@ -1,41 +1,25 @@
-# cfa-repo-template
-A template for new CFA repos
+# RtGAM: Estimating $R_t$ with Generalized Additive Models
 
-⚠️ This is a work in progress
-
-## How to use this template
-To open a new repo using this template, click the green `Use this template`
-button above and to the right. Then select `Create a new repository`.
-Boilerplate language from [CDCgov GitHub Oroganization Open Source Project Template](https://github.com/cdcgov/template)
-below the horizontal rule should be maintained in the final `README.md` file.
-
-[Guidance about when clearance is needed and how to get it]
-
-## This template contains
-- [x] An Apache 2.0 license
-- [ ] Issue templates for bugs, feature requests, and scientific improvements
-- [ ] A pull request (PR) template
-- [x] CI for linting and styling, following CFA's style guide for R, Python, and Java
-- [x] A .gitignore template that covers R, Python, and Java
-
-## Reminder: how to open issues, branches, submit PRs, and review PRs
-[TODO]
-* Link to CFA's style guide
-* How to open issues, including naming conventions, template usage
-* How to create new branches, including naming conventions, template usage
-* How to submit a PR, including when, template usage
-* How to review a PR, including whose responsibility to merge
-
-------------------------------------------------------------------------------------
-# Your project name
+> [!CAUTION]
+> This project is a work-in-progress. Any outputs may be misleading or even incorrect. Despite this project's early stage, all development is in public as part of the Center for Forecasting and Outbreak Analytics' goals around open development. Questions and suggestions are welcome through GitHub issues or a PR.
 
 ## Overview
 
-Describe the purpose of your project. Add additional sections as necessary to help collaborators and potential collaborators understand and use your project.
+This project is an in-development R package for $R_t$ estimation using generalized additive models (GAMs).
+Over the last few years, GAMs have been used with some success to estimate epidemic growth rates and nowcast cases.
+The [R package `{mgcv}`](https://cran.r-project.org/web/packages/mgcv/index.html) provides a flexible, fast, and robust interface to fit penalized-spline based models.
+However, the substantial research effort into spline-based approaches has not been unified into a shared R package.
+
+This R package aims to become an opinionated implementation of the literature, with reasonable defaults for real-time epidemic modeling.
+Development effort is optimized around real-time use-cases, with potential for right-truncation, noisy reporting, and uncertain data-generating processes.
+It is meant to be a simple drop-in tool to be run alongside more computationally intensive implementations like [`{EpiNow2}`](https://github.com/epiforecasts/EpiNow2).
 
 ## Project Admin
 
-Name, Degrees, e-mail, CDC org (e.g., CDC/IOD/ORR/CFA)
+- Zachary Susswein (@zsusswein)
+- Katelyn Gostic, PhD (@kgostic)
+
+------------------------------------------------------------------------------------
 
 ## General Disclaimer
 This repository was created for use by CDC programs to collaborate on public health related projects in support of the [CDC mission](https://www.cdc.gov/about/organization/mission.htm).  GitHub is not hosted by the CDC, but is a third party website used by CDC and its partners to share information and collaborate on software. CDC use of GitHub does not imply an endorsement of any one particular service, product, or enterprise.
