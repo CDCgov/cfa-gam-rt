@@ -18,6 +18,7 @@ It is meant to be a simple drop-in tool to be run alongside more computationally
 
 - Zachary Susswein (@zsusswein)
 - Katelyn Gostic, PhD (@kgostic)
+- Sam Abbott, PhD (@seabbs)
 
 ------------------------------------------------------------------------------------
 
