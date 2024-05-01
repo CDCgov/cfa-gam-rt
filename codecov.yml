@@ -1,0 +1,16 @@
+comment:
+     layout: "condensed_header, condensed_files, condensed_footer" # add "condensed_" to "header", "files" and "footer"
+      hide_project_coverage: TRUE # set to true
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+        informational: true
+    patch:
+      default:
+        target: auto
+        threshold: 1%
+        informational: true

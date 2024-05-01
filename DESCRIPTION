@@ -1,9 +1,14 @@
 Package: RtGam
 Title: Estimating Rt with Generalized Additive Models
 Version: 0.0.0.9000
-Authors@R:c(
- .
-   )
+Authors@R: c(
+    person("Zachary", "Susswein", , "utb2@cdc.gov", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-4329-4833")),
+    person("Katelyn", "Gostic", , "uep6@cdc.gov", role = "aut",
+           comment = c(ORCID = "0000-0002-9369-6371")),
+    person("Sam", "Abbott", , "azw1@cdc.gov", role = "aut",
+           comment = c(ORCID = "0000-0001-8057-8037"))
+  )
 Description: An opinionated implementation of a generalized additive
     modeling (GAMs) approach to estimate epidemic dynamics. This flexible
     semi-parametric method allows fitting to arbitrary incidence
@@ -14,8 +19,13 @@ Description: An opinionated implementation of a generalized additive
     _real-time_ use cases. The package is meant for drop-in use in an
     emerging outbreak, complementing MCMC-based inference methods.
 License: Apache License (>= 2)
-URL: https://github.com/cdcgov/cfa-gam-rt
+URL: https://github.com/cdcgov/cfa-gam-rt,
+    https://cdcgov.github.io/cfa-gam-rt/
 BugReports: https://github.com/cdcgov/cfa-gam-rt/issues
+Suggests:
+    testthat (>= 3.0.0),
+    pkgdown
+Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.1
