@@ -1,0 +1,35 @@
+name: Check NEWS.md Update
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-news-md-modification:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
+      - name: Check for NEWS.md changes
+        run: |
+          echo "Current SHA: $GITHUB_SHA"
+          echo "Base SHA: ${{ github.event.pull_request.base.sha }}"
+
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+
+          CHANGED_FILES=$(git diff --name-only $GITHUB_SHA $(git merge-base $GITHUB_SHA origin/${{ github.event.pull_request.base.ref }}))
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          if echo "$CHANGED_FILES" | grep -q "NEWS.md"; then
+            echo "NEWS.md has been modified."
+          else
+            echo "::error file=NEWS.md,line=1,col=5::NEWS.md must be updated with each PR." >&2
+            exit 1
+          fi
+        shell: /usr/bin/bash -e {0}
