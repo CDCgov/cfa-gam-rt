@@ -1,3 +1,46 @@
+test_that("Required input check works", {
+  cases <- c(1, 2)
+  reference_date <- as.Date(c(1, 2))
+  group <- c(1, 2)
+
+  expect_error(
+    check_required_inputs_provided(
+      call = NULL
+    ),
+    class = "rlang_error"
+  )
+  expect_error(
+    check_required_inputs_provided(
+      cases = cases,
+      call = NULL
+    ),
+    class = "rlang_error"
+  )
+  expect_error(
+    check_required_inputs_provided(
+      cases = cases,
+      reference_date = reference_date,
+      call = NULL
+    ),
+    class = "rlang_error"
+  )
+  expect_null(check_required_inputs_provided(cases,
+    reference_date,
+    group,
+    call = NULL
+  ))
+})
+
+test_that("Missingness check works", {
+  no_missingness <- c(1, 2, 3)
+  missingness <- c(NA, 1, 2)
+
+  expect_error(check_no_missingness(missingness),
+    class = "RtGam_invalid_input"
+  )
+  expect_null(check_no_missingness(no_missingness))
+})
+
 test_that("Negative element check works", {
   non_neg <- c(0, 1, 2)
   has_neg <- c(-1, 1, 2)

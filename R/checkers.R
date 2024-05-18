@@ -1,11 +1,38 @@
+#' Check required inputs provided
+check_required_inputs_provided <- function(cases,
+                                           reference_date,
+                                           group,
+                                           call = caller_env()) {
+  rlang::check_required(cases, "cases")
+  rlang::check_required(reference_date, "reference_date")
+  rlang::check_required(group, "group")
+  invisible()
+}
+
+check_no_missingness <- function(x, arg = "x", call = rlang::caller_env()) {
+  is_missing <- rlang::are_na(x)
+
+  if (any(is_missing)) {
+    cli::cli_abort(
+      c("{.arg {arg}} has missing values",
+        "i" = "Missing values are not supported in {.arg {arg}}",
+        "!" = "Missing element(s): {.val {which(is_missing)}}"
+      ),
+      call = call,
+      class = "RtGam_invalid_input"
+    )
+  }
+}
+
 #' Check all elements are 0 or positive
 check_elements_non_neg <- function(x, arg = "x", call = rlang::caller_env()) {
-  is_pos <- x >= 0
-  if (!all(is_pos)) {
+  # Greater than or equal to 0 or is NA
+  is_non_neg <- (x >= 0) | is.na(x)
+  if (!all(is_non_neg)) {
     cli::cli_abort(
       c("{.arg {arg}} has negative elements",
         "!" = "All elements must be 0 or greater",
-        "i" = "Elements {.val {which(!is_pos)}} are negative"
+        "i" = "Elements {.val {which(!is_non_neg)}} are negative"
       ),
       class = "RtGam_invalid_input",
       call = call
