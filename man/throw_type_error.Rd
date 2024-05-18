@@ -9,7 +9,7 @@ throw_type_error(object, arg_name, expected_type, call = rlang::caller_env())
 \arguments{
 \item{object}{Object with incorrect type}
 
-\item{arg_name}{Name of the corresponding argument to \code{.object}}
+\item{arg_name}{Name of the argument corresponding to \code{object}}
 
 \item{expected_type}{The type that the user should provide instead}
 
@@ -20,5 +20,7 @@ This function is called for its side effect of throwing an error. It
 should never return.
 }
 \description{
-Follows the
+Follows the guidance from \code{\link[rlang:abort]{rlang::abort()}} on applying a call and a class
+in the error message. Used as a base in type-checkers to throw a properly
+formatted error.
 }

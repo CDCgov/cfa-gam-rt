@@ -1,3 +1,92 @@
+test_that("Negative element check works", {
+  non_neg <- c(0, 1, 2)
+  has_neg <- c(-1, 1, 2)
+  call <- NULL
+  arg <- "test"
+
+  expect_error(check_elements_non_neg(has_neg, arg, call),
+    class = "RtGam_invalid_input"
+  )
+  expect_null(check_elements_non_neg(non_neg, arg, call))
+})
+
+test_that("Sums to one check works", {
+  sums_to_one <- c(0.2, 0.4, 0.4)
+  sums_to_more <- c(0.2, 0.4, 0.405)
+  call <- NULL
+  arg <- "test"
+
+  expect_error(check_sums_to_one(sums_to_more, arg, call),
+    class = "RtGam_invalid_input"
+  )
+  expect_null(check_sums_to_one(sums_to_one, arg, call))
+})
+
+test_that("Type-checking dates works", {
+  dates <- as.Date(c("2023-01-01", "2023-01-02"))
+  not_dates <- c("abc", "123")
+  arg <- "test"
+  call <- NULL
+
+  expect_error(check_date(not_dates, arg, call),
+    class = "RtGam_type_error",
+    regexp = "Date"
+  )
+  expect_null(check_date(dates, arg, call))
+})
+
+test_that("Type-checking vectors works", {
+  bare_vector <- c(1, 2, 3)
+  non_bare_vector <- as.Date(bare_vector)
+  non_vector <- list()
+  arg <- "test"
+  call <- NULL
+
+  expect_error(check_vector(non_bare_vector, arg, call),
+    class = "RtGam_type_error",
+    regexp = "vector"
+  )
+  expect_error(check_vector(non_vector, arg, call),
+    class = "RtGam_type_error",
+    regexp = "vector"
+  )
+  expect_null(check_vector(bare_vector, arg, call))
+})
+
+test_that("Type-checking integers works", {
+  integers <- c(1L, 2L, 3L)
+  integerish <- c(-1, 0, 1)
+  not_integers <- c("a", "b", "c")
+  tricky_not_integers <- as.Date(integers)
+  arg <- "test"
+  call <- NULL
+
+  expect_error(check_integer(not_integers, arg, call),
+    class = "RtGam_type_error",
+    regexp = "integer"
+  )
+
+  expect_error(check_integer(tricky_not_integers, arg, call),
+    class = "RtGam_type_error",
+    regexp = "integer"
+  )
+  expect_null(check_integer(integers, arg, call))
+  expect_null(check_integer(integerish, arg, call))
+})
+
+test_that("Type-checking strings works", {
+  char <- c("a", "b", "c")
+  non_char <- c(1, 2, 3)
+  arg <- "test"
+  call <- NULL
+
+  expect_error(check_character(non_char, arg, call),
+    class = "RtGam_type_error",
+    regexp = "character"
+  )
+  expect_null(check_character(char, arg, call))
+})
+
 test_that("Type error throws successfully", {
   object <- "Test string"
   arg_name <- "Test argument"
