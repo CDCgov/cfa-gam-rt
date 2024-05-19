@@ -14,7 +14,9 @@ test_that("`validate_cases()` is successful", {
   has_neg <- c(-1, cases)
 
   expect_null(validate_cases(cases))
-  expect_null(validate_cases(cases_with_missing))
+  expect_error(validate_cases(cases_with_missing, "test"),
+    class = "RtGam_invalid_input"
+  )
   expect_error(validate_cases(not_a_vector),
     class = "RtGam_type_error"
   )

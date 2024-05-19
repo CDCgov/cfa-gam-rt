@@ -69,7 +69,7 @@ NULL
 
 #' @rdname type_checker
 check_date <- function(x, arg = "x", call = rlang::caller_env()) {
-  if ((!rlang::is_integerish(x)) || (!inherits(x, "Date"))) {
+  if ((!rlang::is_integerish(x)) || (!inherits(x, "Date")) {
     throw_type_error(
       object = x,
       arg_name = arg,
