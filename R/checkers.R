@@ -1,8 +1,7 @@
-#' Check required inputs provided
 check_required_inputs_provided <- function(cases,
                                            reference_date,
                                            group,
-                                           call = caller_env()) {
+                                           call = rlang::caller_env()) {
   rlang::check_required(cases, "cases")
   rlang::check_required(reference_date, "reference_date")
   rlang::check_required(group, "group")
@@ -16,7 +15,7 @@ check_no_missingness <- function(x, arg = "x", call = rlang::caller_env()) {
     cli::cli_abort(
       c("{.arg {arg}} has missing values",
         "i" = "Missing values are not supported in {.arg {arg}}",
-        "!" = "Missing element(s): {.val {which(is_missing)}}"
+        "!" = "Missing element(s) index: {.val {which(is_missing)}}"
       ),
       call = call,
       class = "RtGam_invalid_input"
@@ -24,7 +23,6 @@ check_no_missingness <- function(x, arg = "x", call = rlang::caller_env()) {
   }
 }
 
-#' Check all elements are 0 or positive
 check_elements_non_neg <- function(x, arg = "x", call = rlang::caller_env()) {
   # Greater than or equal to 0 or is NA
   is_non_neg <- (x >= 0) | is.na(x)
@@ -41,7 +39,6 @@ check_elements_non_neg <- function(x, arg = "x", call = rlang::caller_env()) {
   invisible()
 }
 
-#' Check vector sums to one
 check_sums_to_one <- function(x,
                               arg = "x",
                               call = rlang::caller_env(),

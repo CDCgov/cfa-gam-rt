@@ -3,6 +3,7 @@
 #' Does not validate _sensibility_ of inputs nor does it do any
 #' comparisons between the inputs to check lengths
 #' @inheritParams RtGam
+#' @param call Caller environment to be passed through the stack
 validate <- function(cases,
                      reference_date,
                      group,
@@ -17,12 +18,12 @@ validate <- function(cases,
 validate_cases <- function(cases, call) {
   arg <- "cases"
   check_vector(cases, arg, call)
+  check_no_missingness(cases, arg, call)
   check_integer(cases, arg, call)
   check_elements_non_neg(cases, arg, call)
   invisible()
 }
 
-#' Can be re-used for both reference and report dates
 validate_dates <- function(dates, arg, call) {
   check_date(dates, arg, call)
   check_no_missingness(dates, arg, call)

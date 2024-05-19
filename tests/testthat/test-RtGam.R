@@ -4,5 +4,5 @@ test_that("RtGam parses inputs successfully", {
   dates <- as.Date("2023-01-01") + 1:timesteps
   group <- NULL
 
-  expect_null(RtGam(cases, timesteps, group))
+  expect_null(RtGam(cases, dates, group))
 })

@@ -16,6 +16,8 @@ once.}
 
 \item{group}{The geographic grouping for the case/reference-date pair. Not
 yet implemented and a value other than \code{NULL} will throw an error.}
+
+\item{call}{Caller environment to be passed through the stack}
 }
 \description{
 Does not validate \emph{sensibility} of inputs nor does it do any

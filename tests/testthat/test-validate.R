@@ -11,7 +11,7 @@ test_that("`validate_cases()` is successful", {
   cases_with_missing <- c(0, 2, 3, NA)
   wrong_type <- as.Date(c(0, 2, 3))
   not_a_vector <- list(cases)
-  has_neg <- c(-1, cases_with_missing)
+  has_neg <- c(-1, cases)
 
   expect_null(validate_cases(cases))
   expect_null(validate_cases(cases_with_missing))
