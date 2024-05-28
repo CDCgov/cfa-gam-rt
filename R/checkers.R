@@ -144,5 +144,4 @@ throw_type_error <- function(object,
     call = call,
     class = "RtGam_type_error"
   )
-  invisible(NULL)
 }
