@@ -1,3 +1,70 @@
+test_that("Vector equal length check works", {
+  # Without group
+  expect_error(
+    check_vectors_equal_length(
+      cases = 0:4,
+      reference_date = 0:3,
+      group = NULL
+    ),
+    class = "RtGam_invalid_input"
+  )
+  expect_null(
+    check_vectors_equal_length(
+      cases = 0:4,
+      reference_date = 0:4,
+      group = NULL
+    )
+  )
+  # With group
+  expect_error(
+    check_vectors_equal_length(
+      cases = 0:4,
+      reference_date = 0:4,
+      group = 0:3
+    ),
+    class = "RtGam_invalid_input"
+  )
+  expect_null(
+    check_vectors_equal_length(
+      cases = 0:4,
+      reference_date = 0:4,
+      group = 0:4
+    )
+  )
+})
+
+test_that("Unique date check works", {
+  # Without group
+  expect_error(
+    check_dates_unique(
+      as.Date(c("2023-01-01", "2023-01-01")),
+      NULL
+    ),
+    class = "RtGam_invalid_input"
+  )
+  expect_null(
+    check_dates_unique(
+      as.Date(c("2023-01-01", "2023-01-02")),
+      NULL
+    )
+  )
+
+  # With group
+  expect_error(
+    check_dates_unique(
+      as.Date(c("2023-01-01", "2023-01-01", "2023-01-02")),
+      group = c(1, 1, 2)
+    ),
+    class = "RtGam_invalid_input",
+  )
+  expect_null(
+    check_dates_unique(
+      as.Date(c("2023-01-01", "2023-01-02", "2023-01-01")),
+      group = c(1, 1, 2)
+    )
+  )
+})
+
 test_that("Required input check works", {
   cases <- c(1, 2)
   reference_date <- as.Date(c(1, 2))
