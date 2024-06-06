@@ -25,6 +25,8 @@ validate_cases <- function(cases, call) {
 }
 
 validate_dates <- function(dates, arg, call) {
+  arg <- "dates"
+  # No vector check because date vector is of type Date
   check_date(dates, arg, call)
   check_no_missingness(dates, arg, call)
   invisible()
