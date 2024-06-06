@@ -2,9 +2,9 @@ check_required_inputs_provided <- function(cases,
                                            reference_date,
                                            group,
                                            call = rlang::caller_env()) {
-  rlang::check_required(cases, "cases")
-  rlang::check_required(reference_date, "reference_date")
-  rlang::check_required(group, "group")
+  rlang::check_required(cases, "cases", call = call)
+  rlang::check_required(reference_date, "reference_date", call = call)
+  rlang::check_required(group, "group", call = call)
   invisible()
 }
 
