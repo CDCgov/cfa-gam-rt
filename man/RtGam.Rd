@@ -4,7 +4,12 @@
 \alias{RtGam}
 \title{Stub: Will become fitting/class constructor}
 \usage{
-RtGam(cases, reference_date, group = NULL)
+RtGam(
+  cases,
+  reference_date,
+  group = NULL,
+  k = dimensionality_heuristic(length(cases))
+)
 }
 \arguments{
 \item{cases}{A vector of non-negative incident case counts occurring on an
@@ -16,6 +21,15 @@ once.}
 
 \item{group}{The geographic grouping for the case/reference-date pair. Not
 yet implemented and a value other than \code{NULL} will throw an error.}
+
+\item{k}{An integer, the \emph{total} dimension of all the smoothing basis
+functions. Defaults to \code{dimensionality_heuristic(length(cases))}, which
+picks a reasonable estimate based on the number of provided data points.
+This total dimension is partitioned between the different smooths in the
+model. In the case of diagnostic issues in a fitted \code{RtGam} model,
+increasing the value of \code{k} above this default and refitting the model is
+a good first step. See the \link{Setting k} section
+and \code{\link[=dimensionality_heuristic]{dimensionality_heuristic()}} documentation for more information.}
 }
 \value{
 Stub function: NULL
@@ -23,8 +37,45 @@ Stub function: NULL
 \description{
 Including as a stub function to showcase control flow
 }
+\details{
+\subsection{Setting k}{
+
+The argument \code{k} governs the \emph{total} basis dimension for the penalized
+regression spline model used by \code{RtGam}. The model is composed of one or
+more smooth predictors, depending the specifics of the model specification.
+Each smooth predictor is penalized and has its own basis
+dimension. The basis dimension controls the maximum degrees of
+freedom (and by proxy the "wiggliness") of the smooth. \link{RtGam}'s \code{k}
+argument controls the total degrees of freedom available to the different
+smooth predictors. In a simple model with only one smooth predictor, all the
+degrees of freedom from \code{k} would be applied to that single smooth. In a
+more complex model composed of multiple smooth predictors, the total degrees
+degrees of freedom made available by \code{k} would be partitioned between the
+different smooths.
+
+In practice, GAMs penalize the wiggliness of smooth terms, so the fitted
+model will use fewer effective degrees of freedom than the total available.
+Although usually harmless to the model fit, excess degrees of freedom can
+make models slower to fit. However, models with \code{k} set too low may
+produce biased estimates or fail to converge.
+
+\code{RtGam} attempts to strike a reasonable balance between these concerns. It
+uses a rule-of-thumb heuristic to set \code{k} based on the number of data points
+provided. GAMs fit through \code{\link{mgcv}} (as in \link{RtGam}) usually fit much quicker
+than MCMC-based approaches, so this diagnostic leans toward providing a
+higher \code{k} than likely needed. This approach is a reasonable first pass, but
+is not a substitute for the user's expert judgement. If the data exhibit a
+sharp change in epidemic trend or the initial \link{RtGam} fit fails to converge,
+it would be reasonable to set \code{k} higher than the default and refit.
+\code{k} can be set up to the number of data points, but not higher.
+}
+}
 \examples{
 cases <- c(1, 2, 3)
 reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
 mod <- RtGam::RtGam(cases, reference_date)
+}
+\seealso{
+\code{\link[=dimensionality_heuristic]{dimensionality_heuristic()}} for the default basis dimension and
+\link[mgcv:choose.k]{mgcv::choose.k} for more general guidance on GAMs from \code{mgcv}
 }
