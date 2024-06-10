@@ -22,9 +22,18 @@
     <loc>https://cdcgov.github.io/cfa-gam-rt/news/index.html</loc>
   </url>
   <url>
-    <loc>https://cdcgov.github.io/cfa-gam-rt/reference/add.html</loc>
+    <loc>https://cdcgov.github.io/cfa-gam-rt/reference/RtGam.html</loc>
   </url>
   <url>
     <loc>https://cdcgov.github.io/cfa-gam-rt/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://cdcgov.github.io/cfa-gam-rt/reference/throw_type_error.html</loc>
+  </url>
+  <url>
+    <loc>https://cdcgov.github.io/cfa-gam-rt/reference/type_checker.html</loc>
+  </url>
+  <url>
+    <loc>https://cdcgov.github.io/cfa-gam-rt/reference/validate.html</loc>
   </url>
 </urlset>
