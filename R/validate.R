@@ -12,6 +12,11 @@ validate <- function(cases,
   validate_cases(cases, call)
   validate_dates(reference_date, "reference_date", call)
   validate_group(group, call)
+
+  # Per-group checks
+  check_vectors_equal_length(cases, reference_date, group, call)
+  check_dates_unique(reference_date, group, call)
+
   invisible()
 }
 

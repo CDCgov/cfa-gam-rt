@@ -24,5 +24,8 @@ RtGam <- function(cases,
     group
   )
   validate(cases, reference_date, group)
+
+  df <- prepare_inputs(cases, reference_date, group)
+
   invisible(NULL)
 }

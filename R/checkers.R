@@ -1,3 +1,77 @@
+check_vectors_equal_length <- function(cases,
+                                       reference_date,
+                                       group,
+                                       call = rlang::caller_env()) {
+  if (rlang::is_null(group)) {
+    args <- c("cases", "reference_date")
+    lengths <- c(length(cases), length(reference_date))
+    all_equal <- length(cases) == length(reference_date)
+  } else {
+    args <- c("cases", "reference_date", "group")
+    lengths <- c(length(cases), length(reference_date), length(group))
+    all_equal <- all(
+      length(cases) == length(reference_date),
+      length(cases) == length(group)
+    )
+  }
+
+  if (!all_equal) {
+    cli::cli_abort(
+      c(
+        "{.arg {args}} must be the same length",
+        "i" = "{.arg {args}} are of lengths {.val {lengths}}"
+      ),
+      class = "RtGam_invalid_input",
+      call = call
+    )
+  }
+  invisible()
+}
+
+check_dates_unique <- function(reference_date,
+                               group,
+                               call = rlang::caller_env()) {
+  # Two cases:
+  ## (1) There are no groups -- need to check that all dates are unique
+  ## (2) There **are** groups -- check that dates unique _within each group_
+
+  # Case (1): No groups
+  if (rlang::is_null(group)) {
+    if (length(unique(reference_date)) != length(reference_date)) {
+      duplicate_table <- table(reference_date)
+      duplicates <- names(which(duplicate_table > 1))
+      cli::cli_abort(
+        c("{.arg reference_date} has duplicate values",
+          "!" = "Dates can only occur once. Did you mean to provide groups?",
+          "i" = "Duplicate dates: {.val {duplicates}}"
+        ),
+        class = "RtGam_invalid_input",
+        call = call
+      )
+    }
+    # Case (2): Groups
+  } else {
+    groups <- unique(group)
+    for (g in groups) {
+      dates_in_group <- reference_date[which(group == g)]
+      if (length(unique(dates_in_group)) != length(dates_in_group)) {
+        duplicate_table <- table(dates_in_group)
+        duplicates <- names(which(duplicate_table > 1))
+        cli::cli_abort(
+          c(
+            "{.arg reference_date} has duplicates in {.arg group} {.val {g}}",
+            "!" = "Dates can only occur once per group",
+            "i" = "Duplicates in {.arg group} {.val {g}}: {.val {duplicates}}"
+          ),
+          class = "RtGam_invalid_input",
+          call = call
+        )
+      }
+    }
+  }
+  invisible()
+}
+
 check_required_inputs_provided <- function(cases,
                                            reference_date,
                                            group,
