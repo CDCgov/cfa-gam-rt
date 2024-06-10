@@ -29,7 +29,7 @@
 #' higher `k` than likely needed. This approach is a reasonable first pass, but
 #' is not a substitute for the user's expert judgement. If the data exhibit a
 #' sharp change in epidemic trend or the initial [RtGam] fit fails to converge,
-#' it would be reasonable to set `k` higher than the default and refit.
+#' it would be reasonable to fit the model with `k` higher than the default.
 #' `k` can be set up to the number of data points, but not higher.
 #'
 #' @param cases A vector of non-negative incident case counts occurring on an
@@ -70,4 +70,88 @@ RtGam <- function(cases,
   df <- prepare_inputs(cases, reference_date, group)
 
   invisible(NULL)
+}
+
+#' Propose total basis dimensionality from number of data points
+#'
+#' Guess a reasonable value for the `k` argument of [RtGam] based on the number
+#' of data points. This guess **may not work** and almost certainly is not the
+#' optimal choice. Rather, it is a _reasonable_ first pass for many situations
+#' and hopefully a good enough choice for most use cases. This guess leans
+#' toward providing an excess number of degrees of freedom to the model. The
+#' consequence is slower model fits, but a better chance of avoiding avoiding
+#' non-convergence due to undersmoothing. See [When to use a different value]
+#' for more guidance on use-cases where this heuristic is likely to fail and
+#' alternative values may need to be chosen. Note that `k` may be a minimum of 2
+#' or a maximum of the number of data points.
+#'
+#' # When to use a different value
+#' ## Model non-convergence
+#' When an [RtGam] model does not converge, a reasonable first debugging step
+#' is to increase the value of `k` and refit the model. Commonly, GAMs exhibit
+#' diagnostic issues when the model does not have enough flexibility to
+#' represent the underlying data generating process. Increasing `k` above the
+#' default heuristic guess provides more flexibility.
+#'
+#' However, insufficient flexibility is not the only source of non-convergence.
+#' When increasing `k` does not improve the default model diagnostics, manual
+#' model checking via [mgcv::gam.check()] may be needed. Also see
+#' [mgcv::choose.k] for guidance.
+#'
+#' ## Slow model fits
+#' [RtGam] models usually fit faster when the model has less flexibility (lower
+#' values of `k`). The guess from [dimensionality_heuristic()] leans toward
+#' providing excess degrees of freedom, so model fits may take a little longer
+#' than needed. If models are taking a long time to converge, it would be
+#' reasonable to set `k` to a small value, checking for convergence, and
+#' increasing `k` if needed until the model convergences. This approach may or
+#' may not be faster than simply waiting for a model with a higher `k` to fit.
+#'
+#' ## Very wiggly data
+#' If running models in a setting where the data seem quite wiggly, exhibiting
+#' sharp jumps or drops, a model with more flexibility than normal may be
+#' needed. `k` should be increased to the maximum possible value. When running
+#' pre-set models in production, it would also be reasonable to fix the value
+#' of `k` above the default. Because GAMs penalize model wiggliness, the fit to
+#' both wiggly and non-wiggly data is likely to be satisfactory, at the cost of
+#' increased runtime.
+#'
+#' # Implementation details
+#' The algorithm to pick `k` is a piecewise function. When eqn{n \le 10}, then
+#' the chosen value is eqn{n}. When eqn{n > 10}, then the selected value is
+#' \eqn{ \leftceil \sqrt{10n} \rightceil \\ n > 10 }.
+#' This approach is loosely inspired by Ward et al., 2021. As in Ward et al.,
+#' the degrees of freedom of the spline is set to a reasonably high value to
+#' avoid oversmoothing. The basis dimension increases with the length of the
+#' timeseries. The scaled square root of the dimension of the data is used to
+#' allow for the higher setup cost of the base model while still increasing the
+#' available degrees of freedom when the length of the timeseries increases.
+#'
+#' @param n An integer, the dimension of the data.
+#' @return An integer, the proposed _total_ basis dimensionality available to
+#'   the [RtGam] model.
+#' @references Ward, Thomas, et al. "Growth, reproduction numbers and factors
+#'   affecting the spread of SARS-CoV-2 novel variants of concern in the UK from
+#'   October 2020 to July 2021: a modelling analysis." BMJ open 11.11 (2021):
+#'   e056636.
+#' @seealso [RtGam()] for the use-case and additional documentation as well as
+#'  [mgcv::choose.k] for more general guidance from `mgcv`.
+#' @export
+#' @examples
+#' cases <- 1:10
+#' k <- dimensionality_heuristic(length(cases))
+dimensionality_heuristic <- function(n) {
+  # Input checks
+  rlang::check_required(n, "n", call = rlang::caller_env())
+  check_vector(n)
+  check_integer(n)
+  check_no_missingness(n)
+  check_elements_non_neg(n)
+  check_minimum_data_length(n)
+
+  if (n < 10) {
+    n
+  } else {
+    as.integer(ceil(sqrt(10 * n)))
+  }
 }
