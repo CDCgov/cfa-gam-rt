@@ -28,7 +28,7 @@ that the timestep will match internally but the user can just supply dates
 without knowledge of the internal timestep representation.
 }
 \details{
-Timesteps are scaled to be on \link{0, 1}. This small range is intentional --
+Timesteps are scaled to be on [0, 1]. This small range is intentional --
 I've seen it help numerical samplers converge and by default in R
 current-ish dates are large integers.
 }
