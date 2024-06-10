@@ -66,7 +66,7 @@ than MCMC-based approaches, so this diagnostic leans toward providing a
 higher \code{k} than likely needed. This approach is a reasonable first pass, but
 is not a substitute for the user's expert judgement. If the data exhibit a
 sharp change in epidemic trend or the initial \link{RtGam} fit fails to converge,
-it would be reasonable to set \code{k} higher than the default and refit.
+it would be reasonable to fit the model with \code{k} higher than the default.
 \code{k} can be set up to the number of data points, but not higher.
 }
 }
