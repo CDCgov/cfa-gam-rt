@@ -1,3 +1,29 @@
+check_vector_length <- function(n, name, min, max, call = rlang::caller_env()) {
+  if (!rlang::is_na(min)) {
+    if (n < min) {
+      cli::cli_abort(
+        c("{.arg {name}} requires a minimum length of {.val {min}}",
+          "i" = "{.arg {name}} is of length {.val {n}}"
+        ),
+        class = "RtGam_invalid_input",
+        call = call
+      )
+    }
+  }
+  if (!rlang::is_na(max)) {
+    if (n > max) {
+      cli::cli_abort(
+        c("{.arg {name}} requires a maximum length of {.val {max}}",
+          "i" = "{.arg {name}} is of length {.val {n}}"
+        ),
+        class = "RtGam_invalid_input",
+        call = call
+      )
+    }
+  }
+  invisible()
+}
+
 check_vectors_equal_length <- function(cases,
                                        reference_date,
                                        group,
@@ -97,14 +123,14 @@ check_no_missingness <- function(x, arg = "x", call = rlang::caller_env()) {
   }
 }
 
-check_elements_non_neg <- function(x, arg = "x", call = rlang::caller_env()) {
+check_elements_above_min <- function(x, arg, min, call = rlang::caller_env()) {
   # Greater than or equal to 0 or is NA
-  is_non_neg <- (x >= 0) | is.na(x)
-  if (!all(is_non_neg)) {
+  is_above_min <- (x >= min) | is.na(x)
+  if (!all(is_above_min)) {
     cli::cli_abort(
-      c("{.arg {arg}} has negative elements",
-        "!" = "All elements must be 0 or greater",
-        "i" = "Elements {.val {which(!is_non_neg)}} are negative"
+      c("{.arg {arg}} has elements smaller than {.val {min}}",
+        "!" = "All elements must be {.val {min}} or greater",
+        "i" = "Elements {.val {which(!is_above_min)}} are smaller"
       ),
       class = "RtGam_invalid_input",
       call = call

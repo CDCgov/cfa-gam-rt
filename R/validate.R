@@ -25,7 +25,7 @@ validate_cases <- function(cases, call) {
   check_vector(cases, arg, call)
   check_no_missingness(cases, arg, call)
   check_integer(cases, arg, call)
-  check_elements_non_neg(cases, arg, call)
+  check_elements_above_min(cases, arg, min = 0, call = call)
   invisible()
 }
 
@@ -44,4 +44,17 @@ validate_group <- function(group, call) {
       class = "RtGam_not_implemented"
     )
   }
+}
+
+#' Used by both dimensionality_heuristic() and RtGam()
+#' @noRd
+validate_min_dimensionality <- function(k, call) {
+  arg <- "k"
+  check_vector(k, arg, call = call)
+  check_no_missingness(k, arg, call)
+  check_integer(k, arg, call)
+  check_elements_above_min(k, arg, min = 3, call = call)
+  check_vector_length(length(k), arg, min = 1, max = 1, call = call)
+
+  invisible()
 }
