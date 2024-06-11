@@ -28,7 +28,7 @@ picks a reasonable estimate based on the number of provided data points.
 This total dimension is partitioned between the different smooths in the
 model. In the case of diagnostic issues in a fitted \code{RtGam} model,
 increasing the value of \code{k} above this default and refitting the model is
-a good first step. See the \link{Setting k} section
+a good first step. See the \verb{Setting k} section
 and \code{\link[=dimensionality_heuristic]{dimensionality_heuristic()}} documentation for more information.}
 }
 \value{

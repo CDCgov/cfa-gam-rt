@@ -64,9 +64,9 @@ increased runtime.
 }
 
 \section{Implementation details}{
-The algorithm to pick \code{k} is a piecewise function. When eqn{n \le 10}, then
-the chosen value is eqn{n}. When eqn{n > 10}, then the selected value is
-\eqn{ \leftceil \sqrt{10n} \rightceil \\ n > 10 }.
+The algorithm to pick \code{k} is a piecewise function. When \eqn{n \le 10}, then
+the chosen value is \eqn{n}. When \eqn{n > 10}, then the selected value is
+\eqn{ \lceil \sqrt{10n} \rceil }.
 This approach is loosely inspired by Ward et al., 2021. As in Ward et al.,
 the degrees of freedom of the spline is set to a reasonably high value to
 avoid oversmoothing. The basis dimension increases with the length of the

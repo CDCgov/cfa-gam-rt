@@ -52,3 +52,37 @@ test_that("`validate_group()` is successful", {
   )
   expect_null(validate_group(NULL, call = NULL))
 })
+
+test_that("`validate_min_dimensionality()` is successful", {
+  not_a_vector <- list("a" = 1)
+  not_an_integer <- as.Date(1)
+  missing <- c(NA)
+  below_min <- 1L
+  too_long <- c(1, 2)
+  too_short <- c()
+  good_input <- 3
+
+  expect_error(validate_min_dimensionality(not_a_vector),
+    class = "RtGam_type_error"
+  )
+  expect_error(validate_min_dimensionality(not_an_integer),
+    class = "RtGam_type_error"
+  )
+  expect_error(validate_min_dimensionality(missing),
+    class = "RtGam_invalid_input"
+  )
+  expect_error(validate_min_dimensionality(below_min),
+    class = "RtGam_invalid_input"
+  )
+  expect_error(validate_min_dimensionality(below_min),
+    class = "RtGam_invalid_input"
+  )
+  expect_error(validate_min_dimensionality(too_long),
+    class = "RtGam_invalid_input"
+  )
+  expect_error(validate_min_dimensionality(too_short),
+    class = "RtGam_type_error"
+  )
+
+  expect_null(validate_min_dimensionality(good_input))
+})

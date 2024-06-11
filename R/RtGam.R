@@ -45,7 +45,7 @@
 #'   This total dimension is partitioned between the different smooths in the
 #'   model. In the case of diagnostic issues in a fitted `RtGam` model,
 #'   increasing the value of `k` above this default and refitting the model is
-#'   a good first step. See the [Setting k] section
+#'   a good first step. See the `Setting k` section
 #'   and [dimensionality_heuristic()] documentation for more information.
 #'
 #' @seealso [dimensionality_heuristic()] for the default basis dimension and
@@ -117,9 +117,9 @@ RtGam <- function(cases,
 #' increased runtime.
 #'
 #' # Implementation details
-#' The algorithm to pick `k` is a piecewise function. When eqn{n \le 10}, then
-#' the chosen value is eqn{n}. When eqn{n > 10}, then the selected value is
-#' \eqn{ \leftceil \sqrt{10n} \rightceil \\ n > 10 }.
+#' The algorithm to pick `k` is a piecewise function. When \eqn{n \le 10}, then
+#' the chosen value is \eqn{n}. When \eqn{n > 10}, then the selected value is
+#' \eqn{ \lceil \sqrt{10n} \rceil }.
 #' This approach is loosely inspired by Ward et al., 2021. As in Ward et al.,
 #' the degrees of freedom of the spline is set to a reasonably high value to
 #' avoid oversmoothing. The basis dimension increases with the length of the
@@ -146,12 +146,12 @@ dimensionality_heuristic <- function(n) {
   check_vector(n)
   check_integer(n)
   check_no_missingness(n)
-  check_elements_non_neg(n)
-  check_minimum_data_length(n)
+  check_elements_above_min(n, "n", min = 1)
+  check_vector_length(length(n), "n", min = 1, max = 1)
 
   if (n < 10) {
     n
   } else {
-    as.integer(ceil(sqrt(10 * n)))
+    as.integer(ceiling(sqrt(10 * n)))
   }
 }
