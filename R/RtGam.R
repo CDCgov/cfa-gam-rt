@@ -1,8 +1,33 @@
-#' Stub: Will become fitting/class constructor
+#' Fit a generalized additive model to incident cases
 #'
-#' Including as a stub function to showcase control flow
+#' # Model specification
+#' Incident cases are modeled as a smooth function of time with generalized
+#' additive models (GAMs). [RtGam] always fits a GAM, predicting incident
+#' cases as a smooth trend of time. However, the model adapts the penalty on
+#' wiggliness over time, allowing for changing epidemic dynamics.
 #'
-#' ## Setting k
+#' If more than three weeks of data are available, [RtGam] will fit a GAM with
+#' an adaptive spline basis. This basis is so named because it allows the
+#' wiggliness penalization to vary over time. Some parts of the fit can be more
+#' or less wiggly than other parts. If one part of the timeseries has a sudden
+#' change in trend while another part shows a smooth increase, the model can
+#' fit both components without smoothing away sharp changes or introducing
+#' additional artificial wiggliness.
+#'
+#' The model introduces an additional penalty basis dimension for each
+#' additional 21 days of observed data. A timeseries of 20 or fewer days would
+#' have the same penalty the whole period, a timeseries of 21 to 42 days would
+#' smoothly interpolate between two penalties, and so on for each additional
+#' 21 day period. This adaptive penalty increases the computational cost of the
+#' model, but allows for a single model to adapt to changing epidemic dynamics.
+#'
+#' In the special case of 20 or fewer oberved days, the model will use a single
+#' penalty over the whole period and use a thin-plate spline as the smoothing
+#' basis. The adaptive spline can only use a P-spline smoothing basis. The thin
+#' plate spline generally has better performance and so [RtGam] uses it in this
+#' special single-penalty case.
+#'
+#' # Setting k
 #' The argument `k` governs the _total_ basis dimension for the penalized
 #' regression spline model used by `RtGam`. The model is composed of one or
 #' more smooth predictors, depending the specifics of the model specification.
@@ -68,6 +93,11 @@ RtGam <- function(cases,
   validate(cases, reference_date, group)
 
   df <- prepare_inputs(cases, reference_date, group)
+  formula <- formula_creator(
+    n_timesteps = length(unique(df[["timesteps"]])),
+    k = k,
+    is_grouped = !rlang::is_null(group)
+  )
 
   invisible(NULL)
 }
@@ -80,7 +110,7 @@ RtGam <- function(cases,
 #' and hopefully a good enough choice for most use cases. This guess leans
 #' toward providing an excess number of degrees of freedom to the model. The
 #' consequence is slower model fits, but a better chance of avoiding avoiding
-#' non-convergence due to undersmoothing. See [When to use a different value]
+#' non-convergence due to undersmoothing. See *When to use a different value*
 #' for more guidance on use-cases where this heuristic is likely to fail and
 #' alternative values may need to be chosen. Note that `k` may be a minimum of 2
 #' or a maximum of the number of data points.
