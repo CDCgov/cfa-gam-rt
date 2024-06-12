@@ -2,7 +2,7 @@
 % Please edit documentation in R/RtGam.R
 \name{RtGam}
 \alias{RtGam}
-\title{Stub: Will become fitting/class constructor}
+\title{Fit a generalized additive model to incident cases}
 \usage{
 RtGam(
   cases,
@@ -35,11 +35,38 @@ and \code{\link[=dimensionality_heuristic]{dimensionality_heuristic()}} document
 Stub function: NULL
 }
 \description{
-Including as a stub function to showcase control flow
+Fit a generalized additive model to incident cases
 }
 \details{
-\subsection{Setting k}{
+If more than three weeks of data are available, \link{RtGam} will fit a GAM with
+an adaptive spline basis. This basis is so named because it allows the
+wiggliness penalization to vary over time. Some parts of the fit can be more
+or less wiggly than other parts. If one part of the timeseries has a sudden
+change in trend while another part shows a smooth increase, the model can
+fit both components without smoothing away sharp changes or introducing
+additional artificial wiggliness.
 
+The model introduces an additional penalty basis dimension for each
+additional 21 days of observed data. A timeseries of 20 or fewer days would
+have the same penalty the whole period, a timeseries of 21 to 42 days would
+smoothly interpolate between two penalties, and so on for each additional
+21 day period. This adaptive penalty increases the computational cost of the
+model, but allows for a single model to adapt to changing epidemic dynamics.
+
+In the special case of 20 or fewer oberved days, the model will use a single
+penalty over the whole period and use a thin-plate spline as the smoothing
+basis. The adaptive spline can only use a P-spline smoothing basis. The thin
+plate spline generally has better performance and so \link{RtGam} uses it in this
+special single-penalty case.
+}
+\section{Model specification}{
+Incident cases are modeled as a smooth function of time with generalized
+additive models (GAMs). \link{RtGam} always fits a GAM, predicting incident
+cases as a smooth trend of time. However, the model adapts the penalty on
+wiggliness over time, allowing for changing epidemic dynamics.
+}
+
+\section{Setting k}{
 The argument \code{k} governs the \emph{total} basis dimension for the penalized
 regression spline model used by \code{RtGam}. The model is composed of one or
 more smooth predictors, depending the specifics of the model specification.
@@ -69,7 +96,7 @@ sharp change in epidemic trend or the initial \link{RtGam} fit fails to converge
 it would be reasonable to fit the model with \code{k} higher than the default.
 \code{k} can be set up to the number of data points, but not higher.
 }
-}
+
 \examples{
 cases <- c(1, 2, 3)
 reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))

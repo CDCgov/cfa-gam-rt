@@ -20,7 +20,7 @@ optimal choice. Rather, it is a \emph{reasonable} first pass for many situations
 and hopefully a good enough choice for most use cases. This guess leans
 toward providing an excess number of degrees of freedom to the model. The
 consequence is slower model fits, but a better chance of avoiding avoiding
-non-convergence due to undersmoothing. See \link{When to use a different value}
+non-convergence due to undersmoothing. See \emph{When to use a different value}
 for more guidance on use-cases where this heuristic is likely to fail and
 alternative values may need to be chosen. Note that \code{k} may be a minimum of 2
 or a maximum of the number of data points.
