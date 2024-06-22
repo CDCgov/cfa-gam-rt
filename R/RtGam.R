@@ -102,23 +102,36 @@ RtGam <- function(cases,
   invisible(NULL)
 }
 
-#' Propose total basis dimensionality from number of data points
+#' Propose total smoothing basis dimension from number of data points
 #'
-#' Guess a reasonable value for the `k` argument of [RtGam] based on the number
-#' of data points. This guess **may not work** and almost certainly is not the
-#' optimal choice. Rather, it is a _reasonable_ first pass for many situations
-#' and hopefully a good enough choice for most use cases. This guess leans
-#' toward providing an excess number of degrees of freedom to the model. The
-#' consequence is slower model fits, but a better chance of avoiding avoiding
-#' non-convergence due to undersmoothing. See *When to use a different value*
-#' for more guidance on use-cases where this heuristic is likely to fail and
-#' alternative values may need to be chosen. Note that `k` may be a minimum of 2
-#' or a maximum of the number of data points.
+#' Return a reasonable value for the `k` argument of [RtGam] (the _total_ smooth
+#' basis dimension of the model's one or more smooth predictors) based on the
+#' number of data points. The smooth basis dimension controls the maximum
+#' degrees of freedom (and by proxy the "wiggliness") of the smooth predictors.
+#' The estimation procedure leans toward providing an excess number of degrees
+#' of freedom to the model. The consequence is slower model fits, but a better
+#' chance of avoiding avoiding non-convergence due to undersmoothing. If
+#' manually supplying a value to `k` rather than relying on the default
+#' estimate, see *When to use a different value* for [RtGam]-specific
+#' implementation guidance and [mgcv::choose.k] for more general debugging
+#' guidance from the underlying model fitting package. Note that `k` may be a
+#' minimum of 2 or a maximum of the number of data points.
+#'
+#' # How `k` is used
+#'
+#' The model is composed of one or more smooth predictors, depending the
+#' specifics of the model specification. In a simple model with only one smooth
+#' predictor, all the degrees of freedom from `k` would be applied to that
+#' single smooth. In a more complex model composed of multiple smooth
+#' predictors, the total degrees degrees of freedom made available by `k` would
+#' be partitioned between the different smooths.
 #'
 #' # When to use a different value
+#'
 #' ## Model non-convergence
-#' When an [RtGam] model does not converge, a reasonable first debugging step
-#' is to increase the value of `k` and refit the model. Commonly, GAMs exhibit
+#'
+#' When an [RtGam] model does not converge, a reasonable first debugging step is
+#' to increase the value of `k` and refit the model. Commonly, GAMs exhibit
 #' diagnostic issues when the model does not have enough flexibility to
 #' represent the underlying data generating process. Increasing `k` above the
 #' default heuristic guess provides more flexibility.
@@ -129,6 +142,7 @@ RtGam <- function(cases,
 #' [mgcv::choose.k] for guidance.
 #'
 #' ## Slow model fits
+#'
 #' [RtGam] models usually fit faster when the model has less flexibility (lower
 #' values of `k`). The guess from [dimensionality_heuristic()] leans toward
 #' providing excess degrees of freedom, so model fits may take a little longer
@@ -138,15 +152,17 @@ RtGam <- function(cases,
 #' may not be faster than simply waiting for a model with a higher `k` to fit.
 #'
 #' ## Very wiggly data
+#'
 #' If running models in a setting where the data seem quite wiggly, exhibiting
 #' sharp jumps or drops, a model with more flexibility than normal may be
 #' needed. `k` should be increased to the maximum possible value. When running
-#' pre-set models in production, it would also be reasonable to fix the value
-#' of `k` above the default. Because GAMs penalize model wiggliness, the fit to
+#' pre-set models in production, it would also be reasonable to fix the value of
+#' `k` above the default. Because GAMs penalize model wiggliness, the fit to
 #' both wiggly and non-wiggly data is likely to be satisfactory, at the cost of
 #' increased runtime.
 #'
 #' # Implementation details
+#'
 #' The algorithm to pick `k` is a piecewise function. When \eqn{n \le 10}, then
 #' the chosen value is \eqn{n}. When \eqn{n > 10}, then the selected value is
 #' \eqn{ \lceil \sqrt{10n} \rceil }.
@@ -165,7 +181,8 @@ RtGam <- function(cases,
 #'   October 2020 to July 2021: a modelling analysis." BMJ open 11.11 (2021):
 #'   e056636.
 #' @seealso [RtGam()] for the use-case and additional documentation as well as
-#'  [mgcv::choose.k] for more general guidance from `mgcv`.
+#'   [mgcv::choose.k] and [mgcv::gam.check] for more general guidance from
+#'   `mgcv`.
 #' @export
 #' @examples
 #' cases <- 1:10
