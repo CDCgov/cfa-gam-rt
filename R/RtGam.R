@@ -1,27 +1,23 @@
 #' Fit a generalized additive model to incident cases
 #'
-#' # Model specification
-#' Incident cases are modeled as a smooth function of time with generalized
-#' additive models (GAMs). [RtGam] always fits a GAM, predicting incident
-#' cases as a smooth trend of time. However, the model adapts the penalty on
-#' wiggliness over time, allowing for changing epidemic dynamics.
+#' Incident cases are modeled as a smooth function of time with a generalized
+#' additive model (GAM).
 #'
 #' If more than three weeks of data are available, [RtGam] will fit a GAM with
 #' an adaptive spline basis. This basis is so named because it allows the
-#' wiggliness penalization to vary over time. Some parts of the fit can be more
-#' or less wiggly than other parts. If one part of the timeseries has a sudden
-#' change in trend while another part shows a smooth increase, the model can
-#' fit both components without smoothing away sharp changes or introducing
-#' additional artificial wiggliness.
+#' wiggliness penalization to vary over time. If one part of the timeseries has
+#' a sudden change in trend while another part shows a smooth increase, the
+#' model can fit both components without smoothing away sharp changes or
+#' introducing additional artificial wiggliness.
 #'
 #' The model introduces an additional penalty basis dimension for each
 #' additional 21 days of observed data. A timeseries of 20 or fewer days would
 #' have the same penalty the whole period, a timeseries of 21 to 42 days would
-#' smoothly interpolate between two penalties, and so on for each additional
-#' 21 day period. This adaptive penalty increases the computational cost of the
+#' smoothly interpolate between two penalties, and so on for each additional 21
+#' day period. This adaptive penalty increases the computational cost of the
 #' model, but allows for a single model to adapt to changing epidemic dynamics.
 #'
-#' In the special case of 20 or fewer oberved days, the model will use a single
+#' In the special case of 20 or fewer observed days, the model will use a single
 #' penalty over the whole period and use a thin-plate spline as the smoothing
 #' basis. The adaptive spline can only use a P-spline smoothing basis. The thin
 #' plate spline generally has better performance and so [RtGam] uses it in this
@@ -107,7 +103,7 @@ RtGam <- function(cases,
 #' to increase the value of `k` and refit the model. Commonly, GAMs exhibit
 #' diagnostic issues when the model does not have enough flexibility to
 #' represent the underlying data generating process. Increasing `k` above the
-#' default heuristic guess provides more flexibility.
+#' default estimate provides more flexibility.
 #'
 #' However, insufficient flexibility is not the only source of non-convergence.
 #' When increasing `k` does not improve the default model diagnostics, manual
@@ -153,8 +149,8 @@ RtGam <- function(cases,
 #' fits are very slow.
 #'
 #' @param n An integer, the dimension of the data.
-#' @return An integer, the proposed _total_ basis dimensionality available to
-#'   the [RtGam] model.
+#' @return An integer, the proposed _total_ smooth basis dimensionality
+#'   available to the [RtGam] model.
 #' @references Ward, Thomas, et al. "Growth, reproduction numbers and factors
 #'   affecting the spread of SARS-CoV-2 novel variants of concern in the UK from
 #'   October 2020 to July 2021: a modelling analysis." BMJ open 11.11 (2021):
@@ -163,6 +159,7 @@ RtGam <- function(cases,
 #'   [mgcv::choose.k] and [mgcv::gam.check] for more general guidance from
 #'   `mgcv`.
 #' @export
+#' @usage dimensionality_heuristic(length(cases))
 #' @examples
 #' cases <- 1:10
 #' k <- dimensionality_heuristic(length(cases))
