@@ -139,7 +139,7 @@ RtGam <- function(cases,
 #' set to a reasonably high value to avoid oversmoothing and (2) scales with the
 #' dimension of the data to accommodate changing trends over time.
 #'
-#' `[smooth_dim_heuristic()]` uses a piecewise function because each smooth
+#' [smooth_dim_heuristic()] uses a piecewise function because each smooth
 #' parameter needs its own degrees of freedom, which adds a fixed initial setup
 #' cost. When the dimension of the data is small, the default value of `k`
 #' increases linearly with the data to accommodate this fixed setup cost. When
