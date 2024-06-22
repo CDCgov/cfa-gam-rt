@@ -32,16 +32,16 @@
 #' @param group The geographic grouping for the case/reference-date pair. Not
 #'   yet implemented and a value other than `NULL` will throw an error.
 #' @param k An integer, the _total_ dimension of all the smoothing basis
-#'   functions. Defaults to `dimensionality_heuristic(length(cases))`, which
+#'   functions. Defaults to `smooth_dim_heuristic(length(cases))`, which
 #'   picks a reasonable estimate based on the number of provided data points.
 #'   This total dimension is partitioned between the different smooths in the
 #'   model. In the case of diagnostic issues in a fitted `RtGam` model,
 #'   increasing the value of `k` above this default and refitting the model is a
-#'   good first step. See the [dimensionality_heuristic()] documentation for
+#'   good first step. See the [smooth_dim_heuristic()] documentation for
 #'   more information.
 #' @param m An integer, the _total_ dimension of the penalty basis for the
 #'
-#' @seealso [dimensionality_heuristic()] more information on the smoothing basis
+#' @seealso [smooth_dim_heuristic()] more information on the smoothing basis
 #'   dimension and [mgcv::choose.k] for more general guidance on GAMs from
 #'   `mgcv`
 #' @return Stub function: NULL
@@ -53,7 +53,7 @@
 RtGam <- function(cases,
                   reference_date,
                   group = NULL,
-                  k = dimensionality_heuristic(length(cases))) {
+                  k = smooth_dim_heuristic(length(cases))) {
   check_required_inputs_provided(
     cases,
     reference_date,
@@ -113,7 +113,7 @@ RtGam <- function(cases,
 #' ## Slow model fits
 #'
 #' [RtGam] models usually fit faster when the model has less flexibility (lower
-#' values of `k`). The guess from [dimensionality_heuristic()] leans toward
+#' values of `k`). The guess from [smooth_dim_heuristic()] leans toward
 #' providing excess degrees of freedom, so model fits may take a little longer
 #' than needed. If models are taking a long time to converge, it would be
 #' reasonable to set `k` to a small value, checking for convergence, and
@@ -139,7 +139,7 @@ RtGam <- function(cases,
 #' set to a reasonably high value to avoid oversmoothing and (2) scales with the
 #' dimension of the data to accommodate changing trends over time.
 #'
-#' `[dimensionality_heuristic()]` uses a piecewise function because each smooth
+#' `[smooth_dim_heuristic()]` uses a piecewise function because each smooth
 #' parameter needs its own degrees of freedom, which adds a fixed initial setup
 #' cost. When the dimension of the data is small, the default value of `k`
 #' increases linearly with the data to accommodate this fixed setup cost. When
@@ -159,11 +159,11 @@ RtGam <- function(cases,
 #'   [mgcv::choose.k] and [mgcv::gam.check] for more general guidance from
 #'   `mgcv`.
 #' @export
-#' @usage dimensionality_heuristic(length(cases))
+#' @usage smooth_dim_heuristic(length(cases))
 #' @examples
 #' cases <- 1:10
-#' k <- dimensionality_heuristic(length(cases))
-dimensionality_heuristic <- function(n) {
+#' k <- smooth_dim_heuristic(length(cases))
+smooth_dim_heuristic <- function(n) {
   # Input checks
   rlang::check_required(n, "n", call = rlang::caller_env())
   check_vector(n)
