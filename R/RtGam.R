@@ -137,14 +137,20 @@ RtGam <- function(cases,
 #' # Implementation details
 #'
 #' The algorithm to pick `k` is a piecewise function. When \eqn{n \le 10}, then
-#' the chosen value is \eqn{n}. When \eqn{n > 10}, then the selected value is
-#' \eqn{ \lceil \sqrt{10n} \rceil }.
-#' This approach is loosely inspired by Ward et al., 2021. As in Ward et al.,
-#' the degrees of freedom of the spline is set to a reasonably high value to
-#' avoid oversmoothing. The basis dimension increases with the length of the
-#' timeseries. The scaled square root of the dimension of the data is used to
-#' allow for the higher setup cost of the base model while still increasing the
-#' available degrees of freedom when the length of the timeseries increases.
+#' the returned value is \eqn{n}. When \eqn{n > 10}, then the returned value is
+#' \eqn{ \lceil \sqrt{10n} \rceil }. This approach is loosely inspired by Ward
+#' et al., 2021. As in Ward et al. the degrees of freedom of the spline (1) is
+#' set to a reasonably high value to avoid oversmoothing and (2) scales with the
+#' dimension of the data to accommodate changing trends over time.
+#'
+#' `[dimensionality_heuristic()]` uses a piecewise function because each smooth
+#' parameter needs its own degrees of freedom, which adds a fixed initial setup
+#' cost. When the dimension of the data is small, the default value of `k`
+#' increases linearly with the data to accommodate this fixed setup cost. When
+#' the dimension of the data is larger, the default value of `k` increases with
+#' the square root of the data to balance having sufficient basis dimension to
+#' fit to changing trends over time without having so many dimensions that model
+#' fits are very slow.
 #'
 #' @param n An integer, the dimension of the data.
 #' @return An integer, the proposed _total_ basis dimensionality available to
