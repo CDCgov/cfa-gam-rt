@@ -2,7 +2,7 @@
 % Please edit documentation in R/RtGam.R
 \name{dimensionality_heuristic}
 \alias{dimensionality_heuristic}
-\title{Propose total basis dimensionality from number of data points}
+\title{Propose total smoothing basis dimension from number of data points}
 \usage{
 dimensionality_heuristic(n)
 }
@@ -14,22 +14,33 @@ An integer, the proposed \emph{total} basis dimensionality available to
 the \link{RtGam} model.
 }
 \description{
-Guess a reasonable value for the \code{k} argument of \link{RtGam} based on the number
-of data points. This guess \strong{may not work} and almost certainly is not the
-optimal choice. Rather, it is a \emph{reasonable} first pass for many situations
-and hopefully a good enough choice for most use cases. This guess leans
-toward providing an excess number of degrees of freedom to the model. The
-consequence is slower model fits, but a better chance of avoiding avoiding
-non-convergence due to undersmoothing. See \emph{When to use a different value}
-for more guidance on use-cases where this heuristic is likely to fail and
-alternative values may need to be chosen. Note that \code{k} may be a minimum of 2
-or a maximum of the number of data points.
+Return a reasonable value for the \code{k} argument of \link{RtGam} (the \emph{total} smooth
+basis dimension of the model's one or more smooth predictors) based on the
+number of data points. The smooth basis dimension controls the maximum
+degrees of freedom (and by proxy the "wiggliness") of the smooth predictors.
+The estimation procedure leans toward providing an excess number of degrees
+of freedom to the model. The consequence is slower model fits, but a better
+chance of avoiding avoiding non-convergence due to undersmoothing. If
+manually supplying a value to \code{k} rather than relying on the default
+estimate, see \emph{When to use a different value} for \link{RtGam}-specific
+implementation guidance and \link[mgcv:choose.k]{mgcv::choose.k} for more general debugging
+guidance from the underlying model fitting package. Note that \code{k} may be a
+minimum of 2 or a maximum of the number of data points.
 }
+\section{How \code{k} is used}{
+The model is composed of one or more smooth predictors, depending the
+specifics of the model specification. In a simple model with only one smooth
+predictor, all the degrees of freedom from \code{k} would be applied to that
+single smooth. In a more complex model composed of multiple smooth
+predictors, the total degrees degrees of freedom made available by \code{k} would
+be partitioned between the different smooths.
+}
+
 \section{When to use a different value}{
 \subsection{Model non-convergence}{
 
-When an \link{RtGam} model does not converge, a reasonable first debugging step
-is to increase the value of \code{k} and refit the model. Commonly, GAMs exhibit
+When an \link{RtGam} model does not converge, a reasonable first debugging step is
+to increase the value of \code{k} and refit the model. Commonly, GAMs exhibit
 diagnostic issues when the model does not have enough flexibility to
 represent the underlying data generating process. Increasing \code{k} above the
 default heuristic guess provides more flexibility.
@@ -56,8 +67,8 @@ may not be faster than simply waiting for a model with a higher \code{k} to fit.
 If running models in a setting where the data seem quite wiggly, exhibiting
 sharp jumps or drops, a model with more flexibility than normal may be
 needed. \code{k} should be increased to the maximum possible value. When running
-pre-set models in production, it would also be reasonable to fix the value
-of \code{k} above the default. Because GAMs penalize model wiggliness, the fit to
+pre-set models in production, it would also be reasonable to fix the value of
+\code{k} above the default. Because GAMs penalize model wiggliness, the fit to
 both wiggly and non-wiggly data is likely to be satisfactory, at the cost of
 increased runtime.
 }
@@ -87,5 +98,6 @@ e056636.
 }
 \seealso{
 \code{\link[=RtGam]{RtGam()}} for the use-case and additional documentation as well as
-\link[mgcv:choose.k]{mgcv::choose.k} for more general guidance from \code{mgcv}.
+\link[mgcv:choose.k]{mgcv::choose.k} and \link[mgcv:gam.check]{mgcv::gam.check} for more general guidance from
+\code{mgcv}.
 }
