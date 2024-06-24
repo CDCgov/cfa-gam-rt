@@ -4,7 +4,7 @@
 \alias{penalty_dim_heuristic}
 \title{Propose a penalty basis dimension based on the number of observed dates}
 \usage{
-penalty_dim_heuristic(length(unique(reference_date))
+penalty_dim_heuristic(n)
 }
 \arguments{
 \item{n}{An integer, the number of dates with an associated case observation.}
