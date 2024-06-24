@@ -82,7 +82,7 @@ et al., 2021. As in Ward et al. the degrees of freedom of the spline (1) is
 set to a reasonably high value to avoid oversmoothing and (2) scales with the
 dimension of the data to accommodate changing trends over time.
 
-\verb{[smooth_dim_heuristic()]} uses a piecewise function because each smooth
+\code{\link[=smooth_dim_heuristic]{smooth_dim_heuristic()}} uses a piecewise function because each smooth
 parameter needs its own degrees of freedom, which adds a fixed initial setup
 cost. When the dimension of the data is small, the default value of \code{k}
 increases linearly with the data to accommodate this fixed setup cost. When

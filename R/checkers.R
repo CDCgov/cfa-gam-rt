@@ -101,10 +101,15 @@ check_dates_unique <- function(reference_date,
 check_required_inputs_provided <- function(cases,
                                            reference_date,
                                            group,
+                                           k,
+                                           m,
                                            call = rlang::caller_env()) {
   rlang::check_required(cases, "cases", call = call)
   rlang::check_required(reference_date, "reference_date", call = call)
   rlang::check_required(group, "group", call = call)
+  rlang::check_required(k, "k", call = call)
+  rlang::check_required(m, "m", call = call)
+
   invisible()
 }
 

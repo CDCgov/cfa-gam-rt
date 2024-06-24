@@ -87,9 +87,15 @@ test_that("Required input check works", {
   cases <- c(1, 2)
   reference_date <- as.Date(c(1, 2))
   group <- c(1, 2)
+  k <- 2
+  m <- 1
 
   expect_error(
     check_required_inputs_provided(
+      reference_date = reference_date,
+      group = group,
+      k = k,
+      m = m,
       call = NULL
     ),
     class = "rlang_error"
@@ -97,6 +103,9 @@ test_that("Required input check works", {
   expect_error(
     check_required_inputs_provided(
       cases = cases,
+      group = group,
+      k = k,
+      m = m,
       call = NULL
     ),
     class = "rlang_error"
@@ -105,15 +114,52 @@ test_that("Required input check works", {
     check_required_inputs_provided(
       cases = cases,
       reference_date = reference_date,
+      k = k,
+      m = m,
       call = NULL
     ),
     class = "rlang_error"
   )
-  expect_null(check_required_inputs_provided(cases,
-    reference_date,
-    group,
-    call = NULL
-  ))
+  expect_error(
+    check_required_inputs_provided(
+      cases = cases,
+      reference_date = reference_date,
+      k = k,
+      m = m,
+      call = NULL
+    ),
+    class = "rlang_error"
+  )
+  expect_error(
+    check_required_inputs_provided(
+      cases = cases,
+      reference_date = reference_date,
+      group = group,
+      m = m,
+      call = NULL
+    ),
+    class = "rlang_error"
+  )
+  expect_error(
+    check_required_inputs_provided(
+      cases = cases,
+      reference_date = reference_date,
+      group = group,
+      k = k,
+      call = NULL
+    ),
+    class = "rlang_error"
+  )
+  expect_null(
+    check_required_inputs_provided(
+      cases = cases,
+      reference_date = reference_date,
+      group = group,
+      k = k,
+      m = m,
+      call = NULL
+    )
+  )
 })
 
 test_that("Missingness check works", {
