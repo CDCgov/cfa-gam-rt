@@ -4,7 +4,7 @@
 \alias{smooth_dim_heuristic}
 \title{Propose total smoothing basis dimension from number of data points}
 \usage{
-smooth_dim_heuristic(length(cases))
+smooth_dim_heuristic(n)
 }
 \arguments{
 \item{n}{An integer, the dimension of the data.}
