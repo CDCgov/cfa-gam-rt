@@ -14,7 +14,7 @@ associated \code{reference_date}. Missing values (NAs) are not allowed.}
 \code{cases} occurred. Missing dates are not allowed and dates can only occur
 once.}
 
-\item{group}{The geographic grouping for the case/reference-date pair. Not
+\item{group}{The grouping for the case/reference-date pair. Not
 yet implemented and a value other than \code{NULL} will throw an error.}
 
 \item{k}{An integer, the \emph{total} dimension of all the smoothing basis
