@@ -1,3 +1,21 @@
+test_that("Vector length check works", {
+  min <- 2
+  max <- 4
+  too_short <- 1
+  too_long <- 5
+  expect_error(check_vector_length(too_short, "test", min, NA),
+    class = "RtGam_invalid_input"
+  )
+  expect_error(check_vector_length(too_long, "test", NA, max),
+    class = "RtGam_invalid_input"
+  )
+  # NAs skip
+  expect_null(check_vector_length(too_long, "test", min, NA))
+  expect_null(check_vector_length(too_short, "test", NA, max))
+  # Goldilocks: just right
+  expect_null(check_vector_length(3, "test", min, max))
+})
+
 test_that("Vector equal length check works", {
   # Without group
   expect_error(
@@ -69,9 +87,15 @@ test_that("Required input check works", {
   cases <- c(1, 2)
   reference_date <- as.Date(c(1, 2))
   group <- c(1, 2)
+  k <- 2
+  m <- 1
 
   expect_error(
     check_required_inputs_provided(
+      reference_date = reference_date,
+      group = group,
+      k = k,
+      m = m,
       call = NULL
     ),
     class = "rlang_error"
@@ -79,6 +103,9 @@ test_that("Required input check works", {
   expect_error(
     check_required_inputs_provided(
       cases = cases,
+      group = group,
+      k = k,
+      m = m,
       call = NULL
     ),
     class = "rlang_error"
@@ -87,15 +114,52 @@ test_that("Required input check works", {
     check_required_inputs_provided(
       cases = cases,
       reference_date = reference_date,
+      k = k,
+      m = m,
       call = NULL
     ),
     class = "rlang_error"
   )
-  expect_null(check_required_inputs_provided(cases,
-    reference_date,
-    group,
-    call = NULL
-  ))
+  expect_error(
+    check_required_inputs_provided(
+      cases = cases,
+      reference_date = reference_date,
+      k = k,
+      m = m,
+      call = NULL
+    ),
+    class = "rlang_error"
+  )
+  expect_error(
+    check_required_inputs_provided(
+      cases = cases,
+      reference_date = reference_date,
+      group = group,
+      m = m,
+      call = NULL
+    ),
+    class = "rlang_error"
+  )
+  expect_error(
+    check_required_inputs_provided(
+      cases = cases,
+      reference_date = reference_date,
+      group = group,
+      k = k,
+      call = NULL
+    ),
+    class = "rlang_error"
+  )
+  expect_null(
+    check_required_inputs_provided(
+      cases = cases,
+      reference_date = reference_date,
+      group = group,
+      k = k,
+      m = m,
+      call = NULL
+    )
+  )
 })
 
 test_that("Missingness check works", {
@@ -109,15 +173,16 @@ test_that("Missingness check works", {
 })
 
 test_that("Negative element check works", {
-  non_neg <- c(0, 1, 2)
+  min <- 0
+  non_neg <- c(0, 1, 2, NA)
   has_neg <- c(-1, 1, 2)
   call <- NULL
   arg <- "test"
 
-  expect_error(check_elements_non_neg(has_neg, arg, call),
+  expect_error(check_elements_above_min(has_neg, arg, min, call),
     class = "RtGam_invalid_input"
   )
-  expect_null(check_elements_non_neg(non_neg, arg, call))
+  expect_null(check_elements_above_min(non_neg, arg, min, call))
 })
 
 test_that("Sums to one check works", {
