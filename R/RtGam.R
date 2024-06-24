@@ -153,7 +153,6 @@ RtGam <- function(cases,
 #'   [mgcv::choose.k] and [mgcv::gam.check] for more general guidance from
 #'   `mgcv`.
 #' @export
-#' @usage smooth_dim_heuristic(length(cases))
 #' @examples
 #' cases <- 1:10
 #' k <- smooth_dim_heuristic(length(cases))
@@ -230,7 +229,6 @@ smooth_dim_heuristic <- function(n) {
 #'   [mgcv::smooth.construct.ad.smooth.spec] for an explanation of the
 #'   underlying adaptive-smooth machinery.
 #' @export
-#' @usage penalty_dim_heuristic(length(unique(reference_date))
 #' @examples
 #' # Default use invokes `unique()` in case of repeated dates from groups
 #' reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
