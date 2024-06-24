@@ -18,7 +18,7 @@
 #' @param reference_date The associated date on which the count of incident
 #'   `cases` occurred. Missing dates are not allowed and dates can only occur
 #'   once.
-#' @param group The grouping for the case/reference-date pair. Not
+#' @param group The grouping variable for the case/reference-date pair. Not
 #'   yet implemented and a value other than `NULL` will throw an error.
 #' @param k An integer, the _total_ dimension of all the smoothing basis
 #'   functions. Defaults to `smooth_dim_heuristic(length(cases))`, which picks a
