@@ -1,4 +1,4 @@
-test_that("Dimensionality heuristic fails for bad inputs", {
+test_that("Smooth heuristic fails for bad inputs", {
   # No input
   expect_error(smooth_dim_heuristic(),
     class = "rlang_error"
@@ -21,7 +21,7 @@ test_that("Dimensionality heuristic fails for bad inputs", {
   )
 })
 
-test_that("Dimensionality heuristic works for good inputs", {
+test_that("Smooth heuristic works for good inputs", {
   # n for n \le 10
   expect_equal(1L, smooth_dim_heuristic(1))
   expect_equal(10L, smooth_dim_heuristic(10))

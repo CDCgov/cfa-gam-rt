@@ -4,7 +4,7 @@
 \alias{validate}
 \title{Validate user-provided inputs for type correctness}
 \usage{
-validate(cases, reference_date, group, call = rlang::caller_env())
+validate(cases, reference_date, group, k, m, call = rlang::caller_env())
 }
 \arguments{
 \item{cases}{A vector of non-negative incident case counts occurring on an
@@ -16,6 +16,20 @@ once.}
 
 \item{group}{The geographic grouping for the case/reference-date pair. Not
 yet implemented and a value other than \code{NULL} will throw an error.}
+
+\item{k}{An integer, the \emph{total} dimension of all the smoothing basis
+functions. Defaults to \code{smooth_dim_heuristic(length(cases))}, which picks a
+reasonable estimate based on the number of provided data points. This total
+dimension is partitioned between the different smooths in the model. In the
+case of diagnostic issues in a fitted \code{RtGam} model, increasing the value
+of \code{k} above this default and refitting the model is a good first step. See
+the \code{\link[=smooth_dim_heuristic]{smooth_dim_heuristic()}} documentation for more information.}
+
+\item{m}{An integer, the dimension of the penalty basis for the global smooth
+trend. If \code{m} is greater than 1, the smooth's wiggliness can change over
+time. An increase in this value above the default should be done carefully.
+See \code{\link[=penalty_dim_heuristic]{penalty_dim_heuristic()}} for more information on \code{m} and when to
+consider changing the default.}
 
 \item{call}{Caller environment to be passed through the stack}
 }

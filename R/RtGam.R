@@ -1,28 +1,17 @@
 #' Fit a generalized additive model to incident cases
 #'
 #' Incident cases are modeled as a smooth function of time with a generalized
-#' additive model (GAM).
+#' additive model (GAM). The model is fit with [mgcv::gam()] and some
+#' familiarity with `mgcv` may be helpful.
 #'
-#' If more than three weeks of data are available, [RtGam] will fit a GAM with
-#' an adaptive spline basis. This basis is so named because it allows the
-#' wiggliness penalization to vary over time. If one part of the timeseries has
-#' a sudden change in trend while another part shows a smooth increase, the
-#' model can fit both components without smoothing away sharp changes or
-#' introducing additional artificial wiggliness.
+#' # Model specification
 #'
-#' The model introduces an additional penalty basis dimension for each
-#' additional 21 days of observed data. A timeseries of 20 or fewer days would
-#' have the same penalty the whole period, a timeseries of 21 to 42 days would
-#' smoothly interpolate between two penalties, and so on for each additional 21
-#' day period. This adaptive penalty increases the computational cost of the
-#' model, but allows for a single model to adapt to changing epidemic dynamics.
+#' Incident cases (\eqn{y}) are modeled as smoothly changing over time:
 #'
-#' In the special case of 20 or fewer observed days, the model will use a single
-#' penalty over the whole period and use a thin-plate spline as the smoothing
-#' basis. The adaptive spline can only use a P-spline smoothing basis. The thin
-#' plate spline generally has better performance and so [RtGam] uses it in this
-#' special single-penalty case.
+#' \deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}(t)}}
 #'
+#' where incidence is negative-binomially distributed and \eqn{f(t)} is a smooth
+#' function of time.
 #'
 #' @param cases A vector of non-negative incident case counts occurring on an
 #'   associated `reference_date`. Missing values (NAs) are not allowed.
@@ -32,15 +21,17 @@
 #' @param group The geographic grouping for the case/reference-date pair. Not
 #'   yet implemented and a value other than `NULL` will throw an error.
 #' @param k An integer, the _total_ dimension of all the smoothing basis
-#'   functions. Defaults to `smooth_dim_heuristic(length(cases))`, which
-#'   picks a reasonable estimate based on the number of provided data points.
-#'   This total dimension is partitioned between the different smooths in the
-#'   model. In the case of diagnostic issues in a fitted `RtGam` model,
-#'   increasing the value of `k` above this default and refitting the model is a
-#'   good first step. See the [smooth_dim_heuristic()] documentation for
-#'   more information.
-#' @param m An integer, the _total_ dimension of the penalty basis for the
-#'
+#'   functions. Defaults to `smooth_dim_heuristic(length(cases))`, which picks a
+#'   reasonable estimate based on the number of provided data points. This total
+#'   dimension is partitioned between the different smooths in the model. In the
+#'   case of diagnostic issues in a fitted `RtGam` model, increasing the value
+#'   of `k` above this default and refitting the model is a good first step. See
+#'   the [smooth_dim_heuristic()] documentation for more information.
+#' @param m An integer, the dimension of the penalty basis for the global smooth
+#'   trend. If `m` is greater than 1, the smooth's wiggliness can change over
+#'   time. An increase in this value above the default should be done carefully.
+#'   See [penalty_dim_heuristic()] for more information on `m` and when to
+#'   consider changing the default.
 #' @seealso [smooth_dim_heuristic()] more information on the smoothing basis
 #'   dimension and [mgcv::choose.k] for more general guidance on GAMs from
 #'   `mgcv`
@@ -53,18 +44,21 @@
 RtGam <- function(cases,
                   reference_date,
                   group = NULL,
-                  k = smooth_dim_heuristic(length(cases))) {
+                  k = smooth_dim_heuristic(length(cases)),
+                  m = penalty_dim_heuristic(length(unique(reference_date)))) {
   check_required_inputs_provided(
     cases,
     reference_date,
-    group
+    group,
+    k,
+    m
   )
-  validate(cases, reference_date, group)
+  validate(cases, reference_date, group, k, m)
 
   df <- prepare_inputs(cases, reference_date, group)
   formula <- formula_creator(
-    n_timesteps = length(unique(df[["timesteps"]])),
     k = k,
+    m = m,
     is_grouped = !rlang::is_null(group)
   )
 
@@ -177,4 +171,79 @@ smooth_dim_heuristic <- function(n) {
   } else {
     as.integer(ceiling(sqrt(10 * n)))
   }
+}
+
+#' Propose a penalty basis dimension based on the number of observed dates
+#'
+#' Return a reasonable value for the `m` argument of [RtGam()] based on the
+#' number of dates that cases are observed. The `m` argument controls the
+#' dimension of the smoothing penalty basis for the model's global smooth trend
+#' (see the *Model specification* section of the [RtGam()] documentation for
+#' more information about the global trend). The penalty basis dimension
+#' controls how much the wiggliness of the global smooth trend can vary over
+#' time. Higher values of `m` help the model to adapt quickly to different
+#' epidemic regimes, but are computationally costly.
+#'
+#' # How `m` is used
+#'
+#' The parameter `m` controls the penalty basis dimension of the model's global
+#' smooth trend. If `m` is 1, there will be single constant penalty on
+#' wiggliness over the entire smooth and [RtGam] will use a thin-plate spline
+#' basis for its superior performance in single-penalty settings. If `m` is 2 or
+#' more, the model will use `m` distinct penalties on the smooth trend's
+#' wiggliness and use an adaptive spline basis. The realized penalty at each
+#' timepoint smoothly interpolates between the `m` estimated wiggliness
+#' penalties. This adaptive penalty increases the computational cost of the
+#' model, but allows for a single model to adapt to changing epidemic dynamics
+#' without oversmoothing or introducing spurious wiggly trends.
+#'
+#' # When to use a different value
+#'
+#' ## Very slow
+#'
+#' Decreasing the penalty basis dimension makes the model less demanding to fit.
+#' Using a single penalty throughout the model is much simpler than using an
+#' adaptive smooth and should be preferred where possible. See
+#' `[mgcv::smooth.construct.ad.smooth.spec]` for more information on how the
+#' adaptive smooth basis uses the penalty dimension.
+#'
+#' ## Observed over-smoothing of non-stationary data
+#'
+#' If a fitted model is observably over-smoothing, it may be reasonable to refit
+#' with a higher penalty basis dimension. Moments with a sudden change in
+#' epidemic dynamics, such as a sharp epidemic peak, can be challenging to fit
+#' with smooth functions. This option should be used with care due to the
+#' increased computational cost.
+#'
+#' # Implementation details
+#'
+#' The algorithm to pick `m` is \eqn{\lfloor \frac{n}{21} \rfloor + 1} where
+#' \eqn{n \in \mathbb{W}} is the number of observed dates. This algorithm
+#' assumes that over a 21-day period, epidemic dynamics remain roughly similarly
+#' wiggly. Sharp jumps or drops requiring a very wiggly trend would remain
+#' similarly plausible over much of the 21-day band.
+#'
+#' @param n An integer, the number of dates with an associated case observation.
+#' @return An integer, the proposed penalty basis dimension to be used by the
+#'   global trend.
+#' @seealso [RtGam()] for the use-case and additional documentation as well as
+#'   [mgcv::smooth.construct.ad.smooth.spec] for an explanation of the
+#'   underlying adaptive-smooth machinery.
+#' @export
+#' @usage penalty_dim_heuristic(length(unique(reference_date))
+#' @examples
+#' # Default use invokes `unique()` in case of repeated dates from groups
+#' reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
+#' m <- penalty_dim_heuristic(length(reference_date))
+#'
+penalty_dim_heuristic <- function(n) {
+  # Input checks
+  rlang::check_required(n, "n", call = rlang::caller_env())
+  check_vector(n)
+  check_integer(n)
+  check_no_missingness(n)
+  check_elements_above_min(n, "n", min = 1)
+  check_vector_length(length(n), "n", min = 1, max = 1)
+
+  as.integer(floor(n / 21) + 1)
 }
