@@ -8,7 +8,8 @@ RtGam(
   cases,
   reference_date,
   group = NULL,
-  k = smooth_dim_heuristic(length(cases))
+  k = smooth_dim_heuristic(length(cases)),
+  m = penalty_dim_heuristic(length(unique(reference_date)))
 )
 }
 \arguments{
@@ -23,44 +24,36 @@ once.}
 yet implemented and a value other than \code{NULL} will throw an error.}
 
 \item{k}{An integer, the \emph{total} dimension of all the smoothing basis
-functions. Defaults to \code{smooth_dim_heuristic(length(cases))}, which
-picks a reasonable estimate based on the number of provided data points.
-This total dimension is partitioned between the different smooths in the
-model. In the case of diagnostic issues in a fitted \code{RtGam} model,
-increasing the value of \code{k} above this default and refitting the model is a
-good first step. See the \code{\link[=smooth_dim_heuristic]{smooth_dim_heuristic()}} documentation for
-more information.}
+functions. Defaults to \code{smooth_dim_heuristic(length(cases))}, which picks a
+reasonable estimate based on the number of provided data points. This total
+dimension is partitioned between the different smooths in the model. In the
+case of diagnostic issues in a fitted \code{RtGam} model, increasing the value
+of \code{k} above this default and refitting the model is a good first step. See
+the \code{\link[=smooth_dim_heuristic]{smooth_dim_heuristic()}} documentation for more information.}
 
-\item{m}{An integer, the \emph{total} dimension of the penalty basis for the}
+\item{m}{An integer, the dimension of the penalty basis for the global smooth
+trend. If \code{m} is greater than 1, the smooth's wiggliness can change over
+time. An increase in this value above the default should be done carefully.
+See \code{\link[=penalty_dim_heuristic]{penalty_dim_heuristic()}} for more information on \code{m} and when to
+consider changing the default.}
 }
 \value{
 Stub function: NULL
 }
 \description{
 Incident cases are modeled as a smooth function of time with a generalized
-additive model (GAM).
+additive model (GAM). The model is fit with \code{\link[mgcv:gam]{mgcv::gam()}} and some
+familiarity with \code{mgcv} may be helpful.
 }
-\details{
-If more than three weeks of data are available, \link{RtGam} will fit a GAM with
-an adaptive spline basis. This basis is so named because it allows the
-wiggliness penalization to vary over time. If one part of the timeseries has
-a sudden change in trend while another part shows a smooth increase, the
-model can fit both components without smoothing away sharp changes or
-introducing additional artificial wiggliness.
+\section{Model specification}{
+Incident cases (\eqn{y}) are modeled as smoothly changing over time:
 
-The model introduces an additional penalty basis dimension for each
-additional 21 days of observed data. A timeseries of 20 or fewer days would
-have the same penalty the whole period, a timeseries of 21 to 42 days would
-smoothly interpolate between two penalties, and so on for each additional 21
-day period. This adaptive penalty increases the computational cost of the
-model, but allows for a single model to adapt to changing epidemic dynamics.
+\deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}(t)}}
 
-In the special case of 20 or fewer observed days, the model will use a single
-penalty over the whole period and use a thin-plate spline as the smoothing
-basis. The adaptive spline can only use a P-spline smoothing basis. The thin
-plate spline generally has better performance and so \link{RtGam} uses it in this
-special single-penalty case.
+where incidence is negative-binomially distributed and \eqn{f(t)} is a smooth
+function of time.
 }
+
 \examples{
 cases <- c(1, 2, 3)
 reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))

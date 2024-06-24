@@ -16,24 +16,24 @@
 #' @param n_timesteps Number of distinct timesteps in the dataframe
 #'  returned from [`prepare_inputs()`]
 #' @param k Global basis dimension to be partitioned between the model smooths
+#' @param m Penalty basis dimension on the global smooth
 #' @param is_grouped Whether to use a hierarchical model. Not yet supported.
 #' @return A formula to be used by [`mgcv::gam()`]
 #' @noRd
-formula_creator <- function(n_timesteps, k, is_grouped) {
+formula_creator <- function(k, m, is_grouped) {
   outcome <- "cases"
   intercept <- "1"
 
-  penalty_basis_dim <- penalty_basis_creator(n_timesteps)
   smooth_basis_dim <- smooth_basis_creator(k)
 
   # Apply adaptive spline if 3 weeks or more of data are available
   # nolint start
-  if (n_timesteps >= 21) {
+  if (m > 1) {
     # With adaptive basis, m refers to the order of the penalty matrix not the
     # order of the smoothing penalty as it does in the other smoothing bases.
     plus_global_trend <- glue::glue("+ s(timesteps,
                                          k = {smooth_basis_dim[['global_trend']]},
-                                         m = {penalty_basis_dim},
+                                         m = {m},
                                          bs = 'ad')") # nolint
   } else {
     # Adaptive penalty with `m = 1` is equivalent to a non-adaptive smooth but
@@ -47,15 +47,6 @@ formula_creator <- function(n_timesteps, k, is_grouped) {
 
   f <- glue::glue("{outcome} ~ {intercept} {plus_global_trend}")
   stats::as.formula(f)
-}
-
-#' Create a penalty per three weeks of data for the global trend
-#'
-#' @inheritParams formula_creator
-#' @return The penalty basis dimension for the global trend
-#' @noRd
-penalty_basis_creator <- function(n_timesteps) {
-  as.integer(floor(n_timesteps / 21) + 1)
 }
 
 #' Partition global basis dimension into components

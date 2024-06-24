@@ -2,8 +2,10 @@ test_that("`validate()` is successful", {
   cases <- c(1, 2, 3)
   dates <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
   groups <- NULL
+  k <- 3
+  m <- 1
 
-  expect_null(validate(cases, dates, groups))
+  expect_null(validate(cases, dates, groups, k, m))
 })
 
 test_that("`validate_cases()` is successful", {
@@ -61,28 +63,29 @@ test_that("`validate_min_dimensionality()` is successful", {
   too_long <- c(1, 2)
   too_short <- c()
   good_input <- 3
+  min_dim <- 3
 
-  expect_error(validate_min_dimensionality(not_a_vector),
+  expect_error(validate_min_dimensionality(not_a_vector, "test", min_dim),
     class = "RtGam_type_error"
   )
-  expect_error(validate_min_dimensionality(not_an_integer),
+  expect_error(validate_min_dimensionality(not_an_integer, "test", min_dim),
     class = "RtGam_type_error"
   )
-  expect_error(validate_min_dimensionality(missing),
+  expect_error(validate_min_dimensionality(missing, "test", min_dim),
     class = "RtGam_invalid_input"
   )
-  expect_error(validate_min_dimensionality(below_min),
+  expect_error(validate_min_dimensionality(below_min, "test", min_dim),
     class = "RtGam_invalid_input"
   )
-  expect_error(validate_min_dimensionality(below_min),
+  expect_error(validate_min_dimensionality(below_min, "test", min_dim),
     class = "RtGam_invalid_input"
   )
-  expect_error(validate_min_dimensionality(too_long),
+  expect_error(validate_min_dimensionality(too_long, "test", min_dim),
     class = "RtGam_invalid_input"
   )
-  expect_error(validate_min_dimensionality(too_short),
+  expect_error(validate_min_dimensionality(too_short, "test", min_dim),
     class = "RtGam_type_error"
   )
 
-  expect_null(validate_min_dimensionality(good_input))
+  expect_null(validate_min_dimensionality(good_input, "test", min_dim))
 })
