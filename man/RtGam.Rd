@@ -2,9 +2,16 @@
 % Please edit documentation in R/RtGam.R
 \name{RtGam}
 \alias{RtGam}
-\title{Stub: Will become fitting/class constructor}
+\title{Fit a generalized additive model to incident cases}
 \usage{
-RtGam(cases, reference_date, group = NULL)
+RtGam(
+  cases,
+  reference_date,
+  group = NULL,
+  k = smooth_dim_heuristic(length(cases)),
+  m = penalty_dim_heuristic(length(unique(reference_date))),
+  backend = "gam"
+)
 }
 \arguments{
 \item{cases}{A vector of non-negative incident case counts occurring on an
@@ -14,17 +21,53 @@ associated \code{reference_date}. Missing values (NAs) are not allowed.}
 \code{cases} occurred. Missing dates are not allowed and dates can only occur
 once.}
 
-\item{group}{The geographic grouping for the case/reference-date pair. Not
-yet implemented and a value other than \code{NULL} will throw an error.}
+\item{group}{The grouping variable for the case/reference-date pair. Not yet
+implemented and a value other than \code{NULL} will throw an error.}
+
+\item{k}{An integer, the \emph{total} dimension of all the smoothing basis
+functions. Defaults to \code{smooth_dim_heuristic(length(cases))}, which picks a
+reasonable estimate based on the number of provided data points. This total
+dimension is partitioned between the different smooths in the model. In the
+case of diagnostic issues in a fitted \code{RtGam} model, increasing the value
+of \code{k} above this default and refitting the model is a good first step. See
+the \code{\link[=smooth_dim_heuristic]{smooth_dim_heuristic()}} documentation for more information.}
+
+\item{m}{An integer, the dimension of the penalty basis for the global smooth
+trend. If \code{m} is greater than 1, the smooth's wiggliness can change over
+time. An increase in this value above the default should be done carefully.
+See \code{\link[=penalty_dim_heuristic]{penalty_dim_heuristic()}} for more information on \code{m} and when to
+consider changing the default.}
+
+\item{backend}{One of \code{gam} or \code{bam}; defaults to \code{gam}. In general, models
+should be fit with \code{\link[mgcv:gam]{mgcv::gam()}}. If \code{\link[mgcv:gam]{mgcv::gam()}} is too slow,
+\code{\link[mgcv:bam]{mgcv::bam()}} converges more quickly but introduces some additional
+numerical error. Note that the \code{bam} backend uses the \code{discrete = TRUE}
+option for an additional speedup. See \code{\link[mgcv:bam]{mgcv::bam()}} for more information.}
 }
 \value{
 Stub function: NULL
 }
 \description{
-Including as a stub function to showcase control flow
+Incident cases are modeled as a smooth function of time with a generalized
+additive model (GAM). The model is fit with \code{\link[mgcv:gam]{mgcv::gam()}} and some
+familiarity with \code{mgcv} may be helpful.
 }
+\section{Model specification}{
+Incident cases (\eqn{y}) are modeled as smoothly changing over time:
+
+\deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}(t)}}
+
+where incidence is negative-binomially distributed and \eqn{f(t)} is a smooth
+function of time.
+}
+
 \examples{
 cases <- c(1, 2, 3)
 reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
 mod <- RtGam::RtGam(cases, reference_date)
+}
+\seealso{
+\code{\link[=smooth_dim_heuristic]{smooth_dim_heuristic()}} more information on the smoothing basis
+dimension and \link[mgcv:choose.k]{mgcv::choose.k} for more general guidance on GAMs from
+\code{mgcv}
 }
