@@ -2,7 +2,7 @@ test_that("Formula created more than 3 weeks", {
   k <- 10
   m <- 2
   is_grouped <- FALSE
-  expected <- "cases ~ 1 + s(timesteps, k = 10, m = 2, bs = \"ad\")"
+  expected <- "cases ~ 1 + s(timestep, k = 10, m = 2, bs = \"ad\")"
 
   f <- formula_creator(k, m, is_grouped)
 
@@ -14,7 +14,7 @@ test_that("Formula created fewer than 3 weeks", {
   k <- 10
   m <- 1
   is_grouped <- FALSE
-  expected <- "cases ~ 1 + s(timesteps, k = 10, bs = \"tp\")"
+  expected <- "cases ~ 1 + s(timestep, k = 10, bs = \"tp\")"
 
 
   f <- formula_creator(k, m, is_grouped)

@@ -18,8 +18,8 @@
 #' @param reference_date The associated date on which the count of incident
 #'   `cases` occurred. Missing dates are not allowed and dates can only occur
 #'   once.
-#' @param group The grouping variable for the case/reference-date pair. Not
-#'   yet implemented and a value other than `NULL` will throw an error.
+#' @param group The grouping variable for the case/reference-date pair. Not yet
+#'   implemented and a value other than `NULL` will throw an error.
 #' @param k An integer, the _total_ dimension of all the smoothing basis
 #'   functions. Defaults to `smooth_dim_heuristic(length(cases))`, which picks a
 #'   reasonable estimate based on the number of provided data points. This total
@@ -32,6 +32,11 @@
 #'   time. An increase in this value above the default should be done carefully.
 #'   See [penalty_dim_heuristic()] for more information on `m` and when to
 #'   consider changing the default.
+#' @param backend One of `gam` or `bam`; defaults to `gam`. In general, models
+#'   should be fit with [mgcv::gam()]. If [mgcv::gam()] is too slow,
+#'   [mgcv::bam()] converges more quickly but introduces some additional
+#'   numerical error. Note that the `bam` backend uses the `discrete = TRUE`
+#'   option for an additional speedup. See [mgcv::bam()] for more information.
 #' @seealso [smooth_dim_heuristic()] more information on the smoothing basis
 #'   dimension and [mgcv::choose.k] for more general guidance on GAMs from
 #'   `mgcv`
@@ -45,13 +50,15 @@ RtGam <- function(cases,
                   reference_date,
                   group = NULL,
                   k = smooth_dim_heuristic(length(cases)),
-                  m = penalty_dim_heuristic(length(unique(reference_date)))) {
+                  m = penalty_dim_heuristic(length(unique(reference_date))),
+                  backend = "gam") {
   check_required_inputs_provided(
     cases,
     reference_date,
     group,
     k,
-    m
+    m,
+    backend
   )
   validate(cases, reference_date, group, k, m)
 
@@ -61,6 +68,8 @@ RtGam <- function(cases,
     m = m,
     is_grouped = !rlang::is_null(group)
   )
+
+  fit <- fit_model(df, formula, backend)
 
   invisible(NULL)
 }

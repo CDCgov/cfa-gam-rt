@@ -103,12 +103,19 @@ check_required_inputs_provided <- function(cases,
                                            group,
                                            k,
                                            m,
+                                           backend,
                                            call = rlang::caller_env()) {
   rlang::check_required(cases, "cases", call = call)
   rlang::check_required(reference_date, "reference_date", call = call)
   rlang::check_required(group, "group", call = call)
   rlang::check_required(k, "k", call = call)
   rlang::check_required(m, "m", call = call)
+  rlang::arg_match(backend,
+    values = c("gam", "bam"),
+    error_arg = "backend",
+    error_call = call,
+    multiple = FALSE
+  )
 
   invisible()
 }

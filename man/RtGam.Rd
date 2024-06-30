@@ -9,7 +9,8 @@ RtGam(
   reference_date,
   group = NULL,
   k = smooth_dim_heuristic(length(cases)),
-  m = penalty_dim_heuristic(length(unique(reference_date)))
+  m = penalty_dim_heuristic(length(unique(reference_date))),
+  backend = "gam"
 )
 }
 \arguments{
@@ -20,8 +21,8 @@ associated \code{reference_date}. Missing values (NAs) are not allowed.}
 \code{cases} occurred. Missing dates are not allowed and dates can only occur
 once.}
 
-\item{group}{The grouping variable for the case/reference-date pair. Not
-yet implemented and a value other than \code{NULL} will throw an error.}
+\item{group}{The grouping variable for the case/reference-date pair. Not yet
+implemented and a value other than \code{NULL} will throw an error.}
 
 \item{k}{An integer, the \emph{total} dimension of all the smoothing basis
 functions. Defaults to \code{smooth_dim_heuristic(length(cases))}, which picks a
@@ -36,6 +37,12 @@ trend. If \code{m} is greater than 1, the smooth's wiggliness can change over
 time. An increase in this value above the default should be done carefully.
 See \code{\link[=penalty_dim_heuristic]{penalty_dim_heuristic()}} for more information on \code{m} and when to
 consider changing the default.}
+
+\item{backend}{One of \code{gam} or \code{bam}; defaults to \code{gam}. In general, models
+should be fit with \code{\link[mgcv:gam]{mgcv::gam()}}. If \code{\link[mgcv:gam]{mgcv::gam()}} is too slow,
+\code{\link[mgcv:bam]{mgcv::bam()}} converges more quickly but introduces some additional
+numerical error. Note that the \code{bam} backend uses the \code{discrete = TRUE}
+option for an additional speedup. See \code{\link[mgcv:bam]{mgcv::bam()}} for more information.}
 }
 \value{
 Stub function: NULL

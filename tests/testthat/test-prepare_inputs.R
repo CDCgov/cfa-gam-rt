@@ -1,5 +1,5 @@
 test_that("Dataframe constructed appropriately", {
-  cases <- c(1, 2, 3)
+  cases <- c(1L, 2L, 3L)
   reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
   timestep <- c(0, 0.5, 1)
 
@@ -37,4 +37,16 @@ test_that("Date conversion matches expected", {
 
   actual <- dates_to_timesteps(dates, min_date, max_date)
   expect_equal(actual, expected)
+})
+
+test_that("Converts double vectors to integers with a warning", {
+  double_vec <- c(1, 2, 3)
+  integer_vec <- c(1L, 2L, 3L)
+
+  expect_warning(actual <- integerify_cases(double_vec),
+    regexp = "Coercing"
+  )
+  expect_equal(actual, integer_vec)
+  expect_no_message(integerify_cases(integer_vec))
+  expect_equal(integerify_cases(integer_vec), integer_vec)
 })

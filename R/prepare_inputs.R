@@ -3,6 +3,8 @@
 #' @inheritParams RtGam
 #' @return A dataframe for mgcv
 prepare_inputs <- function(cases, reference_date, group) {
+  cases_int <- integerify_cases(cases)
+
   timestep <- dates_to_timesteps(
     reference_date,
     min_supplied_date = min(reference_date),
@@ -14,11 +16,29 @@ prepare_inputs <- function(cases, reference_date, group) {
   }
 
   data.frame(
-    cases = cases,
+    cases = cases_int,
     timestep = timestep,
     reference_date = reference_date,
     group = group
   )
+}
+
+#' Convert dates to an integer if needed
+#'
+#' @param cases The user-supplied cases vector
+#' @return cases_int Cases verified to be an int
+#' @noRd
+integerify_cases <- function(cases) {
+  if (!rlang::is_integer(cases)) {
+    cli::cli_warn(c(
+      "Coercing {.arg cases} to an integer vector",
+      "i" = "{.arg cases} is a {.obj_type_friendly {cases}}",
+      "x" = "RtGam uses a count model, requiring integer-valued cases"
+    ))
+    as.integer(cases)
+  } else {
+    cases
+  }
 }
 
 #' Convert an arbitrary vector of dates to a vector of timesteps
