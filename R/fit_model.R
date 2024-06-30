@@ -1,6 +1,7 @@
 #' Fit the RtGam model with {mgcv}
 #'
 #' Use the pre-prepared model dataset and formula. Supply warnings as needed
+#' @noRd
 fit_model <- function(data, formula, backend) {
   args <- args_constructor(data, formula, backend)
   call <- call_constructor(backend)
