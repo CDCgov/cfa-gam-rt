@@ -30,7 +30,7 @@ formula_creator <- function(k, m, is_grouped) {
   if (m > 1) {
     # With adaptive basis, m refers to the order of the penalty matrix not the
     # order of the smoothing penalty as it does in the other smoothing bases.
-    plus_global_trend <- glue::glue("+ s(timesteps,
+    plus_global_trend <- glue::glue("+ s(timestep,
                                          k = {smooth_basis_dim[['global_trend']]},
                                          m = {m},
                                          bs = 'ad')") # nolint
@@ -38,7 +38,7 @@ formula_creator <- function(k, m, is_grouped) {
     # Adaptive penalty with `m = 1` is equivalent to a non-adaptive smooth but
     # thin-plate performance is a bit better than p-spline, so preference to
     # fall back to thin-plate.
-    plus_global_trend <- glue::glue("+ s(timesteps,
+    plus_global_trend <- glue::glue("+ s(timestep,
                                          k = {smooth_basis_dim[['global_trend']]},
                                          bs = 'tp')")
   }
