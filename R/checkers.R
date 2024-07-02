@@ -135,6 +135,23 @@ check_no_missingness <- function(x, arg = "x", call = rlang::caller_env()) {
   }
 }
 
+check_elements_below_max <- function(x, arg, max, call = rlang::caller_env()) {
+  # Greater than or equal to 0 or is NA
+  is_below_max <- all((x <= max) | is.na(x))
+  if (!all(is_below_max)) {
+    cli::cli_abort(
+      c("{.arg {arg}} has elements larger than {.val {max}}",
+        "!" = "All elements must be {.val {max}} or less",
+        "i" = "Elements {.val {which(!is_below_max)}} are larger"
+      ),
+      class = "RtGam_invalid_input",
+      call = call
+    )
+  }
+  invisible()
+}
+
+
 check_elements_above_min <- function(x, arg, min, call = rlang::caller_env()) {
   # Greater than or equal to 0 or is NA
   is_above_min <- (x >= min) | is.na(x)

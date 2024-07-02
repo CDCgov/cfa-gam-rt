@@ -58,3 +58,22 @@ smooth_basis_creator <- function(k) {
     "global_trend" = k
   )
 }
+
+#' Issue warnings if parameterization allowed but suboptimal
+#' @noRd
+warn_for_suboptimal_params <- function(data, m, k) {
+  n_unique_date <- length(unique(data[["timepoint"]]))
+  total_dim <- nrow(data)
+
+  if (m / n_unique_date > 0.2) {
+    cli::cli_warn(
+      c("Using {m} penalty bases with {n_unique_date} dates supplied",
+        "Consider decreasing penalty dimension {.arg m}",
+        "i" = "See {.func penalty_dim_heuristic()} for guidance"
+      )
+    )
+  }
+
+
+  invisible()
+}
