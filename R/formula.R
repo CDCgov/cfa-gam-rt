@@ -26,7 +26,6 @@ formula_creator <- function(k, m, is_grouped) {
 
   smooth_basis_dim <- smooth_basis_creator(k)
 
-  # Apply adaptive spline if 3 weeks or more of data are available
   # nolint start
   if (m > 1) {
     # With adaptive basis, m refers to the order of the penalty matrix not the
