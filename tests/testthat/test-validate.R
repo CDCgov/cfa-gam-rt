@@ -64,6 +64,7 @@ test_that("`validate_min_dimensionality()` is successful", {
   too_short <- c()
   good_input <- 3
   min_dim <- 3
+  max_val <- 0
 
   expect_error(validate_min_dimensionality(not_a_vector, "test", min_dim),
     class = "RtGam_type_error"
@@ -86,6 +87,23 @@ test_that("`validate_min_dimensionality()` is successful", {
   expect_error(validate_min_dimensionality(too_short, "test", min_dim),
     class = "RtGam_type_error"
   )
+  expect_error(
+    validate_min_dimensionality(1:5,
+      "test",
+      min_dim,
+      max_val = 1
+    ),
+    class = "RtGam_invalid_input"
+  )
 
-  expect_null(validate_min_dimensionality(good_input, "test", min_dim))
+  expect_null(validate_min_dimensionality(
+    good_input,
+    "test",
+    min_dim
+  ))
+  expect_null(validate_min_dimensionality(good_input,
+    "test",
+    min_dim,
+    max_val = 3
+  ))
 })

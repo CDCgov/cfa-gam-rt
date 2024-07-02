@@ -186,6 +186,20 @@ test_that("Missingness check works", {
   expect_null(check_no_missingness(no_missingness))
 })
 
+test_that("Below max check works", {
+  max <- 5
+  below_max <- 1:4
+  above_max <- 2:6
+  call <- NULL
+  arg <- "test"
+
+  expect_error(check_elements_below_max(above_max, arg, max, call),
+    class = "RtGam_invalid_input"
+  )
+  expect_null(check_elements_below_max(below_max, arg, max, call))
+})
+
+
 test_that("Negative element check works", {
   min <- 0
   non_neg <- c(0, 1, 2, NA)
