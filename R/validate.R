@@ -14,8 +14,18 @@ validate <- function(cases,
   validate_cases(cases, call)
   validate_dates(reference_date, "reference_date", call)
   validate_group(group, call)
-  validate_min_dimensionality(k, "k", min_dim = 3, call)
-  validate_min_dimensionality(m, "m", min_dim = 1, call)
+  validate_min_dimensionality(k,
+    arg = "k",
+    min_dim = 3,
+    max_val = length(cases),
+    call
+  )
+  validate_min_dimensionality(m,
+    arg = "m",
+    min_dim = 1,
+    max_val = length(unique(reference_date)),
+    call = call
+  )
 
   # Per-group checks
   check_vectors_equal_length(cases, reference_date, group, call)
@@ -52,12 +62,15 @@ validate_group <- function(group, call) {
 
 #' Used by both dimensionality_heuristic() and RtGam()
 #' @noRd
-validate_min_dimensionality <- function(n, arg, min_dim, call) {
+validate_min_dimensionality <- function(n, arg, min_dim, max_val = NA, call) {
   check_vector(n, arg, call = call)
   check_no_missingness(n, arg, call)
   check_integer(n, arg, call)
   check_elements_above_min(n, arg, min = min_dim, call = call)
   check_vector_length(length(n), arg, min = 1, max = 1, call = call)
+  if (!rlang::is_na(max_val)) {
+    check_elements_below_max(n, arg, max_val, call)
+  }
 
   invisible()
 }
