@@ -10,7 +10,7 @@ fit_model.RtGam_gam <- function(data, formula, user_supplied_args) {
     family = "nb",
     method = "REML"
   )
-  args <- modifyList(default_args, user_supplied_args)
+  args <- utils::modifyList(default_args, user_supplied_args)
 
   do.call(mgcv::gam, args)
 }
@@ -24,7 +24,7 @@ fit_model.RtGam_bam <- function(data, formula, user_supplied_args) {
     method = "fREML",
     discrete = TRUE
   )
-  args <- modifyList(default_args, user_supplied_args)
+  args <- utils::modifyList(default_args, user_supplied_args)
 
   do.call(mgcv::bam, args)
 }
