@@ -44,6 +44,9 @@ should be fit with \code{\link[mgcv:gam]{mgcv::gam()}}. If \code{\link[mgcv:gam]
 \code{\link[mgcv:bam]{mgcv::bam()}} converges more quickly but introduces some additional
 numerical error. Note that the \code{bam} backend uses the \code{discrete = TRUE}
 option for an additional speedup. See \code{\link[mgcv:bam]{mgcv::bam()}} for more information.}
+
+\item{user_supplied_args}{A list of custom arguments to pass to the model
+fitting backend to override package defaults.}
 }
 \value{
 Stub function: NULL
@@ -69,6 +72,7 @@ mod <- RtGam::RtGam(cases, reference_date)
 }
 \seealso{
 \code{\link[=smooth_dim_heuristic]{smooth_dim_heuristic()}} more information on the smoothing basis
-dimension and \link[mgcv:choose.k]{mgcv::choose.k} for more general guidance on GAMs from
-\code{mgcv}
+dimension, \link[mgcv:choose.k]{mgcv::choose.k} for more general guidance on GAMs from \code{mgcv},
+and \link[mgcv:gam]{mgcv::gam}/\link[mgcv:bam]{mgcv::bam} for documentation on arguments to the model
+fitting functions.
 }
