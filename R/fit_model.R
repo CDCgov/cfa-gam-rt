@@ -1,42 +1,30 @@
-#' Fit the RtGam model with {mgcv}
-#'
-#' Use the pre-prepared model dataset and formula. Supply warnings as needed
-#' @noRd
-fit_model <- function(data, formula, backend) {
-  args <- args_constructor(data, formula, backend)
-  call <- call_constructor(backend)
-
-  do.call(
-    call,
-    args
-  )
+fit_model <- function(data, formula, user_supplied_args) {
+  UseMethod("fit_model")
 }
 
-args_constructor <- function(data, formula, backend) {
-  backend_agnostic_args <- list(
+#' @export
+fit_model.RtGam_gam <- function(data, formula, user_supplied_args) {
+  default_args <- list(
     formula = formula,
     data = data,
-    # Negative binomial family with overdispersion param estimated
-    family = "nb"
+    family = "nb",
+    method = "REML"
   )
-  if (backend == "gam") {
-    backend_specific_args <- list(
-      method = "REML"
-    )
-  } else if (backend == "bam") {
-    backend_specific_args <- list(
-      method = "fREML",
-      discrete = TRUE
-    )
-  } else {
-    cli::cli_abort("Other backends not yet implemented")
-  }
+  args <- modifyList(default_args, user_supplied_args)
 
-  c(backend_agnostic_args, backend_specific_args)
+  do.call(mgcv::gam, args)
 }
 
-call_constructor <- function(backend) {
-  # This is where we could implement {brms} or mgcv::ginla() at some point
-  func <- paste0("mgcv::", backend)
-  eval(parse(text = func))
+#' @export
+fit_model.RtGam_bam <- function(data, formula, user_supplied_args) {
+  default_args <- list(
+    formula = formula,
+    data = data,
+    family = "nb",
+    method = "fREML",
+    discrete = TRUE
+  )
+  args <- modifyList(default_args, user_supplied_args)
+
+  do.call(mgcv::bam, args)
 }

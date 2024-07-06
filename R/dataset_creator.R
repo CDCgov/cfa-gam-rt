@@ -2,7 +2,7 @@
 #'
 #' @inheritParams RtGam
 #' @return A dataframe for mgcv
-prepare_inputs <- function(cases, reference_date, group) {
+dataset_creator <- function(cases, reference_date, group, backend) {
   cases_int <- integerify_cases(cases)
 
   timestep <- dates_to_timesteps(
@@ -15,12 +15,15 @@ prepare_inputs <- function(cases, reference_date, group) {
     group <- rep(NA, length(cases))
   }
 
-  data.frame(
+  dat <- data.frame(
     cases = cases_int,
     timestep = timestep,
     reference_date = reference_date,
     group = group
   )
+
+  class(dat) <- c(glue::glue("RtGam_{backend}"), class(dat))
+  dat
 }
 
 #' Convert dates to an integer if needed

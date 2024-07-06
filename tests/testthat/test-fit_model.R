@@ -1,40 +1,19 @@
-test_that("fit_model() fits a model", {
+test_that("fit_model.RtGam_gam fits a model", {
   data <- data.frame(x = 1:20, y = rnbinom(20, mu = 1:20, size = 1))
+  class(data) <- c("RtGam_gam", class(data))
   formula <- y ~ 1 + s(x)
 
-  fit_gam <- fit_model(data, formula, backend = "gam")
-  fit_bam <- fit_model(data, formula, backend = "bam")
+  fit_gam <- fit_model(data, formula, list())
 
   expect_s3_class(fit_gam, "gam")
-  expect_s3_class(fit_bam, "bam")
 })
 
-test_that("arg_constructor returns fitting args", {
-  data <- data.frame(x = 1, y = 2)
-  formula <- y ~ x
-  backend <- "gam"
+test_that("fit_model.RtGam_bam fits a model", {
+  data <- data.frame(x = 1:20, y = rnbinom(20, mu = 1:20, size = 1))
+  class(data) <- c("RtGam_bam", class(data))
+  formula <- y ~ 1 + s(x)
 
-  args <- args_constructor(data, formula, backend)
+  fit_gam <- fit_model(data, formula, list())
 
-  expect_type(args$formula, "language")
-  expect_s3_class(args$data, "data.frame")
-  expect_equal(args$family, "nb")
-
-  # `mgcv::gam()` backend
-  expect_equal(args$method, "REML")
-
-  # `mgcv::bam()` backend
-  args_bam <- args_constructor(data, formula, backend = "bam")
-  expect_equal(args_bam$method, "fREML")
-
-  # Other backend
-  expect_error(args_constructor(data, formula, "not_a_backend"))
-})
-
-test_that("call_constructor returns a call", {
-  backend <- "gam"
-
-  call <- call_constructor(backend)
-  expect_type(call, "closure")
-  expect_equal(call, mgcv::gam)
+  expect_s3_class(fit_gam, "bam")
 })
