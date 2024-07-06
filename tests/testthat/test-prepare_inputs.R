@@ -10,7 +10,9 @@ test_that("Dataframe constructed appropriately", {
     reference_date = reference_date,
     group = rep(NA, 3)
   )
-  actual <- prepare_inputs(cases, reference_date, NULL)
+  class(expected) <- c("RtGam_gam", class(expected))
+
+  actual <- dataset_creator(cases, reference_date, NULL, "gam")
   expect_equal(actual, expected)
 
   # With groups
@@ -21,7 +23,9 @@ test_that("Dataframe constructed appropriately", {
     reference_date = reference_date,
     group = group
   )
-  actual <- prepare_inputs(cases, reference_date, group)
+  class(expected) <- c("RtGam_gam", class(expected))
+
+  actual <- dataset_creator(cases, reference_date, group, backend = "gam")
   expect_equal(actual, expected)
 })
 

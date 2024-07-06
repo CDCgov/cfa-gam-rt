@@ -51,7 +51,8 @@ RtGam <- function(cases,
                   group = NULL,
                   k = smooth_dim_heuristic(length(cases)),
                   m = penalty_dim_heuristic(length(unique(reference_date))),
-                  backend = "gam") {
+                  backend = "gam",
+                  user_supplied_args = list()) {
   check_required_inputs_provided(
     cases,
     reference_date,
@@ -62,14 +63,14 @@ RtGam <- function(cases,
   )
   validate(cases, reference_date, group, k, m)
 
-  df <- prepare_inputs(cases, reference_date, group)
+  df <- dataset_creator(cases, reference_date, group, backend)
   formula <- formula_creator(
     k = k,
     m = m,
     is_grouped = !rlang::is_null(group)
   )
 
-  fit <- fit_model(df, formula, backend)
+  fit <- fit_model(df, formula, user_supplied_args)
 
   invisible(NULL)
 }
