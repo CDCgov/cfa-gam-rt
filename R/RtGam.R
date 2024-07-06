@@ -214,6 +214,8 @@ smooth_dim_heuristic <- function(n) {
 #' ## Very slow
 #'
 #' Decreasing the penalty basis dimension makes the model less demanding to fit.
+#' `mgcv` describes an adaptive penalty with 10 basis dimensions and 200 data
+#' points as roughly equivalent to fitting 10 GAMs each from 20 data points.
 #' Using a single penalty throughout the model is much simpler than using an
 #' adaptive smooth and should be preferred where possible. See
 #' `[mgcv::smooth.construct.ad.smooth.spec]` for more information on how the
