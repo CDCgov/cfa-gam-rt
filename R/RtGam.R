@@ -37,9 +37,12 @@
 #'   [mgcv::bam()] converges more quickly but introduces some additional
 #'   numerical error. Note that the `bam` backend uses the `discrete = TRUE`
 #'   option for an additional speedup. See [mgcv::bam()] for more information.
+#' @param user_supplied_args A list of custom arguments to pass to the model
+#'   fitting backend to override package defaults.
 #' @seealso [smooth_dim_heuristic()] more information on the smoothing basis
-#'   dimension and [mgcv::choose.k] for more general guidance on GAMs from
-#'   `mgcv`
+#'   dimension, [mgcv::choose.k] for more general guidance on GAMs from `mgcv`,
+#'   and [mgcv::gam]/[mgcv::bam] for documentation on arguments to the model
+#'   fitting functions.
 #' @return Stub function: NULL
 #' @export
 #' @examples
