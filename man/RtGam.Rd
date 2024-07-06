@@ -10,7 +10,8 @@ RtGam(
   group = NULL,
   k = smooth_dim_heuristic(length(cases)),
   m = penalty_dim_heuristic(length(unique(reference_date))),
-  backend = "gam"
+  backend = "gam",
+  user_supplied_args = list()
 )
 }
 \arguments{
