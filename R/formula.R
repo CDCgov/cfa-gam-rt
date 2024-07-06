@@ -1,4 +1,4 @@
-#' Build formula for `mgcv::gam()`
+#' Build formula for model fitting backend
 #'
 #' Build up the formula as a string and and return a formula object meant for
 #' use by [`mgcv::gam()`]. The formula components are built up based on the
@@ -60,11 +60,21 @@ smooth_basis_creator <- function(k) {
 }
 
 #' Issue warnings if parameterization allowed but suboptimal
+#'
 #' @noRd
 warn_for_suboptimal_params <- function(data, m, k) {
   n_unique_date <- length(unique(data[["timepoint"]]))
   total_dim <- nrow(data)
 
+  # From mgcv: "Bear in mind that adaptive smoothing places quite severe demands
+  # on the data. For example, setting ‘m=10’ for a univariate smooth of 200 data
+  # is rather like estimating 10 smoothing parameters, each from a data series
+  # of length 20. The problem is particularly serious for smooths of 2
+  # variables, where the number of smoothing parameters required to get
+  # reasonable flexibility in the penalty can grow rather fast, but it often
+  # requires a very large smoothing basis dimension to make good use of this
+  # flexibility. In short, adaptive smooths should be used sparingly and with
+  # care."
   if (m / n_unique_date > 0.2) {
     cli::cli_warn(
       c("Using {m} penalty bases with {n_unique_date} dates supplied",
