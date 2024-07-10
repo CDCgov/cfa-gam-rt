@@ -28,3 +28,13 @@ test_that("... passes modified arg to `fit_model()`", {
   expect_s3_class(fit_gam, "gam")
   expect_true(grepl("poisson", fit_gam$family$family))
 })
+
+test_that("Unsupported backend errors", {
+  data <- data.frame(x = 1:20, y = rnbinom(20, mu = 1:20, size = 1))
+  class(data) <- c("RtGam_test", class(data))
+  formula <- y ~ 1 + s(x)
+
+  expect_error(fit_model(data, formula),
+    class = "RtGam_invalid_input"
+  )
+})
