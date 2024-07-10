@@ -110,12 +110,6 @@ check_required_inputs_provided <- function(cases,
   rlang::check_required(group, "group", call = call)
   rlang::check_required(k, "k", call = call)
   rlang::check_required(m, "m", call = call)
-  rlang::arg_match(backend,
-    values = c("gam", "bam"),
-    error_arg = "backend",
-    error_call = call,
-    multiple = FALSE
-  )
 
   invisible()
 }

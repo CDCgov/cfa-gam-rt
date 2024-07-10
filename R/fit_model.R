@@ -33,3 +33,20 @@ fit_model.RtGam_bam <- function(
   args <- utils::modifyList(formals, dots)
   do.call(mgcv::bam, args)
 }
+
+#' Used to throw informative error if non-supported backend supplied
+#' @export
+fit_model.default <- function(
+    data,
+    formula,
+    ...) {
+  requested_backend <- class(data)[1]
+  supported_backends <- c("gam", "bam")
+
+  cli::cli_abort(
+    c("Requested {.field backend} {.val {requested_backend}} not supported",
+      "!" = "Allowed backends: {.val {supported_backends}}"
+    ),
+    class = "RtGam_invalid_input"
+  )
+}
