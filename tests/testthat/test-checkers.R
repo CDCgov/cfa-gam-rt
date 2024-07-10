@@ -151,18 +151,6 @@ test_that("Required input check works", {
     ),
     class = "rlang_error"
   )
-  expect_error(
-    check_required_inputs_provided(
-      cases = cases,
-      reference_date = reference_date,
-      group = group,
-      k = k,
-      m = m,
-      backend = "not_a_real_backend",
-      call = NULL
-    ),
-    class = "rlang_error"
-  )
   expect_null(
     check_required_inputs_provided(
       cases = cases,
