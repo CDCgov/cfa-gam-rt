@@ -37,8 +37,10 @@
 #'   [mgcv::bam()] converges more quickly but introduces some additional
 #'   numerical error. Note that the `bam` backend uses the `discrete = TRUE`
 #'   option for an additional speedup. See [mgcv::bam()] for more information.
-#' @param user_supplied_args A list of custom arguments to pass to the model
-#'   fitting backend to override package defaults.
+#' @param ... Additional arguments passed to the specified modelling backend.
+#'   For example, the default negative binomial error structure could be changed
+#'   to poisson in the default [mgcv::gam] backend by passing `family =
+#'   "poisson"`.
 #' @seealso [smooth_dim_heuristic()] more information on the smoothing basis
 #'   dimension, [mgcv::choose.k] for more general guidance on GAMs from `mgcv`,
 #'   and [mgcv::gam]/[mgcv::bam] for documentation on arguments to the model
@@ -55,7 +57,7 @@ RtGam <- function(cases,
                   k = smooth_dim_heuristic(length(cases)),
                   m = penalty_dim_heuristic(length(unique(reference_date))),
                   backend = "gam",
-                  user_supplied_args = list()) {
+                  ...) {
   check_required_inputs_provided(
     cases,
     reference_date,
@@ -73,7 +75,7 @@ RtGam <- function(cases,
     is_grouped = !rlang::is_null(group)
   )
 
-  fit <- fit_model(df, formula, user_supplied_args)
+  fit <- fit_model(df, formula, ...)
 
   invisible(NULL)
 }
