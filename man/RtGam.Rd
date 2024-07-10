@@ -11,7 +11,7 @@ RtGam(
   k = smooth_dim_heuristic(length(cases)),
   m = penalty_dim_heuristic(length(unique(reference_date))),
   backend = "gam",
-  user_supplied_args = list()
+  ...
 )
 }
 \arguments{
@@ -45,8 +45,9 @@ should be fit with \code{\link[mgcv:gam]{mgcv::gam()}}. If \code{\link[mgcv:gam]
 numerical error. Note that the \code{bam} backend uses the \code{discrete = TRUE}
 option for an additional speedup. See \code{\link[mgcv:bam]{mgcv::bam()}} for more information.}
 
-\item{user_supplied_args}{A list of custom arguments to pass to the model
-fitting backend to override package defaults.}
+\item{...}{Additional arguments passed to the specified modelling backend.
+For example, the default negative binomial error structure could be changed
+to poisson in the default \link[mgcv:gam]{mgcv::gam} backend by passing \code{family = "poisson"}.}
 }
 \value{
 Stub function: NULL
