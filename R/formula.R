@@ -84,6 +84,5 @@ warn_for_suboptimal_params <- function(data, m, k) {
     )
   }
 
-
   invisible()
 }
