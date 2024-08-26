@@ -48,7 +48,7 @@
 #' @return Stub function: NULL
 #' @export
 #' @examples
-#' cases <- c(1, 2, 3)
+#' cases <- c(1L, 2L, 3L)
 #' reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
 #' mod <- RtGam::RtGam(cases, reference_date)
 RtGam <- function(cases,
@@ -75,7 +75,14 @@ RtGam <- function(cases,
     is_grouped = !rlang::is_null(group)
   )
 
-  fit <- fit_model(df, formula, ...)
+  fit <- do.call(
+    fit_model,
+    list(
+      data = df,
+      formula = formula,
+      ...
+    )
+  )
 
   invisible(NULL)
 }
