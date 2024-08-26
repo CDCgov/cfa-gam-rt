@@ -67,7 +67,7 @@ function of time.
 }
 
 \examples{
-cases <- c(1, 2, 3)
+cases <- c(1L, 2L, 3L)
 reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
 mod <- RtGam::RtGam(cases, reference_date)
 }

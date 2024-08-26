@@ -10,12 +10,13 @@ fit_model.RtGam_gam <- function(
     method = "REML",
     ...) {
   # Override the defaults in formals with the user-supplied args in dots
-  formal_arg_names <- Filter(function(x) x != "...", names(formals()))
-  formals <- as.list(environment())[formal_arg_names]
-  dots <- rlang::list2(...)
-  args <- utils::modifyList(formals, dots)
-
-  do.call(mgcv::gam, args)
+  mgcv::gam(
+    formula = formula,
+    family = family,
+    data = data,
+    method = method,
+    ...
+  )
 }
 
 #' @export
@@ -26,12 +27,14 @@ fit_model.RtGam_bam <- function(
     method = "fREML",
     discrete = TRUE,
     ...) {
-  # Override the defaults in formals with the user-supplied args in dots
-  formal_arg_names <- Filter(function(x) x != "...", names(formals()))
-  formals <- as.list(environment())[formal_arg_names]
-  dots <- rlang::list2(...)
-  args <- utils::modifyList(formals, dots)
-  do.call(mgcv::bam, args)
+  mgcv::bam(
+    formula = formula,
+    fmaily = family,
+    data = data,
+    method = method,
+    discrete = discrete,
+    ...
+  )
 }
 
 #' Used to throw informative error if non-supported backend supplied
