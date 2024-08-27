@@ -84,7 +84,15 @@ RtGam <- function(cases,
     )
   )
 
-  invisible(NULL)
+  format_for_return(
+    fit = fit,
+    df = df,
+    group = group,
+    k = k,
+    m = m,
+    backend = backend,
+    formula = formula
+  )
 }
 
 #' Propose total smoothing basis dimension from number of data points
