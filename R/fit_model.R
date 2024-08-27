@@ -44,7 +44,9 @@ fit_model.default <- function(
     formula,
     ...) {
   requested_backend <- class(data)[1]
-  supported_backends <- c("gam", "bam")
+  all_backends <- methods(fit_model)
+  # Drop fit_model.default
+  supported_backends <- all_backends[!(all_backends == "fit_model.default")]
 
   cli::cli_abort(
     c("Requested {.field backend} {.val {requested_backend}} not supported",
