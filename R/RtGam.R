@@ -83,6 +83,10 @@ RtGam <- function(cases,
       ...
     )
   )
+  diagnostics <- calculate_diagnostics(fit)
+  if (warn_for_diagnostic_failure) {
+    issue_diagnostic_warnings(diagnostics)
+  }
 
   format_for_return(
     fit = fit,
@@ -91,7 +95,8 @@ RtGam <- function(cases,
     k = k,
     m = m,
     backend = backend,
-    formula = formula
+    formula = formula,
+    diagnostics = diagnostics
   )
 }
 
