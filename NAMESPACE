@@ -3,6 +3,7 @@
 S3method(fit_model,RtGam_bam)
 S3method(fit_model,RtGam_gam)
 S3method(fit_model,default)
+S3method(print,RtGam)
 export(RtGam)
 export(penalty_dim_heuristic)
 export(smooth_dim_heuristic)

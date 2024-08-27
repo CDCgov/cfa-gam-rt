@@ -29,7 +29,7 @@ fit_model.RtGam_bam <- function(
     ...) {
   mgcv::bam(
     formula = formula,
-    fmaily = family,
+    family = family,
     data = data,
     method = method,
     discrete = discrete,
@@ -50,7 +50,7 @@ fit_model.default <- function(
 
   cli::cli_abort(
     c("Requested {.field backend} {.val {requested_backend}} not supported",
-      "!" = "Allowed backends: {.val {supported_backends}}"
+      "!" = "Supported backends: {.val {supported_backends}}"
     ),
     class = "RtGam_invalid_input"
   )
