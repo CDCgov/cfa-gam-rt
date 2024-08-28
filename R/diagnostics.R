@@ -35,6 +35,7 @@ calculate_diagnostics <- function(fit) {
 
   list(
     model_converged = converged,
+    k_prime = k_check[1],
     k_edf = k_check[2],
     k_index = k_check[3],
     k_p_value = k_check[4],
@@ -54,7 +55,7 @@ issue_diagnostic_warnings <- function(diagnostics) {
       "x" = "Effective degrees of freedom is near the supplied upper bound",
       "!" = "Consider increasing {.arg k}",
       "*" = "Actual: {.val {round(diagnostics[['k_edf']], 3)}}",
-      "*" = "Upper bound: {.val {round(diagnostics[['k\\'']], 3)}}"
+      "*" = "Upper bound: {.val {diagnostics[['k_prime']]}}"
     ))
   }
   if (diagnostics[["k_p_value"]] < 0.05) {
