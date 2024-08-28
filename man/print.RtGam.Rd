@@ -8,10 +8,25 @@
 }
 \arguments{
 \item{x}{Fitted model object of class RtGam}
+
+\item{...}{further arguments to be passed to or from other methods. They are
+ignored in this function.}
 }
 \value{
 The RtGam object, invisibly
 }
 \description{
 Print an RtGam object
+}
+\examples{
+withr::with_seed(12345, {
+  cases <- rpois(20, 10)
+})
+reference_date <- seq.Date(
+  from = as.Date("2023-01-01"),
+  length.out = 20,
+  by = "day"
+)
+fit <- RtGam::RtGam(cases, reference_date)
+print(fit)
 }
