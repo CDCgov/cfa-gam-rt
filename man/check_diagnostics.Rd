@@ -20,13 +20,14 @@ present in the model object under \code{diagnostics}.
 Check diagnostics from a fitted model
 }
 \examples{
-fit <- RtGam::RtGam(
-  cases = c(1L, 2L, 3L, 4L),
-  reference_date = as.Date(c(
-    "2023-01-01",
-    "2023-01-02",
-    "2023-01-03"
-  ))
+withr::with_seed(12345, {
+  cases <- rpois(20, 10)
+})
+reference_date <- seq.Date(
+  from = as.Date("2023-01-01"),
+  length.out = 20,
+  by = "day"
 )
+fit <- RtGam::RtGam(cases, reference_date)
 check_diagnostics(fit)
 }

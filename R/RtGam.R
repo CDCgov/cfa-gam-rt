@@ -37,6 +37,10 @@
 #'   [mgcv::bam()] converges more quickly but introduces some additional
 #'   numerical error. Note that the `bam` backend uses the `discrete = TRUE`
 #'   option for an additional speedup. See [mgcv::bam()] for more information.
+#' @param warn_for_diagnostic_failure Should warnings be issued for
+#'   automatically identified diagnostic issues? Defaults to true. A list of
+#'   quantitative model diagnostics can be inspected in the `diagnostics` slot
+#'   of the returned `RtGam` object.
 #' @param ... Additional arguments passed to the specified modelling backend.
 #'   For example, the default negative binomial error structure could be changed
 #'   to poisson in the default [mgcv::gam] backend by passing `family =
@@ -48,15 +52,23 @@
 #' @return Stub function: NULL
 #' @export
 #' @examples
-#' cases <- c(1L, 2L, 3L)
-#' reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
-#' mod <- RtGam::RtGam(cases, reference_date)
+#' withr::with_seed(12345, {
+#'   cases <- rpois(20, 10)
+#' })
+#' reference_date <- seq.Date(
+#'   from = as.Date("2023-01-01"),
+#'   length.out = 20,
+#'   by = "day"
+#' )
+#' fit <- RtGam::RtGam(cases, reference_date)
+#' fit
 RtGam <- function(cases,
                   reference_date,
                   group = NULL,
                   k = smooth_dim_heuristic(length(cases)),
                   m = penalty_dim_heuristic(length(unique(reference_date))),
                   backend = "gam",
+                  warn_for_diagnostic_failure = TRUE,
                   ...) {
   check_required_inputs_provided(
     cases,
