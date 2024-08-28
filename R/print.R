@@ -17,7 +17,7 @@ format_for_return <- function(fit,
     m = m,
     backend = backend,
     formula = formula,
-    diagnostics
+    diagnostics = diagnostics
   )
 
   structure(formatted, class = "RtGam")
@@ -43,27 +43,31 @@ format_for_return <- function(fit,
 #' fit <- RtGam::RtGam(cases, reference_date)
 #' print(fit)
 print.RtGam <- function(x, ...) {
+  # Header
   cat("===============================\n")
   cat("Fitted RtGam model object (")
   cat(x$backend)
   cat(")\n")
   cat("===============================\n\n")
 
+  # Adaptive
   cat("Model type: ")
   if (x$m > 1) {
     cat("Adaptive (m = ")
   } else {
     cat("Non-adaptive (m = ")
   }
-  cat(x$m, ")\n")
-  cat("Specified maximum smoothing basis dimension: ", x$k, "\n")
+  cat(x$m)
+  cat(")\n")
+
+  # Smoothing basis
+  cat("Specified maximum smoothing basis dimension: ")
+  cat(x$k, "\n")
   cat("Family:", x$model$family$family, "\n")
   cat("Link function:", x$model$family$link)
 
-
-  # TODO estimated edf & diagnostics
-
   cat("\n===============================\n")
+  # Data
   cat("\nObserved data points: ")
   cat(nrow(x$data))
 
@@ -71,7 +75,7 @@ print.RtGam <- function(x, ...) {
   cat(length(unique(x[["data"]][["reference_date"]])))
 
   cat("\nDistinct groups: ")
-  if (rlang::is_null(x[["data"]][["group"]][[1]])) {
+  if (rlang::is_na(x[["data"]][["group"]][[1]])) {
     cat("1")
   } else {
     cat(length(unique(x[["data"]][["group"]])))

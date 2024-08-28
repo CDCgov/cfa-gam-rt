@@ -14,6 +14,7 @@ repos:
     -   id: parsable-R
     -   id: no-browser-statement
     -   id: no-print-statement
+        exclude: '^tests/testthat/test-print\.R$'
     -   id: no-debug-statement
     -   id: deps-in-desc
 -   repo: https://github.com/pre-commit/pre-commit-hooks
@@ -25,6 +26,7 @@ repos:
         files: '^\.Rbuildignore$'
     -   id: end-of-file-fixer
         exclude: '\.Rd'
+        exclude: 'tests/testthat/_snaps/'
 -   repo: https://github.com/pre-commit-ci/pre-commit-ci-config
     rev: v1.6.1
     hooks:
