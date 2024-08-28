@@ -1,6 +1,7 @@
 # RtGAM: Estimating $R_t$ with Generalized Additive Models
 
 [![codecov](https://codecov.io/gh/CDCgov/cfa-gam-rt/graph/badge.svg?token=78QNZW20IW)](https://codecov.io/gh/CDCgov/cfa-gam-rt)
+[![R-CMD-check](https://github.com/CDCgov/cfa-gam-rt/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CDCgov/cfa-gam-rt/actions/workflows/R-CMD-check.yaml)
 
 > [!CAUTION]
 > This project is a work-in-progress. Any outputs may be misleading or even incorrect. Despite this project's early stage, all development is in public as part of the Center for Forecasting and Outbreak Analytics' goals around open development. Questions and suggestions are welcome through GitHub issues or a PR.
