@@ -1,10 +1,14 @@
 test_that("RtGam parses inputs successfully", {
   timesteps <- 20
-  cases <- 1:timesteps
+  withr::with_seed(12345, {
+    cases <- rpois(20, 10)
+  })
   dates <- as.Date("2023-01-01") + 1:timesteps
   group <- NULL
 
-  expect_null(RtGam(cases, dates, group))
+  fit <- RtGam(cases, dates, group)
+
+  expect_s3_class(fit, "RtGam")
 })
 
 test_that("Non-supported backends throw error", {

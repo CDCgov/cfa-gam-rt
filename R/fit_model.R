@@ -39,6 +39,7 @@ fit_model.RtGam_bam <- function(
 
 #' Used to throw informative error if non-supported backend supplied
 #' @export
+#' @noRd
 fit_model.default <- function(
     data,
     formula,

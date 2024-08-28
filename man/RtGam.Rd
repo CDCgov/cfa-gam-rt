@@ -11,6 +11,7 @@ RtGam(
   k = smooth_dim_heuristic(length(cases)),
   m = penalty_dim_heuristic(length(unique(reference_date))),
   backend = "gam",
+  warn_for_diagnostic_failure = TRUE,
   ...
 )
 }
@@ -45,6 +46,11 @@ should be fit with \code{\link[mgcv:gam]{mgcv::gam()}}. If \code{\link[mgcv:gam]
 numerical error. Note that the \code{bam} backend uses the \code{discrete = TRUE}
 option for an additional speedup. See \code{\link[mgcv:bam]{mgcv::bam()}} for more information.}
 
+\item{warn_for_diagnostic_failure}{Should warnings be issued for
+automatically identified diagnostic issues? Defaults to true. A list of
+quantitative model diagnostics can be inspected in the \code{diagnostics} slot
+of the returned \code{RtGam} object.}
+
 \item{...}{Additional arguments passed to the specified modelling backend.
 For example, the default negative binomial error structure could be changed
 to poisson in the default \link[mgcv:gam]{mgcv::gam} backend by passing \code{family = "poisson"}.}
@@ -67,9 +73,16 @@ function of time.
 }
 
 \examples{
-cases <- c(1L, 2L, 3L)
-reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
-mod <- RtGam::RtGam(cases, reference_date)
+withr::with_seed(12345, {
+  cases <- rpois(20, 10)
+})
+reference_date <- seq.Date(
+  from = as.Date("2023-01-01"),
+  length.out = 20,
+  by = "day"
+)
+fit <- RtGam::RtGam(cases, reference_date)
+fit
 }
 \seealso{
 \code{\link[=smooth_dim_heuristic]{smooth_dim_heuristic()}} more information on the smoothing basis

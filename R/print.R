@@ -1,10 +1,13 @@
 #' Format the RtGam object for return from the main function/constructor
-#'
-#' @param fit The model fit created by [fit_model]
-#' @param df The dataset created by [dataset_creator]
-#'
-#' @return An object of type RtGam
-format_for_return <- function(fit, df, group, k, m, backend, formula) {
+#' @noRd
+format_for_return <- function(fit,
+                              df,
+                              group,
+                              k,
+                              m,
+                              backend,
+                              formula,
+                              diagnostics) {
   formatted <- list(
     model = fit,
     data = df,
@@ -13,7 +16,8 @@ format_for_return <- function(fit, df, group, k, m, backend, formula) {
     k = k,
     m = m,
     backend = backend,
-    formula = formula
+    formula = formula,
+    diagnostics
   )
 
   structure(formatted, class = "RtGam")
@@ -22,9 +26,22 @@ format_for_return <- function(fit, df, group, k, m, backend, formula) {
 #' Print an RtGam object
 #'
 #' @param x Fitted model object of class RtGam
+#' @param ... further arguments to be passed to or from other methods. They are
+#'   ignored in this function.
 #'
 #' @return The RtGam object, invisibly
 #' @export
+#' @examples
+#' withr::with_seed(12345, {
+#'   cases <- rpois(20, 10)
+#' })
+#' reference_date <- seq.Date(
+#'   from = as.Date("2023-01-01"),
+#'   length.out = 20,
+#'   by = "day"
+#' )
+#' fit <- RtGam::RtGam(cases, reference_date)
+#' print(fit)
 print.RtGam <- function(x, ...) {
   cat("===============================\n")
   cat("Fitted RtGam model object (")
@@ -38,11 +55,11 @@ print.RtGam <- function(x, ...) {
   } else {
     cat("Non-adaptive (m = ")
   }
-  cat(x$m)
-  cat(")\n")
+  cat(x$m, ")\n")
+  cat("Specified maximum smoothing basis dimension: ", x$k, "\n")
+  cat("Family:", x$model$family$family, "\n")
+  cat("Link function:", x$model$family$link)
 
-  cat("Total smoothing basis dimension: ")
-  cat(x$k)
 
   # TODO estimated edf & diagnostics
 
