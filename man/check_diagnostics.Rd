@@ -2,22 +2,42 @@
 % Please edit documentation in R/diagnostics.R
 \name{check_diagnostics}
 \alias{check_diagnostics}
-\title{Check diagnostics from a fitted model}
+\title{Check quantitative diagnostics from a fitted RtGam model}
 \usage{
 check_diagnostics(fit, warn_for_diagnostic_failure = TRUE)
 }
 \arguments{
-\item{fit}{A fitted \code{RtGam} model object}
+\item{fit}{A fitted \code{RtGam} model object. This should be the result of
+calling \code{RtGam::RtGam()} with appropriate data.}
 
-\item{warn_for_diagnostic_failure}{A bool, whether to issue warnings for
-potential diagnostic issues.}
+\item{warn_for_diagnostic_failure}{A logical value indicating whether to
+issue warnings if diagnostic checks suggest potential issues with the model
+fit. Defaults to TRUE, meaning that warnings will be issued by default.}
 }
 \value{
-Invisibly, a list of diagnostics. This diagnostic list is also
-present in the model object under \code{diagnostics}.
+Invisibly returns a list containing diagnostic results:
+\itemize{
+\item \code{model_converged}: Logical indicating if the model has converged.
+\item \code{k_prime}: The maximum available number of degrees of freedom that could
+be used in the GAM fit.
+\item \code{k_edf}: Estimated degrees of freedom actually used by the smooth terms
+in the model.
+\item \code{k_index}: The ratio of the residual variance of differenced
+near-neighbor residuals to the overall residual variance. This should be
+near 1 or above.
+\item \code{k_p_value}: P-value for testing if k' is adequate for modeling the data.
+\item \code{k_to_edf_ratio}: Ratio of k' to effective degrees of freedom of the
+smooth terms. k' should be well below the available edf.
+\item \code{residual_autocorrelation}: Autocorrelation coefficients for residuals
+up to lag 7 or one-tenth of series length, whichever is smaller.
+}
 }
 \description{
-Check diagnostics from a fitted model
+Evaluates for convergence, effective degrees of freedom, and residual
+autocorrelation. If \code{warn_for_diagnostic_failure} is set to TRUE, will issue
+warnings when potential diagnostic issues are detected. The diagnostics are
+invisibly returned as a list and also stored within the \code{diagnostics} element
+of the provided model object.
 }
 \examples{
 withr::with_seed(12345, {
@@ -30,4 +50,10 @@ reference_date <- seq.Date(
 )
 fit <- RtGam::RtGam(cases, reference_date)
 check_diagnostics(fit)
+}
+\seealso{
+\link[mgcv:k.check]{mgcv::k.check} for a description of the diagnostic tests,
+\link[mgcv:choose.k]{mgcv::choose.k} for a description of discussion of choosing the basis
+dimension, and Wood, Simon N. Generalized additive models: an introduction
+with R. chapman and hall/CRC, 2017. for a derivation of the metrics.
 }
