@@ -1,13 +1,37 @@
-#' Check diagnostics from a fitted model
+#' Check quantitative diagnostics from a fitted RtGam model
 #'
-#' @param fit A fitted `RtGam` model object
-#' @param warn_for_diagnostic_failure A bool, whether to issue warnings for
-#'   potential diagnostic issues.
+#' Evaluates for convergence, effective degrees of freedom, and residual
+#' autocorrelation. If `warn_for_diagnostic_failure` is set to TRUE, will issue
+#' warnings when potential diagnostic issues are detected. The diagnostics are
+#' invisibly returned as a list and also stored within the `diagnostics` element
+#' of the provided model object.
 #'
-#' @return Invisibly, a list of diagnostics. This diagnostic list is also
-#'   present in the model object under `diagnostics`.
+#' @param fit A fitted `RtGam` model object. This should be the result of
+#'   calling `RtGam::RtGam()` with appropriate data.
+#' @param warn_for_diagnostic_failure A logical value indicating whether to
+#'   issue warnings if diagnostic checks suggest potential issues with the model
+#'   fit. Defaults to TRUE, meaning that warnings will be issued by default.
+#'
+#' @return Invisibly returns a list containing diagnostic results:
+#'   - `model_converged`: Logical indicating if the model has converged.
+#'   - `k_prime`: The maximum available number of degrees of freedom that could
+#'   be used in the GAM fit.
+#'   - `k_edf`: Estimated degrees of freedom actually used by the smooth terms
+#'   in the model.
+#'   - `k_index`: The ratio of the residual variance of differenced
+#'   near-neighbor residuals to the overall residual variance. This should be
+#'   near 1 or above.
+#'   - `k_p_value`: P-value for testing if k' is adequate for modeling the data.
+#'   - `k_to_edf_ratio`: Ratio of k' to effective degrees of freedom of the
+#'   smooth terms. k' should be well below the available edf.
+#'   - `residual_autocorrelation`: Autocorrelation coefficients for residuals
+#'   up to lag 7 or one-tenth of series length, whichever is smaller.
+#'
 #' @export
-#'
+#' @seealso [mgcv::k.check] for a description of the diagnostic tests,
+#'   [mgcv::choose.k] for a description of discussion of choosing the basis
+#'   dimension, and Wood, Simon N. Generalized additive models: an introduction
+#'   with R. chapman and hall/CRC, 2017. for a derivation of the metrics.
 #' @examples
 #' withr::with_seed(12345, {
 #'   cases <- rpois(20, 10)
