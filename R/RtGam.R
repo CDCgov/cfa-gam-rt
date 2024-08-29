@@ -38,7 +38,7 @@
 #'   numerical error. Note that the `bam` backend uses the `discrete = TRUE`
 #'   option for an additional speedup. See [mgcv::bam()] for more information.
 #' @param warn_for_diagnostic_failure Should warnings be issued for
-#'   automatically identified diagnostic issues? Defaults to true. A list of
+#'   automatically identified diagnostic issues? Defaults to TRUE. A list of
 #'   quantitative model diagnostics can be inspected in the `diagnostics` slot
 #'   of the returned `RtGam` object.
 #' @param ... Additional arguments passed to the specified modelling backend.
