@@ -44,7 +44,7 @@
 #' fit <- RtGam::RtGam(cases, reference_date)
 #' check_diagnostics(fit)
 check_diagnostics <- function(fit, warn_for_diagnostic_failure = TRUE) {
-  diagnostics <- calculate_diagnostics(fit[["model"]])
+  diagnostics <- fit[["diagnostics"]]
   if (warn_for_diagnostic_failure) {
     issue_diagnostic_warnings(diagnostics)
   }
