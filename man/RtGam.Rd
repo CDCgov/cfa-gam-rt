@@ -47,7 +47,7 @@ numerical error. Note that the \code{bam} backend uses the \code{discrete = TRUE
 option for an additional speedup. See \code{\link[mgcv:bam]{mgcv::bam()}} for more information.}
 
 \item{warn_for_diagnostic_failure}{Should warnings be issued for
-automatically identified diagnostic issues? Defaults to true. A list of
+automatically identified diagnostic issues? Defaults to TRUE. A list of
 quantitative model diagnostics can be inspected in the \code{diagnostics} slot
 of the returned \code{RtGam} object.}
 
