@@ -10,7 +10,7 @@ test_that("check_diagnostics() runs cleanly on happy path", {
     )
   })
 
-  fit <- list(model = model)
+  fit <- list(diagnostics = calculate_diagnostics(model))
   expected_diagnostics <- c(
     "model_converged",
     "k_prime",

@@ -96,11 +96,8 @@ RtGam <- function(cases,
     )
   )
   diagnostics <- calculate_diagnostics(fit)
-  if (warn_for_diagnostic_failure) {
-    issue_diagnostic_warnings(diagnostics)
-  }
 
-  format_for_return(
+  RtGam_object <- format_for_return(
     fit = fit,
     df = df,
     group = group,
@@ -110,6 +107,10 @@ RtGam <- function(cases,
     formula = formula,
     diagnostics = diagnostics
   )
+
+  check_diagnostics(RtGam_object, warn_for_diagnostic_failure)
+
+  return(RtGam_object)
 }
 
 #' Propose total smoothing basis dimension from number of data points
