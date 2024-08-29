@@ -1,13 +1,13 @@
 #' Format the RtGam object for return from the main function/constructor
 #' @noRd
-format_for_return <- function(fit,
-                              df,
-                              group,
-                              k,
-                              m,
-                              backend,
-                              formula,
-                              diagnostics) {
+new_RtGam <- function(fit,
+                      df,
+                      group,
+                      k,
+                      m,
+                      backend,
+                      formula,
+                      diagnostics) {
   formatted <- list(
     model = fit,
     data = df,
