@@ -97,7 +97,7 @@ RtGam <- function(cases,
   )
   diagnostics <- calculate_diagnostics(fit)
 
-  RtGam_object <- format_for_return(
+  RtGam_object <- new_RtGam(
     fit = fit,
     df = df,
     group = group,
