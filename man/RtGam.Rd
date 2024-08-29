@@ -81,7 +81,7 @@ reference_date <- seq.Date(
   length.out = 20,
   by = "day"
 )
-fit <- RtGam::RtGam(cases, reference_date)
+fit <- RtGam(cases, reference_date)
 fit
 }
 \seealso{
