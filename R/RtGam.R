@@ -60,7 +60,7 @@
 #'   length.out = 20,
 #'   by = "day"
 #' )
-#' fit <- RtGam::RtGam(cases, reference_date)
+#' fit <- RtGam(cases, reference_date)
 #' fit
 RtGam <- function(cases,
                   reference_date,
