@@ -2,6 +2,8 @@
 #'
 #' @inheritParams RtGam
 #' @return A dataframe for mgcv
+#' @export
+#' @keywords internal
 dataset_creator <- function(cases, reference_date, group, backend) {
   cases_int <- integerify_cases(cases)
 
@@ -62,6 +64,8 @@ integerify_cases <- function(cases) {
 #' @param max_supplied_date The maximum date supplied in `reference_date` to the
 #'   class constructor.
 #' @return A vector of timesteps, corresponding to the supplied reference dates
+#' @export
+#' @keywords internal
 dates_to_timesteps <- function(reference_date,
                                min_supplied_date,
                                max_supplied_date) {

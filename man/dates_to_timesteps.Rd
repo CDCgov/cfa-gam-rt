@@ -32,3 +32,4 @@ Timesteps are scaled to be on [0, 1]. This small range is intentional --
 I've seen it help numerical samplers converge and by default in R
 current-ish dates are large integers.
 }
+\keyword{internal}
