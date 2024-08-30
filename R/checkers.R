@@ -188,9 +188,11 @@ check_sums_to_one <- function(x,
 #' @name type_checker
 #'
 #' @return NULL, invisibly
+#' @noRd
 NULL
 
 #' @rdname type_checker
+#' @noRd
 check_date <- function(x, arg = "x", call = rlang::caller_env()) {
   if ((!rlang::is_integerish(x)) || (!inherits(x, "Date"))) {
     throw_type_error(
@@ -204,6 +206,7 @@ check_date <- function(x, arg = "x", call = rlang::caller_env()) {
 }
 
 #' @rdname type_checker
+#' @noRd
 check_vector <- function(x, arg = "x", call = rlang::caller_env()) {
   # Lists are bare vectors, but we want truly vanilla vectors
   if (!rlang::is_bare_vector(x) || inherits(x, "list")) {
@@ -218,6 +221,7 @@ check_vector <- function(x, arg = "x", call = rlang::caller_env()) {
 }
 
 #' @rdname type_checker
+#' @noRd
 check_integer <- function(x, arg = "x", call = rlang::caller_env()) {
   if (!rlang::is_bare_integerish(x)) {
     throw_type_error(
@@ -256,6 +260,7 @@ check_character <- function(x, arg = "x", call = rlang::caller_env()) {
 #' @return This function is called for its side effect of throwing an error. It
 #'   should never return.
 #' @importFrom rlang abort
+#' @noRd
 throw_type_error <- function(object,
                              arg_name,
                              expected_type,

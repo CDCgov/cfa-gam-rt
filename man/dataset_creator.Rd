@@ -29,3 +29,4 @@ A dataframe for mgcv
 \description{
 Parse input vectors into a format for \code{{mgcv}}
 }
+\keyword{internal}

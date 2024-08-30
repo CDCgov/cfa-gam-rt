@@ -4,6 +4,7 @@
 #' comparisons between the inputs to check lengths
 #' @inheritParams RtGam
 #' @param call Caller environment to be passed through the stack
+#' @noRd
 validate <- function(cases,
                      reference_date,
                      group,
