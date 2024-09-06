@@ -56,7 +56,17 @@ For example, the default negative binomial error structure could be changed
 to poisson in the default \link[mgcv:gam]{mgcv::gam} backend by passing \code{family = "poisson"}.}
 }
 \value{
-Stub function: NULL
+A fitted model object of type \code{RtGam}. The object has named elements:
+\itemize{
+\item model: The fitted mgcv model object
+\item data: The processed data.frame used to fit the \code{RtGam} model
+\item min_date and max_date: The minimum and maxiumum \code{reference_date} provided
+\item k: The user-provided \code{k} argument
+\item m: The user-provided \code{m} argument
+\item backend: The user-provided \code{backend} argument
+\item formula: The formula object provided to the model
+\item diagnostics: The quantitative diagnostics of the model fit
+}
 }
 \description{
 Incident cases are modeled as a smooth function of time with a generalized

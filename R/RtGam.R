@@ -49,7 +49,15 @@
 #'   dimension, [mgcv::choose.k] for more general guidance on GAMs from `mgcv`,
 #'   and [mgcv::gam]/[mgcv::bam] for documentation on arguments to the model
 #'   fitting functions.
-#' @return Stub function: NULL
+#' @return A fitted model object of type `RtGam`. The object has named elements:
+#'   * model: The fitted mgcv model object
+#'   * data: The processed data.frame used to fit the `RtGam` model
+#'   * min_date and max_date: The minimum and maxiumum `reference_date` provided
+#'   * k: The user-provided `k` argument
+#'   * m: The user-provided `m` argument
+#'   * backend: The user-provided `backend` argument
+#'   * formula: The formula object provided to the model
+#'   * diagnostics: The quantitative diagnostics of the model fit
 #' @export
 #' @examples
 #' withr::with_seed(12345, {
