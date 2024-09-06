@@ -76,7 +76,7 @@ familiarity with \code{mgcv} may be helpful.
 \section{Model specification}{
 Incident cases (\eqn{y}) are modeled as smoothly changing over time:
 
-\deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}(t)}}
+\deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}}(t)}
 
 where incidence is negative-binomially distributed and \eqn{f(t)} is a smooth
 function of time.
