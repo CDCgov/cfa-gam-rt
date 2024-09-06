@@ -1,4 +1,4 @@
-# RtGAM: Estimating $R_t$ with Generalized Additive Models
+# RtGam: Estimating $R_t$ with Generalized Additive Models
 
 [![codecov](https://codecov.io/gh/CDCgov/cfa-gam-rt/graph/badge.svg?token=78QNZW20IW)](https://codecov.io/gh/CDCgov/cfa-gam-rt)
 [![R-CMD-check](https://github.com/CDCgov/cfa-gam-rt/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CDCgov/cfa-gam-rt/actions/workflows/R-CMD-check.yaml)
