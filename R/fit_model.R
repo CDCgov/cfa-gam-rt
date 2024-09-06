@@ -45,7 +45,7 @@ fit_model.default <- function(
     formula,
     ...) {
   requested_backend <- class(data)[1]
-  all_backends <- methods(fit_model)
+  all_backends <- utils::methods(fit_model)
   # Drop fit_model.default
   supported_backends <- all_backends[!(all_backends == "fit_model.default")]
 
