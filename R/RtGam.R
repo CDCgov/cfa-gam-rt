@@ -121,7 +121,7 @@ RtGam <- function(cases,
   return(RtGam_object)
 }
 
-#' Propose total smoothing basis dimension from number of data points
+#' Propose total smoothing basis dimension from the number of data points
 #'
 #' Return a reasonable value for the `k` argument of [RtGam] (the _total_ smooth
 #' basis dimension of the model's one or more smooth predictors) based on the
@@ -228,7 +228,7 @@ smooth_dim_heuristic <- function(n) {
   }
 }
 
-#' Propose a penalty basis dimension based on the number of observed dates
+#' Propose penalty basis dimension from the number of distinct dates
 #'
 #' Return a reasonable value for the `m` argument of [RtGam()] based on the
 #' number of dates that cases are observed. The `m` argument controls the
