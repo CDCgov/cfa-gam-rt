@@ -3,7 +3,7 @@
 shape <- 2
 rate <- 1 / 4
 
-gostic_gt_pmf <- primarycensoreddist::dpcens(0:26,
+sir_gt_pmf <- primarycensoreddist::dpcens(0:26,
   pgamma,
   shape = shape,
   rate = rate,
@@ -11,11 +11,11 @@ gostic_gt_pmf <- primarycensoreddist::dpcens(0:26,
 ) # v0.4.0
 
 # Drop first element because GI can't have same-day transmission
-gostic_gt_pmf <- gostic_gt_pmf[2:27]
+sir_gt_pmf <- sir_gt_pmf[2:27]
 
 # Renormalize to a proper PMF
-while (abs(sum(gostic_gt_pmf) - 1) > 1e-10) {
-  gostic_gt_pmf <- gostic_gt_pmf / sum(gostic_gt_pmf)
+while (abs(sum(sir_gt_pmf) - 1) > 1e-10) {
+  sir_gt_pmf <- sir_gt_pmf / sum(sir_gt_pmf)
 }
 
-usethis::use_data(gostic_gt_pmf, overwrite = TRUE)
+usethis::use_data(sir_gt_pmf, overwrite = TRUE)

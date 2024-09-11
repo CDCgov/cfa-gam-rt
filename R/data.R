@@ -26,11 +26,11 @@
 #' empirical datasets are much noisier. As a result, models built with these
 #' settings in mind can perform poorly on this dataset or fail to converge. We
 #' manually add observation noise with `rnbinom(299, mu =
-#' gostic_toy_rt[["obs_cases"]], size = 10)` and the random seed 123456 and
+#' stochastic_sir_rt[["obs_cases"]], size = 10)` and the random seed 123456 and
 #' store it in the `obs_incidence` column.
 #'
-#' @name gostic_toy_rt
-#' @format `gostic_toy_rt` A data frame with 301 rows and 12 columns:
+#' @name stochastic_sir_rt
+#' @format `stochastic_sir_rt` A data frame with 301 rows and 12 columns:
 #' \describe{
 #'    \item{time}{Timestep of the discrete-time stochastic SEIR simulation}
 #'    \item{date}{Added from the original Gostic, 2020 dataset. A date
@@ -44,7 +44,7 @@
 #'    \item{obs_incidence}{Added from the original Gostic, 2020 dataset. The
 #'     `incidence` column with added negative-binomial observation noise.
 #'     Created with `set.seed(123456)` and the call
-#'      `rnbinom(299, mu = gostic_toy_rt[["incidence"]], size = 10)` Useful for
+#'      `rnbinom(299, mu = [["incidence"]], size = 10)` Useful for
 #'       testing.}
 #'    \item{true_r0}{The initial R0 of the system (i.e., 2)}
 #'    \item{true_rt}{The known, true Rt of the epidemic system}
@@ -52,16 +52,16 @@
 #' @source
 #' <https://github.com/cobeylab/Rt_estimation/tree/d9d8977ba8492ac1a3b8287d2f470b313bfb9f1d> # nolint
 #' <https://github.com/CDCgov/cfa-epinow2-pipeline/pull/17> # nolint
-"gostic_toy_rt"
+"stochastic_sir_rt"
 
-#' Generation interval corresponding to the sample `gostic_toy_rt` dataset
+#' Generation interval corresponding to the sample `stochastic_sir_rt` dataset
 #'
 #' Gostic et al., 2020 simulates data from a stochastic SEIR model. Residence
 #' time in both the E and the I compartments is exponentially distributed, with
 #' a mean of 4 days (or a rate/inverse-scale of 1/4). These residence times
 #' imply a gamma-distributed generation time distribution with a shape of 2 and
 #' a rate of 1/4. The distribution can be regenerated in
-#' `data-raw/gostic_gt_pmf.R`.
+#' `data-raw/sir_gt_pmf.R`.
 #'
 #' From this parametric specification, we produce a double-censored,
 #' left-truncated probability mass function of the generation interval
@@ -70,7 +70,7 @@
 #' https://doi.org/10.1101/2024.01.12.24301247 for more information on
 #' double-censoring biases and corrections.
 #'
-#' @name gostic_gt_pmf
-#' @format `gostic_gt_pmf` A numeric vector of length 26 that sums to one within
+#' @name sir_gt_pmf
+#' @format `sir_gt_pmf` A numeric vector of length 26 that sums to one within
 #'   numerical tolerance
-"gostic_gt_pmf"
+"sir_gt_pmf"
