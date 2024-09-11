@@ -16,25 +16,15 @@ Gostic et al., 2020 simulates data from a stochastic SEIR model. Residence
 time in both the E and the I compartments is exponentially distributed, with
 a mean of 4 days (or a rate/inverse-scale of 1/4). These residence times
 imply a gamma-distributed generation time distribution with a shape of 2 and
-a rate of 1/4. We convert the continuous gamma distribution into a PMF to use
-with \code{{RtGam}}.
+a rate of 1/4. The distribution can be regenerated in
+\code{data-raw/gostic_gt_pmf.R}.
 }
 \details{
 From this parametric specification, we produce a double-censored,
 left-truncated probability mass function of the generation interval
-distribution. We produce the PMF using \code{{epinowcast}}'s
-\code{simulate_double_censored_pmf()} with version 0.3.0. See
+distribution. We produce the PMF using
+\code{\link[primarycensoreddist:dprimarycensoreddist]{primarycensoreddist::dpcens()}} with version 0.4.0. See
 https://doi.org/10.1101/2024.01.12.24301247 for more information on
 double-censoring biases and corrections.
-
-We correct the output from \code{simulate_double_censored_pmf()} to make it
-appropriate to use with \code{{EpiNow2}}. The function returns a numeric vector,
-with the position of the element corresponding to one day more than the
-length of the delay and value corresponding to the amount of discretized
-probability density in the bin. The vector does not necessarily sum to one.
-We drop the first element of the vector, which corresponds to a zero-day
-delay. The renewal framework, which underpins our model does not account for
-zero-day delays. We renormalize the left-truncated vector to sum to one so
-that it's a proper PMF.
 }
 \keyword{datasets}
