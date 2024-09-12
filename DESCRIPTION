@@ -25,13 +25,20 @@ BugReports: https://github.com/cdcgov/cfa-gam-rt/issues
 Suggests:
     testthat (>= 3.0.0),
     pkgdown,
-    withr
+    withr,
+    usethis,
+    primarycensoreddist
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Imports:
     cli,
     glue,
     mgcv,
     rlang
+Depends:
+    R (>= 2.10)
+LazyData: true
+Additional_repositories:
+    https://epinowcast.r-universe.dev
