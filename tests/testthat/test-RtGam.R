@@ -11,7 +11,7 @@ test_that("RtGam parses inputs successfully", {
     "model",
     "data",
     "min_date",
-    "max_data",
+    "max_date",
     "k",
     "m",
     "backend",
