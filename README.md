@@ -1,4 +1,4 @@
-# RtGAM: Estimating $R_t$ with Generalized Additive Models
+# RtGam: Estimating $R_t$ with Generalized Additive Models
 
 [![codecov](https://codecov.io/gh/CDCgov/cfa-gam-rt/graph/badge.svg?token=78QNZW20IW)](https://codecov.io/gh/CDCgov/cfa-gam-rt)
 [![R-CMD-check](https://github.com/CDCgov/cfa-gam-rt/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CDCgov/cfa-gam-rt/actions/workflows/R-CMD-check.yaml)
@@ -16,6 +16,34 @@ However, the substantial research effort into spline-based approaches has not be
 This R package aims to become an opinionated re-implementation of the literature methods, with reasonable defaults for real-time epidemic modeling.
 Development effort is optimized around real-time use-cases, with potential for right-truncation, noisy reporting, and uncertain data-generating processes.
 It is meant to be a simple drop-in tool to be run alongside more computationally intensive implementations like [`{EpiNow2}`](https://github.com/epiforecasts/EpiNow2).
+
+At the moment, the package has some simple functionality to fit a adaptive smooth trend to epidemic data and produce a short forecast.
+It has not yet been benchmarked relative to other approaches.
+
+## Installation
+
+The package can be installed from Github:
+
+```r
+remotes::install_github("cdcgov/cfa-gam-rt@v0.1.0")
+```
+
+## Use
+
+The package can be used to fit smooth trends of time to noisy epidemic data.
+It includes a simulated dataset from Gostic et al., 2020 "Practical considerations for measuring the effective reproductive number, $R_t$".
+This snippet uses the simulated dataset to demonstrate how to use the main model-fitting function:
+
+```r
+library(RtGam)
+
+fit <- RtGam(
+        cases = gostic_toy_rt[["obs_incidence"]],
+        # Randomly chosen date
+        reference_date = gostic_toy_rt[["time"]] + as.Date("2023-01-01")
+       )
+print(fit)
+```
 
 ## Project Admin
 

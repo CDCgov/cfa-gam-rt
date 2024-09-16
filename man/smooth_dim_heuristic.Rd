@@ -2,7 +2,7 @@
 % Please edit documentation in R/RtGam.R
 \name{smooth_dim_heuristic}
 \alias{smooth_dim_heuristic}
-\title{Propose total smoothing basis dimension from number of data points}
+\title{Propose total smoothing basis dimension from the number of data points}
 \usage{
 smooth_dim_heuristic(n)
 }

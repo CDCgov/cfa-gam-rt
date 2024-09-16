@@ -8,7 +8,7 @@
 #'
 #' Incident cases (\eqn{y}) are modeled as smoothly changing over time:
 #'
-#' \deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}(t)}}
+#' \deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}}(t)}
 #'
 #' where incidence is negative-binomially distributed and \eqn{f(t)} is a smooth
 #' function of time.
@@ -49,7 +49,15 @@
 #'   dimension, [mgcv::choose.k] for more general guidance on GAMs from `mgcv`,
 #'   and [mgcv::gam]/[mgcv::bam] for documentation on arguments to the model
 #'   fitting functions.
-#' @return Stub function: NULL
+#' @return A fitted model object of type `RtGam`. The object has named elements:
+#'   * model: The fitted mgcv model object
+#'   * data: The processed data.frame used to fit the `RtGam` model
+#'   * min_date and max_date: The minimum and maxiumum `reference_date` provided
+#'   * k: The user-provided `k` argument
+#'   * m: The user-provided `m` argument
+#'   * backend: The user-provided `backend` argument
+#'   * formula: The formula object provided to the model
+#'   * diagnostics: The quantitative diagnostics of the model fit
 #' @export
 #' @examples
 #' withr::with_seed(12345, {
@@ -113,7 +121,7 @@ RtGam <- function(cases,
   return(RtGam_object)
 }
 
-#' Propose total smoothing basis dimension from number of data points
+#' Propose total smoothing basis dimension from the number of data points
 #'
 #' Return a reasonable value for the `k` argument of [RtGam] (the _total_ smooth
 #' basis dimension of the model's one or more smooth predictors) based on the
@@ -220,7 +228,7 @@ smooth_dim_heuristic <- function(n) {
   }
 }
 
-#' Propose a penalty basis dimension based on the number of observed dates
+#' Propose penalty basis dimension from the number of distinct dates
 #'
 #' Return a reasonable value for the `m` argument of [RtGam()] based on the
 #' number of dates that cases are observed. The `m` argument controls the

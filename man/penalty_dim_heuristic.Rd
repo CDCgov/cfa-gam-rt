@@ -2,7 +2,7 @@
 % Please edit documentation in R/RtGam.R
 \name{penalty_dim_heuristic}
 \alias{penalty_dim_heuristic}
-\title{Propose a penalty basis dimension based on the number of observed dates}
+\title{Propose penalty basis dimension from the number of distinct dates}
 \usage{
 penalty_dim_heuristic(n)
 }
