@@ -1,8 +1,8 @@
 pandoc: 3.1.11
-pkgdown: 2.1.0
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles: {}
-last_built: 2024-09-16T10:09Z
+last_built: 2024-09-24T13:01Z
 urls:
   reference: https://cdcgov.github.io/cfa-gam-rt/reference
   article: https://cdcgov.github.io/cfa-gam-rt/articles

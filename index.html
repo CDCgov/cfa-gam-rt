@@ -51,14 +51,14 @@
 </h1></div>
 <p><a href="https://codecov.io/gh/CDCgov/cfa-gam-rt" class="external-link"><img src="https://codecov.io/gh/CDCgov/cfa-gam-rt/graph/badge.svg?token=78QNZW20IW" alt="codecov"></a> <a href="https://github.com/CDCgov/cfa-gam-rt/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/CDCgov/cfa-gam-rt/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
 <blockquote>
-<p>[!CAUTION] This project is a work-in-progress. Any outputs may be misleading or even incorrect. Despite this project’s early stage, all development is in public as part of the Center for Forecasting and Outbreak Analytics’ goals around open development. Questions and suggestions are welcome through GitHub issues or a PR.</p>
+<p>[!CAUTION] This project is an early-stage work-in-progress. Any outputs may be misleading or even incorrect. Despite this project’s early stage, all development is in public as part of the Center for Forecasting and Outbreak Analytics’ goals around open development. Questions and suggestions are welcome through GitHub issues or a PR.</p>
 </blockquote>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>This project is an in-development R package for <span class="math inline">\(R_t\)</span> estimation using generalized additive models (GAMs). Over the last few years, GAMs have been used with some success to estimate epidemic growth rates and nowcast cases (see <a href="https://doi.org/10.1136/bmjopen-2021-056636" class="external-link">Ward, 2021</a> and <a href="https://doi.org/10.1038/s43856-023-00424-4" class="external-link">Mellor, 2023</a> for an overview of methods). The <a href="https://cran.r-project.org/web/packages/mgcv/index.html" class="external-link">R package <code>{mgcv}</code></a> provides a flexible, fast, and robust interface to fit penalized-spline based models. However, the substantial research effort into spline-based approaches has not been unified into a shared R package.</p>
-<p>This R package aims to become an opinionated re-implementation of the literature methods, with reasonable defaults for real-time epidemic modeling. Development effort is optimized around real-time use-cases, with potential for right-truncation, noisy reporting, and uncertain data-generating processes. It is meant to be a simple drop-in tool to be run alongside more computationally intensive implementations like <a href="https://github.com/epiforecasts/EpiNow2" class="external-link"><code>{EpiNow2}</code></a>.</p>
-<p>At the moment, the package has some simple functionality to fit a adaptive smooth trend to epidemic data and produce a short forecast. It has not yet been benchmarked relative to other approaches.</p>
+<p>This project is an in-development R package for <span class="math inline">\(R_t\)</span> estimation using generalized additive models (GAMs). Over the last few years, GAMs have been used with some success to estimate epidemic growth rates and nowcast cases (see <a href="https://doi.org/10.1136/bmjopen-2021-056636" class="external-link">Ward, 2021</a> and <a href="https://doi.org/10.1038/s43856-023-00424-4" class="external-link">Mellor, 2023</a> for an overview of methods). GAM-based models enable rapid, adaptable protoyping, testing dfferent model structures and data sources with minimal computational and development cost. The <a href="https://cran.r-project.org/web/packages/mgcv/index.html" class="external-link">R package <code>{mgcv}</code></a> provides a flexible, fast, and robust interface to fit penalized-spline based models. However, the substantial research effort into spline-based approaches has not been unified into a shared R package.</p>
+<p>This R package aims to become an opinionated re-implementation of the literature methods, with a focus on enabling hiearchical modeling. Development effort is optimized around real-time use-cases, with potential for right-truncation, noisy reporting, and uncertain data-generating processes. It is meant to be a simple drop-in tool to be run alongside more computationally intensive implementations like <a href="https://github.com/epiforecasts/EpiNow2" class="external-link"><code>{EpiNow2}</code></a>.</p>
+<p>At the moment, the package has some simple functionality to fit a adaptive smooth trend to a single epidemic timeseries and produce a short forecast. It has not yet been benchmarked relative to other approaches.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -182,7 +182,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
