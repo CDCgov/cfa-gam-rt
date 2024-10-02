@@ -39,9 +39,9 @@ This snippet uses the simulated dataset to demonstrate how to use the main model
 library(RtGam)
 
 fit <- RtGam(
-        cases = gostic_toy_rt[["obs_incidence"]],
+        cases = stochastic_sir_rt[["obs_incidence"]],
         # Randomly chosen date
-        reference_date = gostic_toy_rt[["time"]] + as.Date("2023-01-01")
+        reference_date = stochastic_sir_rt[["time"]] + as.Date("2023-01-01")
        )
 print(fit)
 ```
