@@ -49,8 +49,8 @@ print(fit)
 ## Project Admin
 
 - Zachary Susswein (@zsusswein)
-- Katelyn Gostic, PhD (@kgostic)
-- Sam Abbott, PhD (@seabbs)
+- Katelyn Gostic (@gostic)
+- Sam Abbott (@seabbs)
 
 ------------------------------------------------------------------------------------
 
