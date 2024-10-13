@@ -146,7 +146,7 @@ check_elements_below_max <- function(
     max,
     call = rlang::caller_env()) {
   # Greater than or equal to 0 or is NA
-  is_below_max <- all((x <= max) | is.na(x))
+  is_below_max <- (x <= max) | is.na(x)
   if (!all(is_below_max)) {
     cli::cli_abort(
       c("{.arg {arg}} has elements larger than {.val {max}}",

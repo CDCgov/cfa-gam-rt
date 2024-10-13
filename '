@@ -22,7 +22,7 @@ predict.RtGam <- function(
     max_date = NULL,
     n = 10,
     mean_delay = NULL,
-    gi_pmf = NULL,
+    gi_pmf,
     seed = 12345,
     ...) {
   rlang::arg_match(type,
@@ -34,23 +34,6 @@ predict.RtGam <- function(
     ),
     call = rlang::caller_env()
   )
-  if (type != "obs_cases") {
-    if (rlang::is_null(mean_delay)) {
-      cli::cli_abort("{.arg mean_delay} is required when type is {.val {type}}")
-    }
-    check_integer(mean_delay, "gi_pmf")
-  }
-  if (type == "Rt") {
-    if (rlang::is_null(gi_pmf)) {
-      cli::cli_abort("{.arg gi_pmf} is required when type is {.val Rt}")
-    }
-    check_vector(gi_pmf, "gi_pmf")
-    check_no_missingness(gi_pmf, "gi_pmf")
-    check_elements_above_min(gi_pmf, "gi_pmf", 0)
-    check_elements_below_max(gi_pmf, "gi_pmf", 1)
-    check_sums_to_one(gi_pmf, "gi_pmf")
-  }
-
   desired_dates <- parse_predict_dates(
     object = object,
     min_date = min_date,
@@ -58,28 +41,23 @@ predict.RtGam <- function(
     horizon = horizon
   )
   timesteps <- prep_timesteps_for_pred(
-    type = type,
-    desired_min_date = desired_dates[["min_date"]],
-    desired_max_date = desired_dates[["max_date"]],
-    fit_min_date = object[["min_date"]],
-    fit_max_date = object[["max_date"]],
-    mean_delay = mean_delay
-  )
+                  type = type,
+        min_date = object[["min_date"]],
+       max_date = object[["max_date"]]
+)
 
   if (type == "obs_cases") {
-    predict <- predict_obs_cases(
-      object,
-      desired_dates,
-      timesteps,
-      n = n,
-      seed = seed,
-      ...
+    desired_dates <- seq.Date(
+      from = min_date,
+      to = max_date,
+      by = "day"
+      # TODO: does this handle doubles properly? How should they be handled?
     )
 
-  } else {
-    cli::cli_abort("{.val {type}} not yet implemented}")
-  }
-
+    timesteps <- dates_to_timesteps(desired_dates,
+      min_supplied_date = object[["min_date"]],
+      max_supplied_date = object[["max_date"]]
+    )
     newdata <- data.frame(
       timestep = timesteps,
       .row = seq_along(timesteps),
@@ -95,6 +73,26 @@ predict.RtGam <- function(
     print(head(fitted))
   } else if (type == "incidence") {
     # I'm breaking it out because we're going to want to also remove day of week effect I think.
+    if (!rlang::is_bare_numeric(mean_delay)) {
+      cli::cli_abort("{.arg mean_delay} is required when {.arg type} is {.val obs_incidence}")
+    }
+
+    # Extract incidence at mean-shifted dates
+    desired_dates <- seq.Date(
+      from = min_date,
+      to = max_date,
+      by = "day"
+      # TODO: does this handle doubles properly? How should they be handled?
+    )
+
+    # Shift desired dates _forward_ to get the corresponding date in fitted cases
+    mean_shifted_dates <- desired_dates + mean_delay
+
+
+    timesteps <- dates_to_timesteps(mean_shifted_dates,
+      min_supplied_date = object[["min_date"]],
+      max_supplied_date = object[["max_date"]]
+    )
 
     # And associate the timestep with the incidence date, not the case date to shift back from cases to incidence
     newdata <- data.frame(
@@ -111,7 +109,27 @@ predict.RtGam <- function(
       ...
     )
   } else if (type == "r") {
-      # Construct timesteps as with incidence and shift by delta for discrete derivative
+    if (!rlang::is_bare_numeric(mean_delay)) {
+      cli::cli_abort("{.arg mean_delay} is required when {.arg type} is {.val obs_incidence}")
+    }
+
+    # Extract incidence at mean-shifted dates
+    desired_dates <- seq.Date(
+      from = min_date,
+      to = max_date,
+      iy = "day"
+    )
+
+    # Shift desired dates _forward_ to get the corresponding date in fitted cases
+    mean_shifted_dates <- desired_dates + mean_delay
+
+
+    timesteps <- dates_to_timesteps(mean_shifted_dates,
+      min_supplied_date = object[["min_date"]],
+      max_supplied_date = object[["max_date"]]
+    )
+
+    # Construct timesteps as with incidence and shift by delta for discrete derivative
     newdata <- data.frame(
       timestep = timesteps,
       reference_date = desired_dates
@@ -169,11 +187,12 @@ predict.RtGam <- function(
 #'
 #' @return List with two elements: min_date and max_date
 parse_predict_dates <- function(
-    object,
-    min_date = NULL,
-    max_date = NULL,
-    horizon = NULL,
-    call = rlang::caller_env()) {
+  object,
+  min_date = NULL,
+  max_date = NULL,
+  horizon = NULL,
+  call = rlang::caller_env()
+) {
   if (!rlang::is_null(min_date)) check_date(min_date, call = call)
   if (!rlang::is_null(max_date)) check_date(max_date, call = call)
   if (!rlang::is_null(horizon)) check_integer(horizon, call = call)
@@ -191,17 +210,16 @@ parse_predict_dates <- function(
 
   # Ensure min_date is before max_date
   if (min_date >= max_date) {
-    cli::cli_warn(
-      c(
-        "Swapping {.arg min_date} and {.arg max_date}",
-        "{.arg min_date} {.val {min_date}} is after {.arg max_date} {.val {max_date}}"
-      ),
-      class = "RtGam_predict_dates_backward",
-      call = call
-    )
-    temp_var <- max_date
-    max_date <- min_date
-    min_date <- temp_var
+    cli::cli_warn(c(
+      "Swapping {.arg min_date} and {.arg max_date}",
+      "{.arg min_date} {.val {min_date}} is after {.arg max_date} {.val {max_date}}"
+    ),
+    class = "RtGam_predict_dates_backward",
+    call = call
+   )
+   temp_var <- max_date
+   max_date <- min_date
+   min_date <- temp_var
   }
 
   list(min_date = as.Date(min_date), max_date = as.Date(max_date))
@@ -212,32 +230,22 @@ parse_predict_dates <- function(
 #' @inheritParams predict.RtGam
 #' @return Double vector, the timesteps to predict
 prep_timesteps_for_pred <- function(
-    type,
-    fit_min_date,
-    fit_max_date,
-    desired_min_date,
-    desired_max_date,
-    mean_delay,
-    call = rlang::caller_env()) {
+type,
+min_date,
+max_date,
+mean_delay
+call = rlang::caller_env()
+) {
+
   if (type == "incidence" || type == "growth_rate") {
     # Shift cases up by mean delay to get projected incidence on day
-    desired_min_date <- desired_min_date + mean_delay
-    desired_max_date <- desired_max_date + mean_delay
-  } else if (type == "Rt") {
-    # Shift up by mean delay to move to incidence scale and also pad by the
-    # GI on either side to prevent missing dates in the convolution
-    desired_min_date <- desired_min_date + desired_mean_delay - length(gi_pmf)
-    desired_max_date <- desired_max_date + mean_delay + length(gi_pmf)
+    min_date = min_date + mean_delay
+    max_date = max_date + mean_delay
+  } else if (type == "Rt")
+     # Shift up by mean delay to move to incidence scale and also pad by the
+     # GI on either side to prevent missing dates in the convolution
+     min_date = min_date + mean_delay - length(gi_pmf)
+    max_date = max_date + mean_delay + length(gi_pmf)
   }
 
-  dates <- seq.Date(
-    from = desired_min_date,
-    to = desired_max_date,
-    by = "day"
-  )
-  dates_to_timesteps(
-    dates,
-    min_supplied_date = fit_min_date,
-    max_supplied_date = fit_max_date
-  )
 }
