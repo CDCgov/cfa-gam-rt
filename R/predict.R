@@ -1,17 +1,51 @@
-#' Stub docs: Predict method
+#' Predict Method for RtGam Models
 #'
-#' Supports specifying the the dates for prediction four ways:
-#' 1. Passing fit and not specifying any date arguments. In this
-#'  predictions are returned for the dates in between the minimum and maximum
-#'  dates passed to [RtGam()].
-#' 2. Specifying `horizon`. A forecast of `horizon` days is returned, starting
-#'  from last day passed to [RtGam()]. To extract a 7 day-ahead forecast, pass
-#'  `predict(RtGamFit, horizon = 7)`.
-#' 3. Specifying `min_date` and `horizon`. Predictions are returned for the
-#'   period from `min_date` through `horizon` days after last day passed
-#'   to [RtGam()].
-#' 4. Specifying `min_date` and `max_date`. Predictions are returned for each day
-#'   between these two dates (inclusive).
+#' Generates predictions from an `RtGam` fit. Prediction dates can be specified
+#' flexibly using multiple approaches.
+#'
+#' @param object An `RtGamFit` object from [RtGam()].
+#' @param type A string specifying the prediction type. Options are
+#'   `"obs_cases"`, `"incidence"`, `"r"`, and `"Rt"`. Currently, only
+#'   `"obs_cases"` is supported. Matching is enforced by [rlang::arg_match()].
+#' @param horizon Optional. Integer specifying forecast days from the last date
+#'   in the fit. For example, `horizon = 7` returns a 7-day forecast.
+#' @param min_date Optional. A date-like object marking the start of the
+#'   prediction period.
+#' @param max_date Optional. A date-like object marking the end of the
+#'   prediction period.
+#' @param n Number of posterior samples to use. Default is 10.
+#' @param mean_delay Optional. Numeric mean delay used in the prediction.
+#' @param gi_pmf Optional. A vector representing the generation interval PMF.
+#' @param seed Random seed for reproducibility. Default is 12345.
+#' @param ... Additional arguments passed to lower-level functions.
+#'
+#' @details
+#' Prediction dates can be set in four ways:
+#'
+#' 1. **Using Fit Object Alone**: Predictions span the full date range in the
+#'    original model fit.
+#' 2. **Using `horizon`**: Forecasts extend `horizon` days from the fit’s last
+#'    date.
+#' 3. **Using `min_date` and `horizon`**: Predictions start at `min_date` and
+#'    end `horizon` days after the fit’s last date.
+#' 4. **Using `min_date` and `max_date`**: Predictions span all dates between
+#'    these two (inclusive).
+#'
+#' @return
+#' A dataframe in [tidy format](https://www.jstatsoft.org/article/view/v059i10),
+#' with each row representing a draw for a specific date:
+#'
+#' - `reference_date`: Date of the prediction.
+#' - `.response`: Predicted value (e.g., observed cases).
+#' - `.draw`: ID of the posterior draw.
+#'
+#' Example output:
+#' ```
+#'   reference_date .response .draw
+#' 1     2023-01-01        18     1
+#' 2     2023-01-02        13     1
+#' 3     2023-01-03        21     1
+#' ```
 #'
 #' @export
 predict.RtGam <- function(
@@ -59,15 +93,15 @@ predict.RtGam <- function(
   )
   timesteps <- prep_timesteps_for_pred(
     type = type,
-    desired_min_date = desired_dates[["min_date"]],
-    desired_max_date = desired_dates[["max_date"]],
+    desired_min_date = min(desired_dates),
+    desired_max_date = max(desired_dates),
     fit_min_date = object[["min_date"]],
     fit_max_date = object[["max_date"]],
     mean_delay = mean_delay
   )
 
   if (type == "obs_cases") {
-    predict <- predict_obs_cases(
+    predict_obs_cases(
       object,
       desired_dates,
       timesteps,
@@ -75,86 +109,35 @@ predict.RtGam <- function(
       seed = seed,
       ...
     )
-
   } else {
     cli::cli_abort("{.val {type}} not yet implemented}")
   }
+}
 
-    newdata <- data.frame(
-      timestep = timesteps,
-      .row = seq_along(timesteps),
-      reference_date = desired_dates
-    )
+#' Posterior predicted cases
+#' @noRd
+predict_obs_cases <- function(object, desired_dates, timesteps, n, seed, ...) {
+  newdata <- data.frame(
+    timestep = timesteps,
+    .row = seq_along(timesteps),
+    reference_date = desired_dates
+  )
 
-    fitted <- gratia::posterior_samples(
-      object[["model"]],
-      data = newdata,
-      unconditional = TRUE,
-      ...
-    )
-    print(head(fitted))
-  } else if (type == "incidence") {
-    # I'm breaking it out because we're going to want to also remove day of week effect I think.
-
-    # And associate the timestep with the incidence date, not the case date to shift back from cases to incidence
-    newdata <- data.frame(
-      timestep = timesteps,
-      .row = seq_along(timesteps),
-      reference_date = desired_dates
-    )
-
-    # Use `posterior_samples()` over `fitted_samples()` to get response w/ obs uncertainty
-    fitted <- gratia::posterior_samples(
-      object[["model"]],
-      data = newdata,
-      unconditional = TRUE,
-      ...
-    )
-  } else if (type == "r") {
-      # Construct timesteps as with incidence and shift by delta for discrete derivative
-    newdata <- data.frame(
-      timestep = timesteps,
-      reference_date = desired_dates
-    )
-    delta <- 1e-9
-    timesteps_shifted <- timesteps + delta
-    print(head(timesteps))
-    print(head(timesteps_shifted))
-    all_timesteps <- c(rbind(timesteps, timesteps_shifted))
-    print(head(all_timesteps))
-    # `rbind()` interleaves vectors, so we can difference them
-    ds <- gratia::data_slice(fit[["model"]], timestep = all_timesteps)
-
-    all_timesteps <- gratia::fitted_samples(
-      object[["model"]],
-      data = ds,
-      n = n,
-      seed = seed,
-      unconditional = TRUE,
-      scale = "response",
-      ...
-    )
-    is_orig_timestep <- all_timesteps[[".row"]] %% 2 == 1
-    differenced_draws <- all_timesteps[[".fitted"]][is_orig_timestep] - all_timesteps[[".fitted"]][!is_orig_timestep]
-    print(head(differenced_draws))
-    growth_rate <- differenced_draws[is_orig_timestep] / delta
-    print(head(growth_rate))
-    fitted <- data.frame(
-      .response = growth_rate,
-      .row = 1:length(growth_rate),
-      .draw = all_timesteps[[".draw"]][is_orig_timestep],
-      timestep = timesteps
-    )
-    print(head(fitted))
-  } else {
-    cli::cli_abort("Not implemented")
-  }
+  # Use `posterior_samples()` over `fitted_samples()` to get response
+  # w/ obs uncertainty
+  fitted <- gratia::posterior_samples(
+    object[["model"]],
+    data = newdata,
+    unconditional = TRUE,
+    n = n,
+    seed = seed,
+    ...
+  )
 
   merged <- merge(fitted,
     newdata,
-    by = "timestep"
+    by = ".row"
   )
-
   data.frame(
     reference_date = merged[["reference_date"]],
     .response = merged[[".response"]],
@@ -168,6 +151,7 @@ predict.RtGam <- function(
 #' @param call The calling environment to be reflected in the error message
 #'
 #' @return List with two elements: min_date and max_date
+#' @keyword internal
 parse_predict_dates <- function(
     object,
     min_date = NULL,
@@ -191,20 +175,21 @@ parse_predict_dates <- function(
 
   # Ensure min_date is before max_date
   if (min_date >= max_date) {
-    cli::cli_warn(
-      c(
-        "Swapping {.arg min_date} and {.arg max_date}",
-        "{.arg min_date} {.val {min_date}} is after {.arg max_date} {.val {max_date}}"
-      ),
-      class = "RtGam_predict_dates_backward",
-      call = call
-    )
+    cli::cli_alert_warning("Swapping {.arg min_date} and {.arg max_date}")
+    cli::cli_alert(c(
+      "{.arg min_date} {.val {min_date}} ",
+      "is after {.arg max_date} {.val {max_date}}"
+    ))
     temp_var <- max_date
     max_date <- min_date
     min_date <- temp_var
   }
 
-  list(min_date = as.Date(min_date), max_date = as.Date(max_date))
+  seq.Date(
+    from = min_date,
+    to = max_date,
+    by = "day"
+  )
 }
 
 #' Convert from user-specified dates to internal timesteps
