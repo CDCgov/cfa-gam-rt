@@ -152,6 +152,7 @@ predict_obs_cases <- function(object, desired_dates, timesteps, n, seed, ...) {
 #'
 #' @return List with two elements: min_date and max_date
 #' @keyword internal
+#' @importFrom rlang %||%
 parse_predict_dates <- function(
     object,
     min_date = NULL,
@@ -163,8 +164,12 @@ parse_predict_dates <- function(
   if (!rlang::is_null(horizon)) check_integer(horizon, call = call)
 
   # Handle horizon to estimate dates if provided
-  if (!is.null(horizon)) {
-    rlang::check_exclusive(max_date, horizon, call = call)
+  if (!rlang::is_null(horizon)) {
+    if (!rlang::is_null(max_date)) {
+      cli::cli_abort("Cannot specify both {.arg horizon} and {.arg max_date}",
+        call = call
+      )
+    }
     min_date <- min_date %||% (object[["max_date"]] + 1)
     max_date <- object[["max_date"]] + horizon + 1
   } else {
