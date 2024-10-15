@@ -35,6 +35,7 @@ RoxygenNote: 7.3.2
 Imports:
     cli,
     glue,
+    gratia,
     mgcv,
     rlang
 Depends:
