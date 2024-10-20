@@ -1,4 +1,9 @@
-check_vector_length <- function(n, name, min, max, call = rlang::caller_env()) {
+check_vector_length <- function(
+    n,
+    name,
+    min,
+    max,
+    call = rlang::caller_env()) {
   if (!rlang::is_na(min)) {
     if (n < min) {
       cli::cli_abort(
@@ -114,7 +119,10 @@ check_required_inputs_provided <- function(cases,
   invisible()
 }
 
-check_no_missingness <- function(x, arg = "x", call = rlang::caller_env()) {
+check_no_missingness <- function(
+    x,
+    arg = rlang::caller_arg(x),
+    call = rlang::caller_env()) {
   is_missing <- rlang::are_na(x)
 
   if (any(is_missing)) {
@@ -129,7 +137,11 @@ check_no_missingness <- function(x, arg = "x", call = rlang::caller_env()) {
   }
 }
 
-check_elements_below_max <- function(x, arg, max, call = rlang::caller_env()) {
+check_elements_below_max <- function(
+    x,
+    arg = rlang::caller_arg(x),
+    max,
+    call = rlang::caller_env()) {
   # Greater than or equal to 0 or is NA
   is_below_max <- all((x <= max) | is.na(x))
   if (!all(is_below_max)) {
@@ -146,7 +158,11 @@ check_elements_below_max <- function(x, arg, max, call = rlang::caller_env()) {
 }
 
 
-check_elements_above_min <- function(x, arg, min, call = rlang::caller_env()) {
+check_elements_above_min <- function(
+    x,
+    arg = rlang::caller_arg(x),
+    min,
+    call = rlang::caller_env()) {
   # Greater than or equal to 0 or is NA
   is_above_min <- (x >= min) | is.na(x)
   if (!all(is_above_min)) {
@@ -163,7 +179,7 @@ check_elements_above_min <- function(x, arg, min, call = rlang::caller_env()) {
 }
 
 check_sums_to_one <- function(x,
-                              arg = "x",
+                              arg = rlang::caller_arg(x),
                               call = rlang::caller_env(),
                               tol = 1e-8) {
   diff <- abs(sum(x) - 1)
@@ -193,7 +209,10 @@ NULL
 
 #' @rdname type_checker
 #' @noRd
-check_date <- function(x, arg = "x", call = rlang::caller_env()) {
+check_date <- function(
+    x,
+    arg = rlang::caller_arg(x),
+    call = rlang::caller_env()) {
   if ((!rlang::is_integerish(x)) || (!inherits(x, "Date"))) {
     throw_type_error(
       object = x,
@@ -207,7 +226,10 @@ check_date <- function(x, arg = "x", call = rlang::caller_env()) {
 
 #' @rdname type_checker
 #' @noRd
-check_vector <- function(x, arg = "x", call = rlang::caller_env()) {
+check_vector <- function(
+    x,
+    arg = rlang::caller_arg(x),
+    call = rlang::caller_env()) {
   # Lists are bare vectors, but we want truly vanilla vectors
   if (!rlang::is_bare_vector(x) || inherits(x, "list")) {
     throw_type_error(
@@ -222,7 +244,10 @@ check_vector <- function(x, arg = "x", call = rlang::caller_env()) {
 
 #' @rdname type_checker
 #' @noRd
-check_integer <- function(x, arg = "x", call = rlang::caller_env()) {
+check_integer <- function(
+    x,
+    arg = rlang::caller_arg(x),
+    call = rlang::caller_env()) {
   if (!rlang::is_bare_integerish(x)) {
     throw_type_error(
       object = x,
@@ -234,7 +259,10 @@ check_integer <- function(x, arg = "x", call = rlang::caller_env()) {
   invisible()
 }
 
-check_character <- function(x, arg = "x", call = rlang::caller_env()) {
+check_character <- function(
+    x,
+    arg = rlang::caller_arg(x),
+    call = rlang::caller_env()) {
   if (!rlang::is_bare_character(x)) {
     throw_type_error(
       object = x,
@@ -262,7 +290,7 @@ check_character <- function(x, arg = "x", call = rlang::caller_env()) {
 #' @importFrom rlang abort
 #' @noRd
 throw_type_error <- function(object,
-                             arg_name,
+                             arg_name = rlang::caller_arg(object),
                              expected_type,
                              call = rlang::caller_env()) {
   cli::cli_abort(

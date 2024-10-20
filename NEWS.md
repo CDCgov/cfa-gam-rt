@@ -1,3 +1,9 @@
+# RtGam v0.2.0
+
+## Features
+
+* Automatically refer to the argument name in error messages (#51)
+
 # RtGam v0.1.0
 
 This initial release focuses on establishing the package's foundation to support future development. It introduces basic functionality for fitting and returning models, while setting up essential components such as package initialization, documentation, and continuous integration systems.
