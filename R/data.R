@@ -66,7 +66,7 @@
 #' From this parametric specification, we produce a double-censored,
 #' left-truncated probability mass function of the generation interval
 #' distribution. We produce the PMF using
-#' [primarycensoreddist::dpcens()] with version 0.4.0. See
+#' [primarycensored::dpcens()] with version 0.4.0. See
 #' https://doi.org/10.1101/2024.01.12.24301247 for more information on
 #' double-censoring biases and corrections.
 #'
