@@ -1,3 +1,9 @@
+# RtGam v0.2.0
+
+## Development tooling
+
+* Added a Makefile with common commands
+
 # RtGam v0.1.0
 
 This initial release focuses on establishing the package's foundation to support future development. It introduces basic functionality for fitting and returning models, while setting up essential components such as package initialization, documentation, and continuous integration systems.
