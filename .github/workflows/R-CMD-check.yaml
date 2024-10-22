@@ -26,6 +26,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      RCMDCHECK_ERROR_ON: note
 
     steps:
       - uses: actions/checkout@v4
