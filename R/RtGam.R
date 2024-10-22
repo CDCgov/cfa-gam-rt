@@ -41,7 +41,7 @@
 #'   automatically identified diagnostic issues? Defaults to TRUE. A list of
 #'   quantitative model diagnostics can be inspected in the `diagnostics` slot
 #'   of the returned `RtGam` object.
-#' @param ... Additional arguments passed to the specified modelling backend.
+#' @param ... Additional arguments passed to the specified modeling backend.
 #'   For example, the default negative binomial error structure could be changed
 #'   to poisson in the default [mgcv::gam] backend by passing `family =
 #'   "poisson"`.
@@ -203,7 +203,7 @@ RtGam <- function(cases,
 #'   available to the [RtGam] model.
 #' @references Ward, Thomas, et al. "Growth, reproduction numbers and factors
 #'   affecting the spread of SARS-CoV-2 novel variants of concern in the UK from
-#'   October 2020 to July 2021: a modelling analysis." BMJ open 11.11 (2021):
+#'   October 2020 to July 2021: a modeling analysis." BMJ open 11.11 (2021):
 #'   e056636.
 #' @seealso [RtGam()] for the use-case and additional documentation as well as
 #'   [mgcv::choose.k] and [mgcv::gam.check] for more general guidance from

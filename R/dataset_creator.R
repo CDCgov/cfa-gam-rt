@@ -56,7 +56,7 @@ integerify_cases <- function(cases) {
 #'
 #' Timesteps are scaled to be on \[0, 1\]. This small range is intentional --
 #' I've seen it help numerical samplers converge and by default in R
-#' current-ish dates are large integers.
+#' recent dates are large integers.
 #'
 #' @inheritParams RtGam
 #' @param min_supplied_date The minimum date supplied in `reference_date` to the

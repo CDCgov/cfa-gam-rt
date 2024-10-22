@@ -99,7 +99,7 @@ k <- smooth_dim_heuristic(length(cases))
 \references{
 Ward, Thomas, et al. "Growth, reproduction numbers and factors
 affecting the spread of SARS-CoV-2 novel variants of concern in the UK from
-October 2020 to July 2021: a modelling analysis." BMJ open 11.11 (2021):
+October 2020 to July 2021: a modeling analysis." BMJ open 11.11 (2021):
 e056636.
 }
 \seealso{

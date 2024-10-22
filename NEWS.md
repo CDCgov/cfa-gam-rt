@@ -8,7 +8,7 @@
 
 * Update `{primarycensoreddist}` to `{primarycensored}` to match the name change in the v0.6.0 release (#53)
 * Automatically refer to the argument name in error messages (#51)
-* Add dependabot for GitHub Actions (#55)
+* Add Dependabot for GitHub Actions (#55)
 * Error R CMD check for NOTEs when running in CI (#57)
 * Set default merge strategy for NEWS.md to `union` to limit merge conflicts (#58)
 * Added a Justfile with some common development tasks (#56)
@@ -27,6 +27,6 @@ This initial release focuses on establishing the package's foundation to support
 ## Bugs
 
 * Fix math rendering in pkgdown (#36)
-* Update pre-commit hooks from template repo to newest version (#25)
+* Update pre-commit hooks from template repository to newest version (#25)
 * Clean up public docs (#26)
 * Initial CI setup (#11)
