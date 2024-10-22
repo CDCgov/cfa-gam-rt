@@ -23,6 +23,7 @@ URL: https://github.com/cdcgov/cfa-gam-rt,
     https://cdcgov.github.io/cfa-gam-rt/
 BugReports: https://github.com/cdcgov/cfa-gam-rt/issues
 Suggests:
+    spelling,
     testthat (>= 3.0.0),
     pkgdown,
     withr,
@@ -42,3 +43,4 @@ Depends:
 LazyData: true
 Additional_repositories:
     https://epinowcast.r-universe.dev
+Language: en-US
