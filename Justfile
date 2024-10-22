@@ -23,6 +23,9 @@ style:
 lint:
 	Rscript -e "lintr::lint_package()"
 
+update_wordlist:
+    Rscript -e "spelling::update_wordlist(confirm = FALSE)"
+
 clean:
 	git restore --staged .
 	git restore .
