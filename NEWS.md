@@ -12,6 +12,7 @@
 * Error R CMD check for NOTEs when running in CI (#57)
 * Set default merge strategy for NEWS.md to `union` to limit merge conflicts (#58)
 * Added a Justfile with some common development tasks (#56)
+* Set up automated spellcheck (#61)
 
 # RtGam v0.1.0
 
