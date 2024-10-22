@@ -1,0 +1,61 @@
+on:
+  push:
+    branches:
+      - update-wordlist-pr-command
+
+jobs:
+  update_wordlist:
+    name: update_worldlist
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+          extra-repositories: 'https://epinowcast.r-universe.dev'
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::spelling
+
+      - name: Update wordlist
+        run: spelling::update_wordlist(confirm = FALSE)
+        shell: Rscript {0}
+
+      - name: commit
+        run: |
+          git config --local user.name "$GITHUB_ACTOR"
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git add inst/WORDLIST
+          git commit -m 'Update Wordlist with new words'
+
+      - uses: r-lib/actions/pr-push@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Hide kickoff comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            'repos/{owner}/{repo}/issues/${{ github.event.number }}/comments' --paginate | \
+              jq '.[] |
+                select(.body | startsWith("/update_wordlist")) |
+                .node_id' | \
+                  xargs --no-run-if-empty --replace='{node_id}' \
+                    gh api graphql --raw-field subjectId="{node_id}" \
+                      --raw-field query='mutation($subjectId:ID!) {
+                        minimizeComment(input: { subjectId: $subjectId, classifier: OUTDATED }) {
+                          clientMutationId
+                          minimizedComment {
+                            isMinimized
+                            minimizedReason
+                            viewerCanMinimize
+                          }
+                        }
+                      }
