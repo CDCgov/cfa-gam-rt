@@ -10,11 +10,11 @@
 
 This project is an in-development R package for $R_t$ estimation using generalized additive models (GAMs).
 Over the last few years, GAMs have been used with some success to estimate epidemic growth rates and nowcast cases (see [Ward, 2021](https://doi.org/10.1136/bmjopen-2021-056636) and [Mellor, 2023](https://doi.org/10.1038/s43856-023-00424-4) for an overview of methods).
-GAM-based models enable rapid, adaptable protoyping, testing dfferent model structures and data sources with minimal computational and development cost.
+GAM-based models enable rapid, adaptable prototyping, testing different model structures and data sources with minimal computational and development cost.
 The [R package `{mgcv}`](https://cran.r-project.org/web/packages/mgcv/index.html) provides a flexible, fast, and robust interface to fit penalized-spline based models.
 However, the substantial research effort into spline-based approaches has not been unified into a shared R package.
 
-This R package aims to become an opinionated re-implementation of the literature methods, with a focus on enabling hiearchical modeling.
+This R package aims to become an opinionated re-implementation of the literature methods, with a focus on enabling hierarchical modeling.
 Development effort is optimized around real-time use-cases, with potential for right-truncation, noisy reporting, and uncertain data-generating processes.
 It is meant to be a simple drop-in tool to be run alongside more computationally intensive implementations like [`{EpiNow2}`](https://github.com/epiforecasts/EpiNow2).
 
@@ -23,7 +23,7 @@ It has not yet been benchmarked relative to other approaches.
 
 ## Installation
 
-The package can be installed from Github:
+The package can be installed from GitHub:
 
 ```r
 remotes::install_github("cdcgov/cfa-gam-rt@v0.1.0")

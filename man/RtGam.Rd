@@ -51,7 +51,7 @@ automatically identified diagnostic issues? Defaults to TRUE. A list of
 quantitative model diagnostics can be inspected in the \code{diagnostics} slot
 of the returned \code{RtGam} object.}
 
-\item{...}{Additional arguments passed to the specified modelling backend.
+\item{...}{Additional arguments passed to the specified modeling backend.
 For example, the default negative binomial error structure could be changed
 to poisson in the default \link[mgcv:gam]{mgcv::gam} backend by passing \code{family = "poisson"}.}
 }
