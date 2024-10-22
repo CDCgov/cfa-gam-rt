@@ -1,6 +1,6 @@
+alias docs := document
 
 prep: style document lint check
-
 
 test:
 	Rscript -e "testthat::test_local()"
@@ -20,4 +20,5 @@ lint:
 clean:
 	git restore --staged .
 	git restore .
+	git reset --hard HEAD
 	git status
