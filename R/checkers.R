@@ -29,10 +29,11 @@ check_vector_length <- function(
   invisible()
 }
 
-check_vectors_equal_length <- function(cases,
-                                       reference_date,
-                                       group,
-                                       call = rlang::caller_env()) {
+check_vectors_equal_length <- function(
+    cases,
+    reference_date,
+    group,
+    call = rlang::caller_env()) {
   if (rlang::is_null(group)) {
     args <- c("cases", "reference_date")
     lengths <- c(length(cases), length(reference_date))
@@ -59,9 +60,10 @@ check_vectors_equal_length <- function(cases,
   invisible()
 }
 
-check_dates_unique <- function(reference_date,
-                               group,
-                               call = rlang::caller_env()) {
+check_dates_unique <- function(
+    reference_date,
+    group,
+    call = rlang::caller_env()) {
   # Two cases:
   ## (1) There are no groups -- need to check that all dates are unique
   ## (2) There **are** groups -- check that dates unique _within each group_
@@ -103,13 +105,14 @@ check_dates_unique <- function(reference_date,
   invisible()
 }
 
-check_required_inputs_provided <- function(cases,
-                                           reference_date,
-                                           group,
-                                           k,
-                                           m,
-                                           backend,
-                                           call = rlang::caller_env()) {
+check_required_inputs_provided <- function(
+    cases,
+    reference_date,
+    group,
+    k,
+    m,
+    backend,
+    call = rlang::caller_env()) {
   rlang::check_required(cases, "cases", call = call)
   rlang::check_required(reference_date, "reference_date", call = call)
   rlang::check_required(group, "group", call = call)
@@ -178,10 +181,11 @@ check_elements_above_min <- function(
   invisible()
 }
 
-check_sums_to_one <- function(x,
-                              arg = rlang::caller_arg(x),
-                              call = rlang::caller_env(),
-                              tol = 1e-8) {
+check_sums_to_one <- function(
+    x,
+    arg = rlang::caller_arg(x),
+    call = rlang::caller_env(),
+    tol = 1e-8) {
   diff <- abs(sum(x) - 1)
   if (diff > tol) {
     cli::cli_abort(
@@ -289,10 +293,11 @@ check_character <- function(
 #'   should never return.
 #' @importFrom rlang abort
 #' @noRd
-throw_type_error <- function(object,
-                             arg_name = rlang::caller_arg(object),
-                             expected_type,
-                             call = rlang::caller_env()) {
+throw_type_error <- function(
+    object,
+    arg_name = rlang::caller_arg(object),
+    expected_type,
+    call = rlang::caller_env()) {
   cli::cli_abort(
     c("{.arg {arg_name}} is {.obj_type_friendly {object}}",
       "i" = "Must be of type {.emph {expected_type}}"
