@@ -9,6 +9,7 @@
 * Update `{primarycensoreddist}` to `{primarycensored}` to match the name change in the v0.6.0 release (#53)
 * Automatically refer to the argument name in error messages (#51)
 * Add dependabot for GitHub Actions (#55)
+* Set default merge strategy for NEWS.md to `union` to limit merge conflicts (#58)
 
 # RtGam v0.1.0
 
