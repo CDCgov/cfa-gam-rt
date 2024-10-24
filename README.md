@@ -6,6 +6,8 @@
 > [!CAUTION]
 > This project is an early-stage work-in-progress. Any outputs may be misleading or even incorrect. Despite this project's early stage, all development is in public as part of the Center for Forecasting and Outbreak Analytics' goals around open development. Questions and suggestions are welcome through GitHub issues or a PR.
 
+notnotwordword
+
 ## Overview
 
 This project is an in-development R package for $R_t$ estimation using generalized additive models (GAMs).
