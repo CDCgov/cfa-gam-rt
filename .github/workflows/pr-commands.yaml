@@ -80,7 +80,7 @@ jobs:
 
   update_wordlist:
     if: ${{ github.event.issue.pull_request && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER') && startsWith(github.event.comment.body, '/wordlist') }}
-    name: update_worldlist
+    name: update_wordlist
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -98,6 +98,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::spelling
+          extra-repositories: 'https://epinowcast.r-universe.dev'
 
       - name: Update wordlist
         run: spelling::update_wordlist(confirm = FALSE)
