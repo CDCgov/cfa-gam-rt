@@ -113,7 +113,7 @@ jobs:
 
       - uses: r-lib/actions/pr-push@v2
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.ZS_PAT }}
 
 
       - name: Hide kickoff comment
