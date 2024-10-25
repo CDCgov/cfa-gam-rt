@@ -13,6 +13,7 @@
 * Set default merge strategy for NEWS.md to `union` to limit merge conflicts (#58)
 * Added a Justfile with some common development tasks (#56)
 * Set up automated spellcheck (#61)
+* Add slash-command to update WORDLIST in a PR (#64)
 
 # RtGam v0.1.0
 
