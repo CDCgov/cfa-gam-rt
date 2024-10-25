@@ -8,7 +8,7 @@ name: Commands
 
 jobs:
   document:
-    if: ${{ github.event.issue.pull_request && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER') && startsWith(github.event.comment.body, '/document') }}
+    if: ${{ github.event.issue.pull_request && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'CONTRIBUTOR' || github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'USER') && startsWith(github.event.comment.body, '/document') }}
     name: document
     runs-on: ubuntu-latest
     env:
@@ -79,7 +79,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
   update_wordlist:
-    if: ${{ github.event.issue.pull_request && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER') && startsWith(github.event.comment.body, '/wordlist') }}
+    if: ${{ github.event.issue.pull_request && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'CONTRIBUTOR' || github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'USER') && startsWith(github.event.comment.body, '/wordlist') }}
     name: update_wordlist
     runs-on: ubuntu-latest
     env:
