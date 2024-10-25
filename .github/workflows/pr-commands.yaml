@@ -8,7 +8,7 @@ name: Commands
 
 jobs:
   document:
-    if: ${{ github.event.issue.pull_request && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER') && startsWith(github.event.comment.body, '/document') }}
+    if: ${{ github.event.issue.pull_request && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'CONTRIBUTOR' || github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'USER') && startsWith(github.event.comment.body, '/document') }}
     name: document
     runs-on: ubuntu-latest
     env:
@@ -79,8 +79,8 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
   update_wordlist:
-    if: ${{ github.event.issue.pull_request && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER') && startsWith(github.event.comment.body, '/update_wordlist') }}
-    name: update_worldlist
+    if: ${{ github.event.issue.pull_request && (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'CONTRIBUTOR' || github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'USER') && startsWith(github.event.comment.body, '/wordlist') }}
+    name: update_wordlist
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -94,6 +94,7 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
+          extra-repositories: 'https://epinowcast.r-universe.dev'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
@@ -112,7 +113,7 @@ jobs:
 
       - uses: r-lib/actions/pr-push@v2
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.ZS_PAT }}
 
 
       - name: Hide kickoff comment
@@ -121,9 +122,9 @@ jobs:
         run: |
           gh api -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            'repos/{owner}/{repo}/issues/${{ github.event.number }}/comments' --paginate | \
+            'repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments' --paginate | \
               jq '.[] |
-                select(.body | startsWith("/update_wordlist")) |
+                select(.body == "/wordlist") |
                 .node_id' | \
                   xargs --no-run-if-empty --replace='{node_id}' \
                     gh api graphql --raw-field subjectId="{node_id}" \

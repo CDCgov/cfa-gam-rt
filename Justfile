@@ -2,6 +2,7 @@ alias docs := document
 alias spell := spellcheck
 
 export NOT_CRAN := "1"
+export RCMDCHECK_ERROR_ON := "note"
 
 prep: style document spellcheck lint check
 
