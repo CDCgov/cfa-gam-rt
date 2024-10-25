@@ -14,6 +14,7 @@ PMF
 README
 SEIR
 USC
+WORDLIST
 al
 benchmarked
 benchmarking
@@ -24,14 +25,13 @@ convolved
 doi
 edf
 et
-gam
 http
 https
 maxiumum
 md
 mgcv
-modelling
 nolint
+notnotwordword
 nowcast
 oversmoothing
 pkgdown
@@ -43,4 +43,3 @@ timeseries
 undersmoothing
 wiggliness
 www
-WORDLIST
