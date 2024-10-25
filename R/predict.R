@@ -209,6 +209,28 @@ prep_timesteps_for_pred <- function(
     desired_max_date,
     mean_delay,
     call = rlang::caller_env()) {
+  dates <- shift_desired_dates(
+    type,
+    desired_min_date,
+    desired_max_date
+  )
+  dates_to_timesteps(
+    dates,
+    min_supplied_date = fit_min_date,
+    max_supplied_date = fit_max_date
+  )
+}
+
+#' Map user-req'd dates to model-req'd dates. Incidence is a
+#' mean-shift ahead of cases and Rt requires GI padding for the
+#' convolution
+#' @noRd
+shift_desired_dates <- function(
+    type,
+    desired_min_date,
+    desired_max_date,
+    mean_delay,
+    gi_pmf) {
   if (type == "incidence" || type == "growth_rate") {
     # Shift cases up by mean delay to get projected incidence on day
     desired_min_date <- desired_min_date + mean_delay
@@ -220,14 +242,9 @@ prep_timesteps_for_pred <- function(
     desired_max_date <- desired_max_date + mean_delay + length(gi_pmf)
   }
 
-  dates <- seq.Date(
+  seq.Date(
     from = desired_min_date,
     to = desired_max_date,
     by = "day"
-  )
-  dates_to_timesteps(
-    dates,
-    min_supplied_date = fit_min_date,
-    max_supplied_date = fit_max_date
   )
 }
