@@ -1,5 +1,6 @@
 ^.lintr$
 ^.secrets.baseline$
+^Justfile$
 ^LICENSE$
 ^\.github$
 ^\.pre-commit-config\.yaml$
@@ -8,4 +9,3 @@
 ^data-raw$
 ^docs$
 ^pkgdown$
-^Justfile$
