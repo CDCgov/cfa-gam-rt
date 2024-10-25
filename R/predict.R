@@ -221,7 +221,7 @@ prep_timesteps_for_pred <- function(
   )
 }
 
-#' Map user-req'd dates to model-req'd dates. Incidence is a
+#' Map user-req'd dates to model-applied dates. Incidence is a
 #' mean-shift ahead of cases and Rt requires GI padding for the
 #' convolution
 #' @noRd
@@ -231,20 +231,23 @@ shift_desired_dates <- function(
     desired_max_date,
     mean_delay,
     gi_pmf) {
-  if (type == "incidence" || type == "growth_rate") {
+  if (type == "obs_cases") {
+    applied_min_date <- desired_min_date
+    applied_max_date <- desired_max_date
+  } else if (type == "incidence" || type == "r") {
     # Shift cases up by mean delay to get projected incidence on day
-    desired_min_date <- desired_min_date + mean_delay
-    desired_max_date <- desired_max_date + mean_delay
+    applied_min_date <- desired_min_date + mean_delay
+    applied_max_date <- desired_max_date + mean_delay
   } else if (type == "Rt") {
     # Shift up by mean delay to move to incidence scale and also pad by the
     # GI on either side to prevent missing dates in the convolution
-    desired_min_date <- desired_min_date + desired_mean_delay - length(gi_pmf)
-    desired_max_date <- desired_max_date + mean_delay + length(gi_pmf)
+    applied_min_date <- desired_min_date + mean_delay - length(gi_pmf)
+    applied_max_date <- desired_max_date + mean_delay + length(gi_pmf)
   }
 
   seq.Date(
-    from = desired_min_date,
-    to = desired_max_date,
+    from = applied_min_date,
+    to = applied_max_date,
     by = "day"
   )
 }

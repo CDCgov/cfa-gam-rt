@@ -32,7 +32,7 @@ test_that("Dates are shifted correctly", {
     by = "day"
   )
   actual_incidence_dates <- shift_desired_dates(
-    type = "obs_incidence",
+    type = "incidence",
     desired_min_date = desired_min_date,
     desired_max_date = desired_max_date,
     mean_delay = mean_delay,
@@ -48,11 +48,11 @@ test_that("Dates are shifted correctly", {
   expect_equal(actual_incidence_dates, expected_incidence_dates)
   expect_equal(actual_growth_dates, expected_incidence_dates)
 
-  # Test case (3): Rt has a delay shit and GI length padding
+  # Test case (3): Rt has a delay shift and GI length padding
   gi_length <- length(gi_pmf)
   expected_rt_dates <- seq.Date(
     from = desired_min_date + mean_delay - gi_length,
-    to = desired_min_date + mean_delay + gi_length,
+    to = desired_max_date + mean_delay + gi_length,
     by = "day"
   )
   actual_rt_dates <- shift_desired_dates(
