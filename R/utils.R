@@ -7,3 +7,7 @@ stringify_date <- function(d) {
     d
   }
 }
+#' Combine 2 vectors by alternating between elements
+interleave <- function(v1, v2) {
+  c(rbind(v1, v2))
+}

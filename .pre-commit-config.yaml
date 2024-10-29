@@ -44,6 +44,7 @@ repos:
         entry: Cannot commit .Rhistory, .RData, .Rds or .rds.
         language: fail
         files: '\.(Rhistory|RData|Rds|rds)$'
+        exclude: ^tests/testthat/data/
 #####
 # Secrets
 -   repo: https://github.com/Yelp/detect-secrets

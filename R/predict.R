@@ -3,8 +3,8 @@
 #' Generates predictions from an `RtGam` fit. Prediction dates can be specified
 #' flexibly using multiple approaches.
 #'
-#' @param object An `RtGamFit` object from [RtGam()].
-#' @param type A string specifying the prediction type. Options are
+#' @param object An `RtGam` object from [RtGam()].
+#' @param parameter A string specifying the prediction parameter. Options are
 #'   `"obs_cases"`, `"incidence"`, `"r"`, and `"Rt"`. Currently, only
 #'   `"obs_cases"` is supported. Matching is enforced by [rlang::arg_match()].
 #' @param horizon Optional. Integer specifying forecast days from the last date
@@ -45,12 +45,15 @@
 #' 1     2023-01-01        18     1
 #' 2     2023-01-02        13     1
 #' 3     2023-01-03        21     1
-#' ```
+#' 4     2023-01-01        11     2
+#' 4     2023-01-02        19     2
+#' 6     2023-01-03        24     2
+##' ```
 #'
 #' @export
 predict.RtGam <- function(
     object,
-    type,
+    parameter = "obs_cases",
     horizon = NULL,
     min_date = NULL,
     max_date = NULL,
@@ -59,68 +62,75 @@ predict.RtGam <- function(
     gi_pmf = NULL,
     seed = 12345,
     ...) {
-  rlang::arg_match(type,
-    values = c(
-      "obs_cases",
-      "incidence",
-      "r",
-      "Rt"
-    ),
-    call = rlang::caller_env()
+  validate_predict_inputs(
+    parameter,
+    mean_delay,
+    gi_pmf
   )
-  if (type != "obs_cases") {
-    if (rlang::is_null(mean_delay)) {
-      cli::cli_abort("{.arg mean_delay} is required when type is {.val {type}}")
-    }
-    check_integer(mean_delay, "gi_pmf")
-  }
-  if (type == "Rt") {
-    if (rlang::is_null(gi_pmf)) {
-      cli::cli_abort("{.arg gi_pmf} is required when type is {.val Rt}")
-    }
-    check_vector(gi_pmf, "gi_pmf")
-    check_no_missingness(gi_pmf, "gi_pmf")
-    check_elements_above_min(gi_pmf, "gi_pmf", 0)
-    check_elements_below_max(gi_pmf, "gi_pmf", 1)
-    check_sums_to_one(gi_pmf, "gi_pmf")
-  }
-
-  desired_dates <- parse_predict_dates(
-    object = object,
-    min_date = min_date,
-    max_date = max_date,
-    horizon = horizon
-  )
-  timesteps <- prep_timesteps_for_pred(
-    type = type,
-    desired_min_date = min(desired_dates),
-    desired_max_date = max(desired_dates),
-    fit_min_date = object[["min_date"]],
-    fit_max_date = object[["max_date"]],
-    mean_delay = mean_delay
-  )
-
-  if (type == "obs_cases") {
+  if (parameter == "obs_cases") {
     predict_obs_cases(
-      object,
-      desired_dates,
-      timesteps,
+      object = object,
+      horizon = horizon,
+      min_date = min_date,
+      max_date = max_date,
       n = n,
+      mean_delay = mean_delay,
+      gi_pmf = gi_pmf,
+      seed = seed,
+      ...
+    )
+  } else if (parameter == "obs_incidence") {
+    predict_obs_incidence(
+      object = object,
+      horizon = horizon,
+      min_date = min_date,
+      max_date = max_date,
+      n = n,
+      mean_delay = mean_delay,
+      seed = seed,
+      ...
+    )
+  } else if (parameter == "r") {
+    predict_growth_rate(
+      object = object,
+      horizon = horizon,
+      min_date = min_date,
+      max_date = max_date,
+      n = n,
+      mean_delay = mean_delay,
       seed = seed,
       ...
     )
   } else {
-    cli::cli_abort("{.val {type}} not yet implemented}")
+    cli::cli_abort("{.val {parameter}} not yet implemented}")
   }
 }
 
 #' Posterior predicted cases
-#' @noRd
-predict_obs_cases <- function(object, desired_dates, timesteps, n, seed, ...) {
-  newdata <- data.frame(
-    timestep = timesteps,
-    .row = seq_along(timesteps),
-    reference_date = desired_dates
+#'
+#' TODO put roxygen2 grouping here
+#'
+#' @inheritParams predict.RtGam
+#' @return A dataframe with schema ...
+#' @export
+#' @keywords internal
+predict_obs_cases <- function(
+    object,
+    horizon = NULL,
+    min_date = NULL,
+    max_date = NULL,
+    n = 10,
+    gi_pmf = NULL,
+    seed = 12345,
+    call = rlang::caller_env(),
+    ...) {
+  newdata <- create_newdata_dataframe(
+    object = object,
+    parameter = "obs_cases",
+    mean_delay = mean_delay,
+    min_date = min_date,
+    max_date = max_date,
+    horizon = horizon
   )
 
   # Use `posterior_samples()` over `fitted_samples()` to get response
@@ -133,17 +143,79 @@ predict_obs_cases <- function(object, desired_dates, timesteps, n, seed, ...) {
     seed = seed,
     ...
   )
+  format_predicted_dataframe(parameter = "obs_cases", fitted, newdata)
+}
 
-  merged <- merge(fitted,
-    newdata,
-    by = ".row"
+predict_obs_incidence <- function(
+    object,
+    horizon = NULL,
+    min_date = NULL,
+    max_date = NULL,
+    n = 10,
+    gi_pmf = NULL,
+    seed = 12345,
+    mean_delay,
+    call = rlang::caller_env(),
+    ...) {
+  newdata <- create_newdata_dataframe(
+    object = object,
+    parameter = "obs_incidence",
+    mean_delay = mean_delay,
+    min_date = min_date,
+    max_date = max_date,
+    horizon = horizon
   )
-  data.frame(
-    reference_date = merged[["reference_date"]],
-    .response = merged[[".response"]],
-    .draw = merged[[".draw"]]
+
+  # Use `posterior_samples()` over `fitted_samples()` to get response
+  # w/ obs uncertainty
+  fitted <- gratia::posterior_samples(
+    object[["model"]],
+    data = newdata,
+    unconditional = TRUE,
+    n = n,
+    seed = seed,
+    ...
+  )
+  format_predicted_dataframe(fitted, newdata)
+}
+
+predict_growth_rate <- function(
+    object,
+    horizon = NULL,
+    min_date = NULL,
+    max_date = NULL,
+    n = 10,
+    gi_pmf = NULL,
+    seed = 12345,
+    mean_delay,
+    call = rlang::caller_env(),
+    ...) {
+  newdata <- create_newdata_dataframe(
+    object = object,
+    parameter = "r",
+    mean_delay = mean_delay,
+    min_date = min_date,
+    max_date = max_date,
+    horizon = horizon
+  )
+
+  fitted <- gratia::fitted_samples(
+    object[["model"]],
+    data = newdata,
+    n = n,
+    seed = seed,
+    unconditional = TRUE,
+    scale = "linear_predictor",
+    ...
+  )
+  format_predicted_dataframe(
+    parameter = "r",
+    fitted = fitted,
+    newdata = newdata,
+    delta = 1
   )
 }
+
 
 #' Convert from user specification to necessary date range
 #'
@@ -151,7 +223,7 @@ predict_obs_cases <- function(object, desired_dates, timesteps, n, seed, ...) {
 #' @param call The calling environment to be reflected in the error message
 #'
 #' @return List with two elements: min_date and max_date
-#' @keyword internal
+#' @keywords internal
 #' @importFrom rlang %||%
 parse_predict_dates <- function(
     object,
@@ -202,7 +274,7 @@ parse_predict_dates <- function(
 #' @inheritParams predict.RtGam
 #' @return Double vector, the timesteps to predict
 prep_timesteps_for_pred <- function(
-    type,
+    parameter,
     fit_min_date,
     fit_max_date,
     desired_min_date,
@@ -234,7 +306,7 @@ shift_desired_dates <- function(
   if (type == "obs_cases") {
     applied_min_date <- desired_min_date
     applied_max_date <- desired_max_date
-  } else if (type == "incidence" || type == "r") {
+  } else if (type == "obs_incidence" || type == "r") {
     # Shift cases up by mean delay to get projected incidence on day
     applied_min_date <- desired_min_date + mean_delay
     applied_max_date <- desired_max_date + mean_delay
@@ -243,6 +315,8 @@ shift_desired_dates <- function(
     # GI on either side to prevent missing dates in the convolution
     applied_min_date <- desired_min_date + mean_delay - length(gi_pmf)
     applied_max_date <- desired_max_date + mean_delay + length(gi_pmf)
+  } else {
+    cli::cli_abort("Parameter spelled wrong. Impossible to reach")
   }
 
   seq.Date(
@@ -250,4 +324,178 @@ shift_desired_dates <- function(
     to = applied_max_date,
     by = "day"
   )
+}
+
+#' Check user-provided input matches expectations
+#' @noRd
+validate_predict_inputs <- function(
+    parameter,
+    mean_delay,
+    gi_pmf,
+    call = rlang::caller_env()) {
+  rlang::arg_match(parameter,
+    values = c(
+      "obs_cases",
+      "obs_incidence",
+      "r",
+      "Rt"
+    ),
+    call = call
+  )
+  if (parameter == "obs_cases") {
+    if (!rlang::is_null(mean_delay)) {
+      cli::cli_alert(
+        "{.arg mean_delay} ignored when {.arg parameter} is {.val obs_cases}"
+      )
+    }
+    if (!rlang::is_null(gi_pmf)) {
+      cli::cli_alert(
+        "{.arg gi_pmf} ignored when {.arg parameter} is {.val obs_cases}"
+      )
+    }
+  } else {
+    if (rlang::is_null(mean_delay)) {
+      cli::cli_abort(
+        c(
+          "{.arg mean_delay} is required when}",
+          "{.arg parameter} is {.val {parameter}}"
+        ),
+        call = call
+      )
+    }
+    check_integer(mean_delay, "gi_pmf", call = call)
+  }
+  if (parameter == "Rt") {
+    if (rlang::is_null(gi_pmf)) {
+      cli::cli_abort(
+        c(
+          "{.arg gi_pmf} is required when",
+          "{.arg parameter} is {.val Rt}"
+        ),
+        call = call
+      )
+    }
+    check_vector(gi_pmf, "gi_pmf", call = call)
+    check_no_missingness(gi_pmf, "gi_pmf", call = call)
+    check_elements_above_min(gi_pmf, "gi_pmf", 0, call = call)
+    check_elements_below_max(gi_pmf, "gi_pmf", 1, call = call)
+    check_sums_to_one(gi_pmf, "gi_pmf", call = call)
+  }
+}
+
+#' Generate dataframe with values of model covariates to predict
+#'
+#' We need to parse user-specified input and map it to the necessary
+#' input to the model for prediction. These are not the same thing.
+#' @noRd
+create_newdata_dataframe <- function(
+    object,
+    parameter,
+    min_date,
+    max_date,
+    horizon,
+    mean_delay,
+    gi_pmf,
+    call = rlang::caller_env()) {
+  desired_dates <- parse_predict_dates(
+    object = object,
+    min_date = min_date,
+    max_date = max_date,
+    horizon = horizon,
+    call = call
+  )
+  dates <- shift_desired_dates(
+    parameter,
+    min(desired_dates),
+    max(desired_dates),
+    mean_delay = mean_delay,
+    gi_pmf = gi_pmf
+  )
+  timesteps <- dates_to_timesteps(
+    dates,
+    min_supplied_date = object[["min_date"]],
+    max_supplied_date = object[["max_date"]]
+  )
+  format_newdata_dataframe(
+    fit = object,
+    parameter = parameter,
+    desired_dates = desired_dates,
+    timesteps = timesteps,
+    gi_pmf = gi_pmf
+  )
+}
+
+#' Rename gratia's different defaults to a uniform minimal spec
+#' @noRd
+format_predicted_dataframe <- function(
+    parameter,
+    fitted,
+    newdata,
+    delta) {
+  if ((parameter == "obs_cases") || (parameter == "obs_incidence")) {
+    merged <- merge(fitted,
+      newdata,
+      by = ".row"
+    )
+    preds <- data.frame(
+      reference_date = merged[["reference_date"]],
+      .response = merged[[".response"]],
+      .draw = merged[[".draw"]]
+    )
+  } else if (parameter == "r") {
+    # Get only
+    is_valid_row <- which((fitted[[".row"]] - 1) %% 2 == 0)
+    diff <- discrete_diff_derivative(fitted[[".fitted"]], 1)
+    deriv_df <- data.frame(
+      .row = (fitted[is_valid_row, ".row"] + 1) / 2,
+      .response = diff,
+      .draw = fitted[is_valid_row, ".draw"]
+    )
+    merged <- merge(deriv_df,
+      newdata,
+      by = ".row"
+    )
+    preds <- data.frame(
+      reference_date = as.Date(merged[["reference_date"]]),
+      .response = merged[[".response"]],
+      .draw = merged[[".draw"]]
+    )
+  }
+  return(preds)
+}
+
+format_newdata_dataframe <- function(
+    fit,
+    parameter,
+    desired_dates,
+    timesteps,
+    gi_pmf) {
+  delta <- 1e-9
+  if (parameter == "r") {
+    all_timesteps <- interleave(timesteps - delta, timesteps + delta)
+    newdata <- gratia::data_slice(fit[["model"]], timestep = all_timesteps)
+    newdata["reference_date"] <- interleave(desired_dates, NA)
+    newdata[".row"] <- interleave(seq_along(timesteps), NA)
+  } else if (parameter == "Rt") {
+    na_pad <- rep(NA, length(gi_pmf))
+    desired_dates <- as.Date(
+      c(na_pad, desired_dates, na_pad)
+    )
+    newdata <- data.frame()
+  } else {
+    newdata <- data.frame(
+      timestep = timesteps,
+      .row = seq_along(timesteps),
+      reference_date = desired_dates
+    )
+  }
+  return(newdata)
+}
+
+discrete_diff_derivative <- function(vals, delta) {
+  len <- length(vals)
+  t0 <- seq(1, len - 1, 2)
+  t1 <- seq(2, len, 2)
+
+  (vals[t1] - vals[t0])
 }
