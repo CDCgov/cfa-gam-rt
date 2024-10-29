@@ -190,13 +190,15 @@ predict_growth_rate <- function(
     mean_delay,
     call = rlang::caller_env(),
     ...) {
+  delta <- compute_delta(object)
   newdata <- create_newdata_dataframe(
     object = object,
     parameter = "r",
     mean_delay = mean_delay,
     min_date = min_date,
     max_date = max_date,
-    horizon = horizon
+    horizon = horizon,
+    delta = delta
   )
 
   fitted <- gratia::fitted_samples(
@@ -212,7 +214,7 @@ predict_growth_rate <- function(
     parameter = "r",
     fitted = fitted,
     newdata = newdata,
-    delta = 1
+    delta = delta
   )
 }
 
@@ -396,6 +398,7 @@ create_newdata_dataframe <- function(
     horizon,
     mean_delay,
     gi_pmf,
+    delta = delta,
     call = rlang::caller_env()) {
   desired_dates <- parse_predict_dates(
     object = object,
@@ -421,7 +424,8 @@ create_newdata_dataframe <- function(
     parameter = parameter,
     desired_dates = desired_dates,
     timesteps = timesteps,
-    gi_pmf = gi_pmf
+    gi_pmf = gi_pmf,
+    delta = delta
   )
 }
 
@@ -469,8 +473,8 @@ format_newdata_dataframe <- function(
     parameter,
     desired_dates,
     timesteps,
-    gi_pmf) {
-  delta <- 1e-9
+    gi_pmf,
+    delta) {
   if (parameter == "r") {
     all_timesteps <- interleave(timesteps - delta, timesteps + delta)
     newdata <- gratia::data_slice(fit[["model"]], timestep = all_timesteps)
@@ -497,5 +501,18 @@ discrete_diff_derivative <- function(vals, delta) {
   t0 <- seq(1, len - 1, 2)
   t1 <- seq(2, len, 2)
 
-  (vals[t1] - vals[t0])
+  (vals[t1] - vals[t0]) / 2
+}
+
+compute_delta <- function(fit) {
+  min_date <- fit[["min_date"]]
+  timesteps <- dates_to_timesteps(
+    c(
+      min_date,
+      min_date + 1
+    ),
+    min_supplied_date = min_date,
+    max_supplied_date = fit[["max_date"]]
+  )
+  return(timesteps[2] - timesteps[1])
 }
