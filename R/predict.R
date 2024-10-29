@@ -46,7 +46,7 @@
 #' 2     2023-01-02        13     1
 #' 3     2023-01-03        21     1
 #' 4     2023-01-01        11     2
-#' 4     2023-01-02        19     2
+#' 5     2023-01-02        19     2
 #' 6     2023-01-03        24     2
 ##' ```
 #'
@@ -176,7 +176,10 @@ predict_obs_incidence <- function(
     seed = seed,
     ...
   )
-  format_predicted_dataframe(fitted, newdata)
+  format_predicted_dataframe(
+    parameter = "obs_incidence",
+    fitted, newdata
+  )
 }
 
 predict_growth_rate <- function(
@@ -202,6 +205,7 @@ predict_growth_rate <- function(
   )
 
   fitted <- gratia::fitted_samples(
+
     object[["model"]],
     data = newdata,
     n = n,
@@ -245,7 +249,7 @@ parse_predict_dates <- function(
       )
     }
     min_date <- min_date %||% (object[["max_date"]] + 1)
-    max_date <- object[["max_date"]] + horizon + 1
+    max_date <- object[["max_date"]] + horizon
   } else {
     # Default to object's date range if not specified
     min_date <- min_date %||% object[["min_date"]]
@@ -419,13 +423,20 @@ create_newdata_dataframe <- function(
     min_supplied_date = object[["min_date"]],
     max_supplied_date = object[["max_date"]]
   )
+  if (parameter == "r") {
+    timesteps <- interleave(timesteps - delta, timesteps + delta)
+    desired_dates <- interleave(desired_dates, NA)
+  } else if (parameter == "Rt") {
+    na_pad <- rep(NA, length(gi_pmf))
+    desired_dates <- as.Date(
+      c(na_pad, desired_dates, na_pad)
+    )
+  }
   format_newdata_dataframe(
     fit = object,
     parameter = parameter,
     desired_dates = desired_dates,
-    timesteps = timesteps,
-    gi_pmf = gi_pmf,
-    delta = delta
+    timesteps = timesteps
   )
 }
 
@@ -447,13 +458,16 @@ format_predicted_dataframe <- function(
       .draw = merged[[".draw"]]
     )
   } else if (parameter == "r") {
-    # Get only
-    is_valid_row <- which((fitted[[".row"]] - 1) %% 2 == 0)
+    # `fitted` has two rows per timestep, for differencing. We
+    # want to difference and select one row per timestep.
+    # Arbitrarily pick the first of the two rows
+    timestep_first_row <- which((fitted[[".row"]] - 1) %% 2 == 0)
     diff <- discrete_diff_derivative(fitted[[".fitted"]], 1)
     deriv_df <- data.frame(
-      .row = (fitted[is_valid_row, ".row"] + 1) / 2,
+      # 1, 3, 5, ... -> 1, 2, 3, ...
+      .row = (fitted[timestep_first_row, ".row"] + 1) / 2,
       .response = diff,
-      .draw = fitted[is_valid_row, ".draw"]
+      .draw = fitted[timestep_first_row, ".draw"]
     )
     merged <- merge(deriv_df,
       newdata,
@@ -475,24 +489,16 @@ format_newdata_dataframe <- function(
     timesteps,
     gi_pmf,
     delta) {
+  newdata <- gratia::data_slice(fit[["model"]], timestep = timesteps)
+
   if (parameter == "r") {
-    all_timesteps <- interleave(timesteps - delta, timesteps + delta)
-    newdata <- gratia::data_slice(fit[["model"]], timestep = all_timesteps)
-    newdata["reference_date"] <- interleave(desired_dates, NA)
-    newdata[".row"] <- interleave(seq_along(timesteps), NA)
-  } else if (parameter == "Rt") {
-    na_pad <- rep(NA, length(gi_pmf))
-    desired_dates <- as.Date(
-      c(na_pad, desired_dates, na_pad)
-    )
-    newdata <- data.frame()
+    # Join key when adding metadata to posterior sim. Setting
+    # every other row to NA ensures we get one row per date-draw.
+    newdata[".row"] <- interleave(seq(1, length(timesteps) / 2, 1), NA)
   } else {
-    newdata <- data.frame(
-      timestep = timesteps,
-      .row = seq_along(timesteps),
-      reference_date = desired_dates
-    )
+    newdata[".row"] <- seq_along(timesteps)
   }
+  newdata["reference_date"] <- desired_dates
   return(newdata)
 }
 
