@@ -44,41 +44,6 @@ repos:
         entry: Cannot commit .Rhistory, .RData, .Rds or .rds.
         language: fail
         files: '\.(Rhistory|RData|Rds|rds)$'
-        # `exclude: <regex>` to allow committing specific files
-#####
-# Python
--   repo: https://github.com/psf/black
-    rev: 24.4.2
-    hooks:
-        # if you have ipython notebooks, consider using
-        # `black-jupyter` hook instead
-    -   id: black
-        args: ['--line-length', '79']
--   repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
-    hooks:
-    -   id: isort
-        args: ['--profile', 'black',
-               '--line-length', '79']
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.4.2
-  hooks:
-    - id: ruff
-#####
-# Java
-- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.13.0
-  hooks:
-  - id: pretty-format-java
-    args: [--aosp,--autofix]
-#####
-# Julia
-# Due to lack of first-class Julia support, this needs Julia local install
-#   and JuliaFormatter.jl installed in the library
-# - repo: https://github.com/domluna/JuliaFormatter.jl
-#   rev: v1.0.39
-#   hooks:
-#   - id: julia-formatter
 #####
 # Secrets
 -   repo: https://github.com/Yelp/detect-secrets

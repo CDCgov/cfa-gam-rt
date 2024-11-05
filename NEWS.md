@@ -14,6 +14,7 @@
 * Added a Justfile with some common development tasks (#56)
 * Set up automated spellcheck (#61)
 * Add slash-command to update WORDLIST in a PR (#64)
+* Remove pre-commit hooks from extraneous languages
 
 # RtGam v0.1.0
 
