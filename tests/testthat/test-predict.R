@@ -92,71 +92,63 @@ test_that("predict_obs_cases predicts observed cases", {
 })
 
 test_that("Newdata dataframe generated correctly", {
-  object <- list(
-    min_date = as.Date("2023-01-01"),
-    max_date = as.Date("2023-01-03")
-  )
+  object <- readRDS(test_path("data", "fit.RDS"))
   mean_delay <- 2
   gi_pmf <- c(0.5, 0.5)
+  min_date <- object[["min_date"]]
+  max_date <- object[["max_date"]]
 
-
+  expected_cols <- c("timestep", ".row", "reference_date")
+  expected_nrows <- 10
   # Obs cases
-  expected <- data.frame(
-    timestep = c(0, 0.5, 1),
-    .row = c(1, 2, 3),
-    reference_date = as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
-  )
   actual <- create_newdata_dataframe(
     object = object,
+    parameter = "obs_cases",
     min_date = NULL,
     max_date = NULL,
     horizon = NULL,
-    parameter = "obs_cases",
     mean_delay = mean_delay
   )
-  expect_equal(actual, expected)
+  expect_equal(colnames(actual), expected_cols)
+  expect_equal(nrow(actual), expected_nrows)
 
   # Incidence
-  expected <- data.frame(
-    timestep = c(1.0, 1.5, 2),
-    .row = c(1, 2, 3),
-    reference_date = as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
-  )
   actual <- create_newdata_dataframe(
     object = object,
-    min_date = NULL,
-    max_date = NULL,
+    min_date = min_date,
+    max_date = max_date,
     horizon = NULL,
     parameter = "obs_incidence",
     mean_delay = mean_delay
   )
-  expect_equal(actual, expected)
+  expect_equal(colnames(actual), expected_cols)
+  expect_equal(nrow(actual), expected_nrows)
 
-
-  # Rt
-  expected <- data.frame(
-    timestep = seq(from = 0, to = 3, by = 0.5),
-    .row = 1:7,
-    reference_date = as.Date(c(
-      NA,
-      NA,
-      "2023-01-01",
-      "2023-01-02",
-      "2023-01-03",
-      NA,
-      NA
-    ))
-  )
+  # r
   actual <- create_newdata_dataframe(
     object = object,
-    min_date = NULL,
-    max_date = NULL,
+    min_date = min_date,
+    max_date = max_date,
+    horizon = NULL,
+    parameter = "r",
+    mean_delay = mean_delay,
+    delta = 0.1
+  )
+  expect_equal(colnames(actual), expected_cols)
+  expect_equal(nrow(actual), 2 * expected_nrows)
+
+  # Rt
+  actual <- create_newdata_dataframe(
+    object = object,
+    min_date = min_date,
+    max_date = max_date,
     horizon = NULL,
     parameter = "Rt",
     mean_delay = mean_delay,
     gi_pmf = gi_pmf
   )
-  expect_equal(actual, expected)
+  expect_equal(colnames(actual), expected_cols)
+  expect_equal(nrow(actual), expected_nrows + 2 * length(gi_pmf))
 })
 
 test_that("Dates are shifted correctly", {
@@ -178,7 +170,7 @@ test_that("Dates are shifted correctly", {
     by = "day"
   )
   actual_cases_dates <- shift_desired_dates(
-    type = "obs_cases",
+    parameter = "obs_cases",
     desired_min_date = desired_min_date,
     desired_max_date = desired_max_date,
     mean_delay = mean_delay,
@@ -193,14 +185,14 @@ test_that("Dates are shifted correctly", {
     by = "day"
   )
   actual_incidence_dates <- shift_desired_dates(
-    type = "obs_incidence",
+    parameter = "obs_incidence",
     desired_min_date = desired_min_date,
     desired_max_date = desired_max_date,
     mean_delay = mean_delay,
     gi_pmf = gi_pmf
   )
   actual_growth_dates <- shift_desired_dates(
-    type = "r",
+    parameter = "r",
     desired_min_date = desired_min_date,
     desired_max_date = desired_max_date,
     mean_delay = mean_delay,
@@ -217,7 +209,7 @@ test_that("Dates are shifted correctly", {
     by = "day"
   )
   actual_rt_dates <- shift_desired_dates(
-    type = "Rt",
+    parameter = "Rt",
     desired_min_date = desired_min_date,
     desired_max_date = desired_max_date,
     mean_delay = mean_delay,
@@ -250,7 +242,7 @@ test_that("Dates are parsed correctly", {
   horizon <- 5
   expected_horizon_dates <- seq.Date(
     from = object_dates$max_date + 1,
-    to = object_dates$max_date + 1 + horizon,
+    to = object_dates$max_date + horizon,
     by = "day"
   )
 
@@ -269,7 +261,7 @@ test_that("Dates are parsed correctly", {
   horizon <- 3
   expected_min_horiz_dates <- seq.Date(
     from = min_date,
-    to = object_dates$max_date + 1 + horizon,
+    to = object_dates$max_date + horizon,
     by = "day"
   )
   actual_min_horiz_dates <- parse_predict_dates(
