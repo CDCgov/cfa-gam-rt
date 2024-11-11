@@ -368,8 +368,6 @@ shift_desired_dates <- function(
     # GI on either side to prevent missing dates in the convolution
     applied_min_date <- desired_min_date + mean_delay - length(gi_pmf)
     applied_max_date <- desired_max_date + mean_delay + length(gi_pmf)
-  } else {
-    cli::cli_abort("Parameter spelled wrong. Impossible to reach")
   }
 
   seq.Date(
