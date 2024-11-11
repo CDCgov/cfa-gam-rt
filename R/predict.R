@@ -464,8 +464,7 @@ format_predicted_dataframe <- function(
     ".draw"
   )]
   merged$reference_date <- as.Date(merged$reference_date)
-
-  return(merged)
+  merged[which(!is.na(merged[["reference_date"]])), ]
 }
 
 #' Turn input parameters into a dataframe to pass to model

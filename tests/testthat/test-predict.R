@@ -91,6 +91,52 @@ test_that("predict_obs_cases predicts observed cases", {
   expect_equal(actual, expected)
 })
 
+test_that("predicting little r is on correct scale", {
+  fit <- readRDS(test_path("data", "fit.rds"))
+
+  actual <- predict.RtGam(fit,
+    n = 1,
+    seed = 12345,
+    parameter = "r",
+    mean_delay = 3,
+    horizon = 10
+  )
+  # Hard to know that this is right-right, so testing that it has reasonable
+  # properties
+  expect_equal(nrow(actual), 10)
+  expect_equal(colnames(actual), c("reference_date", ".response", ".draw"))
+  expect_true(all(abs(actual[[".response"]]) < 0.5))
+  expect_true(
+    length(
+      unique(
+        actual[["reference_date"]]
+      )
+    ) == length(actual[["reference_date"]])
+  )
+})
+
+test_that("predicting Rt works and is reasonable", {
+  fit <- readRDS(test_path("data", "fit.RDS"))
+  actual <- predict.RtGam(fit,
+    mean_delay = 2,
+    gi_pmf = c(0.5, 0.5),
+    horizon = 10,
+    n = 1,
+    parameter = "Rt"
+  )
+
+  expect_equal(nrow(actual), 10)
+  expect_equal(colnames(actual), c("reference_date", ".response", ".draw"))
+  expect_true(all(abs(actual[[".response"]]) > 0))
+  expect_true(
+    length(
+      unique(
+        actual[["reference_date"]]
+      )
+    ) == length(actual[["reference_date"]])
+  )
+})
+
 test_that("Newdata dataframe generated correctly", {
   object <- readRDS(test_path("data", "fit.rds"))
   mean_delay <- 2
