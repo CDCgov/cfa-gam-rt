@@ -13,7 +13,7 @@ validate <- function(cases,
                      call = rlang::caller_env()) {
   # Basic type checks
   validate_cases(cases, call)
-  validate_dates(reference_date, "reference_date", call)
+  reference_date <- validate_dates(reference_date, "reference_date", call)
   validate_group(group, call)
   validate_min_dimensionality(k,
     arg = "k",
@@ -32,7 +32,7 @@ validate <- function(cases,
   check_vectors_equal_length(cases, reference_date, group, call)
   check_dates_unique(reference_date, group, call)
 
-  invisible()
+  invisible(reference_date)
 }
 
 validate_cases <- function(cases, call) {
@@ -47,9 +47,9 @@ validate_cases <- function(cases, call) {
 validate_dates <- function(dates, arg, call) {
   arg <- "dates"
   # No vector check because date vector is of type Date
-  check_date(dates, arg, call)
+  dates <- check_date(dates, arg, call)
   check_no_missingness(dates, arg, call)
-  invisible()
+  invisible(dates)
 }
 
 validate_group <- function(group, call) {

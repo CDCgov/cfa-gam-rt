@@ -33,3 +33,17 @@ test_that("Non-supported backends throw error", {
     class = "RtGam_invalid_input"
   )
 })
+
+test_that("Can autofix dates and fit model", {
+  timesteps <- 20
+  withr::with_seed(12345, {
+    cases <- rpois(20, 10)
+  })
+  dates <- as.Date("2023-01-01") + 1:timesteps
+  group <- NULL
+
+  expect_snapshot(
+    fit <- RtGam(cases, stringify_date(dates), group)
+  )
+  expect_s3_class(fit, "RtGam")
+})

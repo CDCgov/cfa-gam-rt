@@ -2,6 +2,8 @@
 
 ## Features
 
+* Cast dates passed as strings to a `Date` if possible (#67)
+
 ## Bugs
 
 ## Developer tooling
