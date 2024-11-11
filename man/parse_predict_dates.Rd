@@ -15,11 +15,8 @@ parse_predict_dates(
 \arguments{
 \item{object}{An \code{RtGam} object from \code{\link[=RtGam]{RtGam()}}.}
 
-\item{min_date}{Optional. A date-like object marking the start of the
-prediction period.}
-
-\item{max_date}{Optional. A date-like object marking the end of the
-prediction period.}
+\item{min_date, max_date}{Optional. A date-like object. See details for more
+information on specification.}
 
 \item{horizon}{Optional. Integer specifying forecast days from the last date
 in the fit. For example, \code{horizon = 7} returns a 7-day forecast.}
@@ -32,3 +29,4 @@ List with two elements: min_date and max_date
 \description{
 Convert from user specification to necessary date range
 }
+\keyword{internal}

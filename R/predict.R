@@ -5,15 +5,12 @@
 #'
 #' @param object An `RtGam` object from [RtGam()].
 #' @param parameter A string specifying the prediction parameter. Options are
-#'   `"obs_cases"`, `"incidence"`, `"r"`, and `"Rt"`. Currently, only
-#'   `"obs_cases"` is supported. Matching is enforced by [rlang::arg_match()].
+#'   `"obs_cases"`, `"incidence"`, `"r"`, and `"Rt"`. Defaults to `"obs_cases"`.
 #' @param horizon Optional. Integer specifying forecast days from the last date
 #'   in the fit. For example, `horizon = 7` returns a 7-day forecast.
-#' @param min_date Optional. A date-like object marking the start of the
-#'   prediction period.
-#' @param max_date Optional. A date-like object marking the end of the
-#'   prediction period.
-#' @param n Number of posterior samples to use. Default is 10.
+#' @param min_date,max_date Optional. A date-like object. See details for more
+#'   information on specification.
+#' @param n Number of posterior samples to use. Default is 100.
 #' @param mean_delay Optional. Numeric mean delay used in the prediction.
 #' @param gi_pmf Optional. A vector representing the generation interval PMF.
 #' @param seed Random seed for reproducibility. Default is 12345.
@@ -57,7 +54,7 @@ predict.RtGam <- function(
     horizon = NULL,
     min_date = NULL,
     max_date = NULL,
-    n = 10,
+    n = 100,
     mean_delay = NULL,
     gi_pmf = NULL,
     seed = 12345,
@@ -101,19 +98,30 @@ predict.RtGam <- function(
       seed = seed,
       ...
     )
-  } else {
-    cli::cli_abort("{.val {parameter}} not yet implemented}")
+  } else if (parameter == "Rt") {
+    predict_rt(
+      object = object,
+      horizon = horizon,
+      min_date = min_date,
+      max_date = max_date,
+      n = n,
+      mean_delay = mean_delay,
+      seed = seed,
+      gi_pmf = gi_pmf,
+      ...
+    )
   }
 }
 
-#' Posterior predicted cases
+#' Parameter-specific posterior predictions
 #'
-#' TODO put roxygen2 grouping here
-#'
-#' @inheritParams predict.RtGam
-#' @return A dataframe with schema ...
-#' @export
-#' @keywords internal
+#' @inherit predict.RtGam
+#' @param call The calling environment to pass to error messages
+#' @name predictor
+NULL
+
+#' @rdname predictor
+# " @export
 predict_obs_cases <- function(
     object,
     horizon = NULL,
@@ -127,7 +135,6 @@ predict_obs_cases <- function(
   newdata <- create_newdata_dataframe(
     object = object,
     parameter = "obs_cases",
-    mean_delay = mean_delay,
     min_date = min_date,
     max_date = max_date,
     horizon = horizon
@@ -146,6 +153,9 @@ predict_obs_cases <- function(
   format_predicted_dataframe(parameter = "obs_cases", fitted, newdata)
 }
 
+#' @rdname predictor
+#' @export
+#' @export
 predict_obs_incidence <- function(
     object,
     horizon = NULL,
@@ -165,7 +175,6 @@ predict_obs_incidence <- function(
     max_date = max_date,
     horizon = horizon
   )
-
   # Use `posterior_samples()` over `fitted_samples()` to get response
   # w/ obs uncertainty
   fitted <- gratia::posterior_samples(
@@ -182,6 +191,8 @@ predict_obs_incidence <- function(
   )
 }
 
+#' @rdname predictor
+# " @export
 predict_growth_rate <- function(
     object,
     horizon = NULL,
@@ -203,9 +214,7 @@ predict_growth_rate <- function(
     horizon = horizon,
     delta = delta
   )
-
   fitted <- gratia::fitted_samples(
-
     object[["model"]],
     data = newdata,
     n = n,
@@ -222,6 +231,44 @@ predict_growth_rate <- function(
   )
 }
 
+#' @rdname predictor
+#' @export
+predict_rt <- function(
+    object,
+    horizon = NULL,
+    min_date = NULL,
+    max_date = NULL,
+    n = 10,
+    gi_pmf = NULL,
+    seed = 12345,
+    mean_delay,
+    call = rlang::caller_env(),
+    ...) {
+  newdata <- create_newdata_dataframe(
+    object = object,
+    parameter = "Rt",
+    mean_delay = mean_delay,
+    min_date = min_date,
+    max_date = max_date,
+    horizon = horizon,
+    gi_pmf = gi_pmf
+  )
+  fitted <- gratia::fitted_samples(
+    object[["model"]],
+    data = newdata,
+    n = n,
+    seed = seed,
+    unconditional = TRUE,
+    scale = "response",
+    ...
+  )
+  format_predicted_dataframe(
+    parameter = "Rt",
+    fitted = fitted,
+    newdata = newdata,
+    gi_pmf = gi_pmf
+  )
+}
 
 #' Convert from user specification to necessary date range
 #'
@@ -277,8 +324,8 @@ parse_predict_dates <- function(
 
 #' Convert from user-specified dates to internal timesteps
 #'
-#' @inheritParams predict.RtGam
 #' @return Double vector, the timesteps to predict
+#' @noRd
 prep_timesteps_for_pred <- function(
     parameter,
     fit_min_date,
@@ -288,7 +335,7 @@ prep_timesteps_for_pred <- function(
     mean_delay,
     call = rlang::caller_env()) {
   dates <- shift_desired_dates(
-    type,
+    parameter,
     desired_min_date,
     desired_max_date
   )
@@ -304,19 +351,19 @@ prep_timesteps_for_pred <- function(
 #' convolution
 #' @noRd
 shift_desired_dates <- function(
-    type,
+    parameter,
     desired_min_date,
     desired_max_date,
     mean_delay,
     gi_pmf) {
-  if (type == "obs_cases") {
+  if (parameter == "obs_cases") {
     applied_min_date <- desired_min_date
     applied_max_date <- desired_max_date
-  } else if (type == "obs_incidence" || type == "r") {
+  } else if (parameter == "obs_incidence" || parameter == "r") {
     # Shift cases up by mean delay to get projected incidence on day
     applied_min_date <- desired_min_date + mean_delay
     applied_max_date <- desired_max_date + mean_delay
-  } else if (type == "Rt") {
+  } else if (parameter == "Rt") {
     # Shift up by mean delay to move to incidence scale and also pad by the
     # GI on either side to prevent missing dates in the convolution
     applied_min_date <- desired_min_date + mean_delay - length(gi_pmf)
@@ -332,67 +379,45 @@ shift_desired_dates <- function(
   )
 }
 
-#' Check user-provided input matches expectations
+#' Convert gratia output draws to standardized parameters
 #' @noRd
-validate_predict_inputs <- function(
+format_predicted_dataframe <- function(
     parameter,
-    mean_delay,
-    gi_pmf,
-    call = rlang::caller_env()) {
-  rlang::arg_match(parameter,
-    values = c(
-      "obs_cases",
-      "obs_incidence",
-      "r",
-      "Rt"
-    ),
-    call = call
-  )
-  if (parameter == "obs_cases") {
-    if (!rlang::is_null(mean_delay)) {
-      cli::cli_alert(
-        "{.arg mean_delay} ignored when {.arg parameter} is {.val obs_cases}"
-      )
-    }
-    if (!rlang::is_null(gi_pmf)) {
-      cli::cli_alert(
-        "{.arg gi_pmf} ignored when {.arg parameter} is {.val obs_cases}"
-      )
-    }
-  } else {
-    if (rlang::is_null(mean_delay)) {
-      cli::cli_abort(
-        c(
-          "{.arg mean_delay} is required when}",
-          "{.arg parameter} is {.val {parameter}}"
-        ),
-        call = call
-      )
-    }
-    check_integer(mean_delay, "gi_pmf", call = call)
+    fitted,
+    newdata,
+    delta,
+    gi_pmf) {
+  if (parameter == "r") {
+    # Difference calculation for `r` parameter
+    timestep_first_row <- which((fitted[[".row"]] - 1) %% 2 == 0)
+    fitted <- data.frame(
+      .row = (fitted[timestep_first_row, ".row"] + 1) / 2,
+      .response = discrete_diff_derivative(fitted[[".fitted"]]),
+      .draw = fitted[timestep_first_row, ".draw"]
+    )
+  } else if (parameter == "Rt") {
+    # Rt calculation
+    fitted <- rt_by_group(fitted,
+      group_cols = ".draw",
+      value_col = ".fitted",
+      vec = gi_pmf
+    )
   }
-  if (parameter == "Rt") {
-    if (rlang::is_null(gi_pmf)) {
-      cli::cli_abort(
-        c(
-          "{.arg gi_pmf} is required when",
-          "{.arg parameter} is {.val Rt}"
-        ),
-        call = call
-      )
-    }
-    check_vector(gi_pmf, "gi_pmf", call = call)
-    check_no_missingness(gi_pmf, "gi_pmf", call = call)
-    check_elements_above_min(gi_pmf, "gi_pmf", 0, call = call)
-    check_elements_below_max(gi_pmf, "gi_pmf", 1, call = call)
-    check_sums_to_one(gi_pmf, "gi_pmf", call = call)
-  }
+
+  # Merge with newdata and select required columns
+  merged <- merge(fitted,
+    newdata,
+    by = ".row"
+  )[, c("reference_date", ".response", ".draw")]
+  merged$reference_date <- as.Date(merged$reference_date)
+
+  return(merged)
 }
 
 #' Generate dataframe with values of model covariates to predict
 #'
 #' We need to parse user-specified input and map it to the necessary
-#' input to the model for prediction. These are not the same thing.
+#' input to the model for prediction.
 #' @noRd
 create_newdata_dataframe <- function(
     object,
@@ -427,6 +452,7 @@ create_newdata_dataframe <- function(
     timesteps <- interleave(timesteps - delta, timesteps + delta)
     desired_dates <- interleave(desired_dates, NA)
   } else if (parameter == "Rt") {
+    # Use NA padding to mark incomplete sections to remove
     na_pad <- rep(NA, length(gi_pmf))
     desired_dates <- as.Date(
       c(na_pad, desired_dates, na_pad)
@@ -440,48 +466,47 @@ create_newdata_dataframe <- function(
   )
 }
 
-#' Rename gratia's different defaults to a uniform minimal spec
+#' Format predicted data frame with uniform minimal specification
 #' @noRd
 format_predicted_dataframe <- function(
     parameter,
     fitted,
     newdata,
-    delta) {
-  if ((parameter == "obs_cases") || (parameter == "obs_incidence")) {
-    merged <- merge(fitted,
-      newdata,
-      by = ".row"
-    )
-    preds <- data.frame(
-      reference_date = merged[["reference_date"]],
-      .response = merged[[".response"]],
-      .draw = merged[[".draw"]]
-    )
-  } else if (parameter == "r") {
-    # `fitted` has two rows per timestep, for differencing. We
-    # want to difference and select one row per timestep.
-    # Arbitrarily pick the first of the two rows
+    delta,
+    gi_pmf) {
+  if (parameter == "r") {
+    # Difference calculation for `r` parameter
     timestep_first_row <- which((fitted[[".row"]] - 1) %% 2 == 0)
-    diff <- discrete_diff_derivative(fitted[[".fitted"]], 1)
-    deriv_df <- data.frame(
-      # 1, 3, 5, ... -> 1, 2, 3, ...
+    fitted <- data.frame(
       .row = (fitted[timestep_first_row, ".row"] + 1) / 2,
-      .response = diff,
+      .response = discrete_diff_derivative(fitted[[".fitted"]]),
       .draw = fitted[timestep_first_row, ".draw"]
     )
-    merged <- merge(deriv_df,
-      newdata,
-      by = ".row"
-    )
-    preds <- data.frame(
-      reference_date = as.Date(merged[["reference_date"]]),
-      .response = merged[[".response"]],
-      .draw = merged[[".draw"]]
+  } else if (parameter == "Rt") {
+    # Rt calculation
+    fitted <- rt_by_group(fitted,
+      group_cols = ".draw",
+      value_col = ".fitted",
+      vec = gi_pmf
     )
   }
-  return(preds)
+
+  # Merge with newdata and select required columns
+  merged <- merge(fitted,
+    newdata,
+    by = ".row"
+  )[, c(
+    "reference_date",
+    ".response",
+    ".draw"
+  )]
+  merged$reference_date <- as.Date(merged$reference_date)
+
+  return(merged)
 }
 
+#' Turn input parameters into a dataframe to pass to model
+#' @noRd
 format_newdata_dataframe <- function(
     fit,
     parameter,
@@ -502,7 +527,9 @@ format_newdata_dataframe <- function(
   return(newdata)
 }
 
-discrete_diff_derivative <- function(vals, delta) {
+#' Centered difference derivative.
+#' @noRd
+discrete_diff_derivative <- function(vals) {
   len <- length(vals)
   t0 <- seq(1, len - 1, 2)
   t1 <- seq(2, len, 2)
@@ -510,6 +537,8 @@ discrete_diff_derivative <- function(vals, delta) {
   (vals[t1] - vals[t0]) / 2
 }
 
+#' Generate size in timesteps of centered two day window
+#' @noRd
 compute_delta <- function(fit) {
   min_date <- fit[["min_date"]]
   timesteps <- dates_to_timesteps(
@@ -521,4 +550,25 @@ compute_delta <- function(fit) {
     max_supplied_date = fit[["max_date"]]
   )
   return(timesteps[2] - timesteps[1])
+}
+
+#' Convolve by draw. In the future, additional groups could be detected and
+#' specified here.
+#' @noRd
+rt_by_group <- function(df, group_cols, value_col, vec) {
+  df[["group_id"]] <- interaction(df[group_cols], drop = TRUE)
+  unique_groups <- as.character(unique(df[["group_id"]]))
+
+  grouped_rt <- lapply(unique_groups, function(group_id) {
+    group_df <- df[df[["group_id"]] == group_id, ]
+    # Produces vec w/ length nrow(group_df) + length(vec) - 1
+    convolved <- stats::convolve(group_df[[value_col]], rev(vec), type = "open")
+    # Keep the first N elements of the convolution vector
+    conv_ts <- 1:(length(convolved) - length(vec) + 1)
+    # Cori method: I_t / \sum_{s = 1}^t{I_{t - s} w_s}
+    group_df[".response"] <- group_df[[value_col]] / convolved[conv_ts]
+    group_df
+  })
+
+  do.call(rbind, grouped_rt)
 }

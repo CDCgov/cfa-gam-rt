@@ -75,3 +75,60 @@ validate_min_dimensionality <- function(n, arg, min_dim, max_val = NA, call) {
 
   invisible()
 }
+
+#' Check user-provided input matches expectations
+#' @noRd
+validate_predict_inputs <- function(
+    parameter,
+    mean_delay,
+    gi_pmf,
+    call = rlang::caller_env()) {
+  rlang::arg_match(parameter,
+    values = c(
+      "obs_cases",
+      "obs_incidence",
+      "r",
+      "Rt"
+    ),
+    call = call
+  )
+  if (parameter == "obs_cases") {
+    if (!rlang::is_null(mean_delay)) {
+      cli::cli_alert(
+        "{.arg mean_delay} ignored when {.arg parameter} is {.val obs_cases}"
+      )
+    }
+    if (!rlang::is_null(gi_pmf)) {
+      cli::cli_alert(
+        "{.arg gi_pmf} ignored when {.arg parameter} is {.val obs_cases}"
+      )
+    }
+  } else {
+    if (rlang::is_null(mean_delay)) {
+      cli::cli_abort(
+        c(
+          "{.arg mean_delay} is required when",
+          "{.arg parameter} is {.val {parameter}}"
+        ),
+        call = call
+      )
+    }
+    check_integer(mean_delay, "gi_pmf", call = call)
+  }
+  if (parameter == "Rt") {
+    if (rlang::is_null(gi_pmf)) {
+      cli::cli_abort(
+        c(
+          "{.arg gi_pmf} is required when",
+          "{.arg parameter} is {.val Rt}"
+        ),
+        call = call
+      )
+    }
+    check_vector(gi_pmf, "gi_pmf", call = call)
+    check_no_missingness(gi_pmf, "gi_pmf", call = call)
+    check_elements_above_min(gi_pmf, "gi_pmf", 0, call = call)
+    check_elements_below_max(gi_pmf, "gi_pmf", 1, call = call)
+    check_sums_to_one(gi_pmf, "gi_pmf", call = call)
+  }
+}
