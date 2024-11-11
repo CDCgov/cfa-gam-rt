@@ -322,30 +322,6 @@ parse_predict_dates <- function(
   )
 }
 
-#' Convert from user-specified dates to internal timesteps
-#'
-#' @return Double vector, the timesteps to predict
-#' @noRd
-prep_timesteps_for_pred <- function(
-    parameter,
-    fit_min_date,
-    fit_max_date,
-    desired_min_date,
-    desired_max_date,
-    mean_delay,
-    call = rlang::caller_env()) {
-  dates <- shift_desired_dates(
-    parameter,
-    desired_min_date,
-    desired_max_date
-  )
-  dates_to_timesteps(
-    dates,
-    min_supplied_date = fit_min_date,
-    max_supplied_date = fit_max_date
-  )
-}
-
 #' Map user-req'd dates to model-applied dates. Incidence is a
 #' mean-shift ahead of cases and Rt requires GI padding for the
 #' convolution
