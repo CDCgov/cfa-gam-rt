@@ -110,3 +110,111 @@ test_that("`validate_min_dimensionality()` is successful", {
     max_val = 3
   ))
 })
+
+test_that("validate_predict_inputs handles 'obs_cases' correctly", {
+  expect_snapshot(
+    validate_predict_inputs(
+      parameter = "obs_cases",
+      mean_delay = 2,
+      gi_pmf = c(0.5, 0.5)
+    )
+  )
+
+  expect_snapshot(
+    validate_predict_inputs(
+      parameter = "obs_cases",
+      mean_delay = NULL,
+      gi_pmf = c(0.5, 0.5)
+    )
+  )
+
+  expect_silent(
+    validate_predict_inputs(
+      parameter = "obs_cases",
+      mean_delay = NULL,
+      gi_pmf = NULL
+    )
+  )
+})
+
+test_that(
+  "validate_predict_inputs requires mean_delay for non-obs_cases parameters",
+  {
+    expect_snapshot(
+      validate_predict_inputs(
+        parameter = "obs_incidence",
+        mean_delay = NULL,
+        gi_pmf = c(0.5, 0.5)
+      ),
+      error = TRUE
+    )
+
+    expect_snapshot(
+      validate_predict_inputs(
+        parameter = "r",
+        mean_delay = NULL,
+        gi_pmf = c(0.5, 0.5)
+      ),
+      error = TRUE
+    )
+
+    expect_silent(
+      validate_predict_inputs(
+        parameter = "obs_incidence",
+        mean_delay = 2,
+        gi_pmf = c(0.5, 0.5)
+      )
+    )
+  }
+)
+
+test_that("validate_predict_inputs requires gi_pmf for parameter 'Rt'", {
+  expect_snapshot(
+    expect_error(
+      validate_predict_inputs(
+        parameter = "Rt",
+        mean_delay = 2,
+        gi_pmf = NULL
+      )
+    )
+  )
+})
+
+test_that("validate_predict_inputs checks gi_pmf values for 'Rt'", {
+  expect_snapshot(
+    validate_predict_inputs(
+      parameter = "Rt",
+      mean_delay = 2,
+      gi_pmf = c(0.5, NA)
+    ),
+    error = TRUE
+  )
+
+  expect_snapshot(
+    validate_predict_inputs(
+      parameter = "Rt",
+      mean_delay = 2,
+      gi_pmf = c(-0.1, 1.1)
+    ),
+    error = TRUE
+  )
+
+  expect_silent(
+    validate_predict_inputs(
+      parameter = "Rt",
+      mean_delay = 2,
+      gi_pmf = c(0.5, 0.5)
+    )
+  )
+})
+
+test_that("validate_predict_inputs handles invalid parameter values", {
+  expect_snapshot(
+    validate_predict_inputs(
+      parameter = "unknown",
+      mean_delay = 2,
+      gi_pmf = c(0.5, 0.5)
+    ),
+    error = TRUE
+  )
+})

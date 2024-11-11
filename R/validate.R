@@ -106,10 +106,7 @@ validate_predict_inputs <- function(
   } else {
     if (rlang::is_null(mean_delay)) {
       cli::cli_abort(
-        c(
-          "{.arg mean_delay} is required when",
-          "{.arg parameter} is {.val {parameter}}"
-        ),
+        "{.arg parameter} {.val {parameter}} requires {.arg mean_delay}",
         call = call
       )
     }
