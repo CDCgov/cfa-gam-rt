@@ -116,7 +116,7 @@ test_that("predicting little r is on correct scale", {
 })
 
 test_that("predicting Rt works and is reasonable", {
-  fit <- readRDS(test_path("data", "fit.RDS"))
+  fit <- readRDS(test_path("data", "fit.rds"))
   actual <- predict.RtGam(fit,
     mean_delay = 2,
     gi_pmf = c(0.5, 0.5),
