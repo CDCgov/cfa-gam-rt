@@ -92,7 +92,7 @@ test_that("predict_obs_cases predicts observed cases", {
 })
 
 test_that("Newdata dataframe generated correctly", {
-  object <- readRDS(test_path("data", "fit.RDS"))
+  object <- readRDS(test_path("data", "fit.rds"))
   mean_delay <- 2
   gi_pmf <- c(0.5, 0.5)
   min_date <- object[["min_date"]]

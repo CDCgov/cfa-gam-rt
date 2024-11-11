@@ -379,41 +379,6 @@ shift_desired_dates <- function(
   )
 }
 
-#' Convert gratia output draws to standardized parameters
-#' @noRd
-format_predicted_dataframe <- function(
-    parameter,
-    fitted,
-    newdata,
-    delta,
-    gi_pmf) {
-  if (parameter == "r") {
-    # Difference calculation for `r` parameter
-    timestep_first_row <- which((fitted[[".row"]] - 1) %% 2 == 0)
-    fitted <- data.frame(
-      .row = (fitted[timestep_first_row, ".row"] + 1) / 2,
-      .response = discrete_diff_derivative(fitted[[".fitted"]]),
-      .draw = fitted[timestep_first_row, ".draw"]
-    )
-  } else if (parameter == "Rt") {
-    # Rt calculation
-    fitted <- rt_by_group(fitted,
-      group_cols = ".draw",
-      value_col = ".fitted",
-      vec = gi_pmf
-    )
-  }
-
-  # Merge with newdata and select required columns
-  merged <- merge(fitted,
-    newdata,
-    by = ".row"
-  )[, c("reference_date", ".response", ".draw")]
-  merged$reference_date <- as.Date(merged$reference_date)
-
-  return(merged)
-}
-
 #' Generate dataframe with values of model covariates to predict
 #'
 #' We need to parse user-specified input and map it to the necessary
