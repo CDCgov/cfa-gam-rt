@@ -219,11 +219,10 @@ test_that("Type-checking dates works", {
   arg <- "test"
   call <- NULL
 
-  expect_error(check_date(not_dates, arg, call),
-    class = "RtGam_type_error",
-    regexp = "Date"
+  expect_snapshot(check_date(not_dates, arg, call),
+    error = TRUE
   )
-  expect_null(check_date(dates, arg, call))
+  expect_equal(check_date(dates, arg, call), dates)
 })
 
 test_that("Type-checking vectors works", {
@@ -289,4 +288,14 @@ test_that("Type error throws successfully", {
     obj = throw_type_error(object, arg_name, expected_type, call),
     class = "RtGam_type_error"
   )
+})
+
+test_that("Autofixing dates works as expected", {
+  date_string <- "2023-01-01"
+  date_Date <- as.Date(date_string)
+
+  expect_snapshot(
+    autofixed <- check_date(date_string, "potato")
+  )
+  expect_equal(autofixed, date_Date)
 })

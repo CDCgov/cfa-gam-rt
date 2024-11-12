@@ -86,7 +86,7 @@ RtGam <- function(cases,
     m,
     backend
   )
-  validate(cases, reference_date, group, k, m)
+  reference_date <- validate(cases, reference_date, group, k, m)
 
   df <- dataset_creator(cases, reference_date, group, backend)
   formula <- formula_creator(

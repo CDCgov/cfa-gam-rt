@@ -217,6 +217,24 @@ check_date <- function(
     x,
     arg = rlang::caller_arg(x),
     call = rlang::caller_env()) {
+  if (rlang::is_character(x)) {
+    casted <- rlang::try_fetch(
+      as.Date(x),
+      error = function(con) {
+        cli::cli_abort(c(
+          "{.arg {arg}} {.val {x}} could not be automatically cast to date.",
+          "Try explicitly converting with {.fn as.Date}"
+        ))
+      },
+      call = call
+    )
+    cli::cli_alert(c(
+      "Casting {.arg {arg}} {.obj_type_friendly {x}} ",
+      "{.arg {head(x)}} to {.obj_type_friendly {casted}} ",
+      "{.val {stringify_date(head(casted))}}"
+    ))
+    x <- casted
+  }
   if ((!rlang::is_integerish(x)) || (!inherits(x, "Date"))) {
     throw_type_error(
       object = x,
@@ -225,7 +243,7 @@ check_date <- function(
       call = call
     )
   }
-  invisible()
+  invisible(x)
 }
 
 #' @rdname type_checker

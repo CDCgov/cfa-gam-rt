@@ -5,7 +5,10 @@ test_that("`validate()` is successful", {
   k <- 3
   m <- 1
 
-  expect_null(validate(cases, dates, groups, k, m))
+  expect_equal(
+    validate(cases, dates, groups, k, m),
+    dates
+  )
 })
 
 test_that("`validate_cases()` is successful", {
@@ -36,15 +39,15 @@ test_that("`validate_dates()` is successful", {
   has_missing <- c(dates, NA)
   not_a_vector <- list(dates)
 
-  expect_null(validate_dates(dates, "test"))
+  expect_equal(validate_dates(dates, "test"), dates)
   expect_error(validate_dates(not_dates, "test"),
     class = "RtGam_type_error"
   )
   expect_error(validate_dates(has_missing, "test"),
     class = "RtGam_invalid_input"
   )
-  expect_error(validate_dates(not_a_vector, "test"),
-    class = "RtGam_type_error"
+  expect_snapshot(validate_dates(not_a_vector, "test"),
+    error = TRUE
   )
 })
 
