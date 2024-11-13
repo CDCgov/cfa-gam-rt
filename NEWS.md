@@ -14,6 +14,7 @@
 * Added a Justfile with some common development tasks (#56)
 * Set up automated spellcheck (#61)
 * Add slash-command to update WORDLIST in a PR (#64)
+* Cancel in-progress GHA runs on subsequent push (#71)
 
 # RtGam v0.1.0
 
