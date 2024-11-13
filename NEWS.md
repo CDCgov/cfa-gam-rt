@@ -23,6 +23,7 @@
 * Remove pre-commit hooks from extraneous languages
 * Add Justfile recipe to locally update PR with rebase (#75)
 * Cancel in-progress GHA runs on subsequent push (#71)
+* Cancel in-progress GHA runs on subsequent push to a PR (#71)
 
 # RtGam v0.1.0
 
