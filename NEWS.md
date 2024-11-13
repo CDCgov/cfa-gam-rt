@@ -22,6 +22,7 @@
 * Add slash-command to update WORDLIST in a PR (#64)
 * Remove pre-commit hooks from extraneous languages
 * Add Justfile recipe to locally update PR with rebase (#75)
+* Cancel in-progress GHA runs on subsequent push (#71)
 
 # RtGam v0.1.0
 
