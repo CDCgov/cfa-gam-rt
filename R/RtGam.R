@@ -52,7 +52,7 @@
 #' @return A fitted model object of type `RtGam`. The object has named elements:
 #'   * model: The fitted mgcv model object
 #'   * data: The processed data.frame used to fit the `RtGam` model
-#'   * min_date and max_date: The minimum and maxiumum `reference_date` provided
+#'   * min_date and max_date: The minimum and maximum `reference_date` provided
 #'   * k: The user-provided `k` argument
 #'   * m: The user-provided `m` argument
 #'   * backend: The user-provided `backend` argument
