@@ -32,3 +32,11 @@ clean:
 	git restore .
 	git reset --hard HEAD
 	git status
+
+update:
+    git stash push --include-untracked
+    git switch main
+    git pull --ff-only
+    git switch -
+    git rebase main
+    git push --force-with-lease --force-if-includes
