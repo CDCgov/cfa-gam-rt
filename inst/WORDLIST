@@ -14,6 +14,7 @@ PMF
 README
 SEIR
 USC
+WORDLIST
 al
 benchmarked
 benchmarking
@@ -24,7 +25,6 @@ convolved
 doi
 edf
 et
-gam
 http
 https
 md
@@ -36,9 +36,9 @@ pkgdown
 poisson
 pre
 smooth's
+snuck
 timepoint
 timeseries
 undersmoothing
 wiggliness
 www
-WORDLIST
