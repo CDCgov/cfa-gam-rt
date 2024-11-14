@@ -7,6 +7,7 @@
 ## Bugs
 
 * Drop old typos that snuck through the WORDLIST setup (#73)
+* Turn off credential caching in WORDLIST update action preventing CI from restarting (#74)
 
 ## Developer tooling
 
