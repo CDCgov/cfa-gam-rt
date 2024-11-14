@@ -6,6 +6,8 @@
 
 ## Bugs
 
+* Drop old typos that snuck through the WORDLIST setup (#73)
+
 ## Developer tooling
 
 * Update `{primarycensoreddist}` to `{primarycensored}` to match the name change in the v0.6.0 release (#53)
