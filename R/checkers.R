@@ -221,10 +221,14 @@ check_date <- function(
     casted <- rlang::try_fetch(
       as.Date(x),
       error = function(con) {
-        cli::cli_abort(c(
-          "{.arg {arg}} {.val {x}} could not be automatically cast to date.",
-          "Try explicitly converting with {.fn as.Date}"
-        ))
+        cli::cli_abort(
+          c(
+            "{.arg {arg}} {.val {x}} could not be automatically cast to date.",
+            "Try explicitly converting with {.fn as.Date}"
+          ),
+          call = call,
+          class = "failed_to_cast_date"
+        )
       },
       call = call
     )

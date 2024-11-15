@@ -137,7 +137,8 @@ predict_obs_cases <- function(
     parameter = "obs_cases",
     min_date = min_date,
     max_date = max_date,
-    horizon = horizon
+    horizon = horizon,
+    call = call
   )
 
   # Use `posterior_samples()` over `fitted_samples()` to get response
@@ -173,7 +174,8 @@ predict_obs_incidence <- function(
     mean_delay = mean_delay,
     min_date = min_date,
     max_date = max_date,
-    horizon = horizon
+    horizon = horizon,
+    call = call
   )
   # Use `posterior_samples()` over `fitted_samples()` to get response
   # w/ obs uncertainty
@@ -212,7 +214,8 @@ predict_growth_rate <- function(
     min_date = min_date,
     max_date = max_date,
     horizon = horizon,
-    delta = delta
+    delta = delta,
+    call = call
   )
   fitted <- gratia::fitted_samples(
     object[["model"]],
@@ -251,7 +254,8 @@ predict_rt <- function(
     min_date = min_date,
     max_date = max_date,
     horizon = horizon,
-    gi_pmf = gi_pmf
+    gi_pmf = gi_pmf,
+    call = call
   )
   fitted <- gratia::fitted_samples(
     object[["model"]],
@@ -284,8 +288,12 @@ parse_predict_dates <- function(
     max_date = NULL,
     horizon = NULL,
     call = rlang::caller_env()) {
-  if (!rlang::is_null(min_date)) check_date(min_date, call = call)
-  if (!rlang::is_null(max_date)) check_date(max_date, call = call)
+  if (!rlang::is_null(min_date)) {
+    min_date <- check_date(min_date, call = call)
+  }
+  if (!rlang::is_null(max_date)) {
+    max_date <- check_date(max_date, call = call)
+  }
   if (!rlang::is_null(horizon)) check_integer(horizon, call = call)
 
   # Handle horizon to estimate dates if provided

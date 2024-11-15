@@ -1,3 +1,16 @@
+test_that("predict can handle string dates", {
+  fit <- readRDS(test_path("data", "fit.rds"))
+
+  # Throws properly formatted warnings
+  expect_snapshot(
+    actual <- predict(fit, min_date = "2023-01-05", max_date = "2023-01-10")
+  )
+
+  # Dates are correct
+  expect_equal(min(actual[["reference_date"]]), as.Date("2023-01-05"))
+  expect_equal(max(actual[["reference_date"]]), as.Date("2023-01-10"))
+})
+
 test_that("predict_obs_incidence predicts observed incidence", {
   fit <- readRDS(test_path("data", "fit.rds"))
   expected <- data.frame(
@@ -337,6 +350,26 @@ test_that("Dates are parsed correctly", {
   expect_equal(actual_min_max_dates, expected_min_max_dates)
 })
 
+test_that("String dates are parsed to dates", {
+  object_dates <- list(
+    min_date = as.Date("2023-01-01"),
+    max_date = as.Date("2023-01-15")
+  )
+  min_date <- "2023-01-02"
+  max_date <- "2023-01-20"
+  expected_min_max_dates <- seq.Date(
+    from = as.Date(min_date),
+    to = as.Date(max_date),
+    by = "day"
+  )
+  actual_min_max_dates <- parse_predict_dates(
+    object = object,
+    min_date = min_date,
+    max_date = max_date
+  )
+  expect_equal(actual_min_max_dates, expected_min_max_dates)
+})
+
 test_that("Bad dates throw appropriate status messages", {
   object <- list(
     min_date = as.Date("2023-01-01"),
@@ -345,11 +378,11 @@ test_that("Bad dates throw appropriate status messages", {
   # Type errors
   expect_error(
     parse_predict_dates(object, max_date = "potato"),
-    class = "RtGam_type_error"
+    class = "failed_to_cast_date"
   )
   expect_error(
     parse_predict_dates(object, min_date = "potato"),
-    class = "RtGam_type_error"
+    class = "failed_to_cast_date"
   )
   expect_error(
     parse_predict_dates(object, horizon = "potato"),
