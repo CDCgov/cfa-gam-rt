@@ -342,10 +342,13 @@ test_that("Dates are parsed correctly", {
     to = max_date,
     by = "day"
   )
-  actual_min_max_dates <- parse_predict_dates(
-    object = object,
-    min_date = min_date,
-    max_date = max_date
+
+  expect_snapshot(
+    actual_min_max_dates <- parse_predict_dates(
+      object = object,
+      min_date = min_date,
+      max_date = max_date
+    )
   )
   expect_equal(actual_min_max_dates, expected_min_max_dates)
 })
