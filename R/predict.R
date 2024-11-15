@@ -226,11 +226,17 @@ predict_growth_rate <- function(
     scale = "linear_predictor",
     ...
   )
+  # Difference calculation for `r` parameter
+  timestep_first_row <- which((fitted[[".row"]] - 1) %% 2 == 0)
+  fitted <- data.frame(
+    .row = (fitted[timestep_first_row, ".row"] + 1) / 2,
+    .response = discrete_diff_derivative(fitted[[".fitted"]]),
+    .draw = fitted[timestep_first_row, ".draw"]
+  )
   format_predicted_dataframe(
     parameter = "r",
     fitted = fitted,
-    newdata = newdata,
-    delta = delta
+    newdata = newdata
   )
 }
 
@@ -266,11 +272,16 @@ predict_rt <- function(
     scale = "response",
     ...
   )
+  # Rt calculation
+  fitted <- rt_by_group(fitted,
+    group_cols = ".draw",
+    value_col = ".fitted",
+    vec = gi_pmf
+  )
   format_predicted_dataframe(
     parameter = "Rt",
     fitted = fitted,
-    newdata = newdata,
-    gi_pmf = gi_pmf
+    newdata = newdata
   )
 }
 
@@ -418,26 +429,7 @@ create_newdata_dataframe <- function(
 format_predicted_dataframe <- function(
     parameter,
     fitted,
-    newdata,
-    delta,
-    gi_pmf) {
-  if (parameter == "r") {
-    # Difference calculation for `r` parameter
-    timestep_first_row <- which((fitted[[".row"]] - 1) %% 2 == 0)
-    fitted <- data.frame(
-      .row = (fitted[timestep_first_row, ".row"] + 1) / 2,
-      .response = discrete_diff_derivative(fitted[[".fitted"]]),
-      .draw = fitted[timestep_first_row, ".draw"]
-    )
-  } else if (parameter == "Rt") {
-    # Rt calculation
-    fitted <- rt_by_group(fitted,
-      group_cols = ".draw",
-      value_col = ".fitted",
-      vec = gi_pmf
-    )
-  }
-
+    newdata) {
   # Merge with newdata and select required columns
   merged <- merge(fitted,
     newdata,
