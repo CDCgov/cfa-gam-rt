@@ -90,7 +90,7 @@ validate_predict_inputs <- function(
       "r",
       "Rt"
     ),
-    call = call
+    error_call = call
   )
   if (parameter == "obs_cases") {
     if (!rlang::is_null(mean_delay)) {

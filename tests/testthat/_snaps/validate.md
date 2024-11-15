@@ -72,6 +72,6 @@
       validate_predict_inputs(parameter = "unknown", mean_delay = 2, gi_pmf = c(0.5,
         0.5))
     Condition
-      Error in `validate_predict_inputs()`:
+      Error:
       ! `parameter` must be one of "obs_cases", "obs_incidence", "r", or "Rt", not "unknown".
 
