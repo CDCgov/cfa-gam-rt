@@ -483,7 +483,9 @@ discrete_diff_derivative <- function(vals) {
   (vals[t1] - vals[t0]) / 2
 }
 
-#' Generate size in timesteps of centered two day window
+#' Generate size in timesteps of a one day step. This one-day
+#' step will be applied in either direction of the day of
+#' interest to generate a centered two-day window.
 #' @noRd
 compute_delta <- function(fit) {
   min_date <- fit[["min_date"]]
