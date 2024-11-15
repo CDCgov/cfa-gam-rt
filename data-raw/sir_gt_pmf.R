@@ -11,7 +11,8 @@ sir_gt_pmf <- primarycensored::dpcens(0:26,
 ) # v0.4.0
 
 # Drop first element because GI can't have same-day transmission
-sir_gt_pmf <- sir_gt_pmf[2:27]
+# and replace with a zero
+sir_gt_pmf <- c(0, sir_gt_pmf[2:27])
 
 # Renormalize to a proper PMF
 while (abs(sum(sir_gt_pmf) - 1) > 1e-10) {
