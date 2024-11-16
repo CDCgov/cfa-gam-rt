@@ -1,5 +1,5 @@
 test_that("Plots look the same", {
-  fit <- readRDS(test_path("data", "fit.rds"))
+  fit <- readRDS(test_path("data", "stochastic_sir_fit.rds"))
 
   # Obs cases
   p <- plot(fit)
