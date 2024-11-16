@@ -146,7 +146,7 @@ check_elements_below_max <- function(
     max,
     call = rlang::caller_env()) {
   # Greater than or equal to 0 or is NA
-  is_below_max <- all((x <= max) | is.na(x))
+  is_below_max <- (x <= max) | is.na(x)
   if (!all(is_below_max)) {
     cli::cli_abort(
       c("{.arg {arg}} has elements larger than {.val {max}}",
@@ -221,10 +221,14 @@ check_date <- function(
     casted <- rlang::try_fetch(
       as.Date(x),
       error = function(con) {
-        cli::cli_abort(c(
-          "{.arg {arg}} {.val {x}} could not be automatically cast to date.",
-          "Try explicitly converting with {.fn as.Date}"
-        ))
+        cli::cli_abort(
+          c(
+            "{.arg {arg}} {.val {x}} could not be automatically cast to date.",
+            "Try explicitly converting with {.fn as.Date}"
+          ),
+          call = call,
+          class = "failed_to_cast_date"
+        )
       },
       call = call
     )

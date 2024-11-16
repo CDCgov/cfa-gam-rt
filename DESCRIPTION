@@ -36,10 +36,11 @@ RoxygenNote: 7.3.2
 Imports:
     cli,
     glue,
+    gratia,
     mgcv,
     rlang
 Depends:
-    R (>= 2.10)
+    R (>= 3.50)
 LazyData: true
 Additional_repositories:
     https://epinowcast.r-universe.dev

@@ -1,6 +1,7 @@
 # RtGam v0.2.0
 
 ## Features
+* Predict method for RtGam models, with parameters `obs_cases`, `obs_incidence`, `r`, and `Rt` (#48)
 
 * Cast dates passed as strings to a `Date` if possible (#67)
 

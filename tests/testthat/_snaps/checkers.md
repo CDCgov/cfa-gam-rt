@@ -3,7 +3,7 @@
     Code
       check_date(not_dates, arg, call)
     Condition
-      Error in `handlers[[1L]]()`:
+      Error:
       ! `test` "abc" and "123" could not be automatically cast to date.
       Try explicitly converting with `as.Date()`
 
