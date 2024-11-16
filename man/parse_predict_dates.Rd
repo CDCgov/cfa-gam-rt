@@ -13,13 +13,17 @@ parse_predict_dates(
 )
 }
 \arguments{
-\item{object}{An \code{RtGam} object from \code{\link[=RtGam]{RtGam()}}.}
+\item{object}{An \code{RtGam} object created using the \code{\link[=RtGam]{RtGam()}}
+function.}
 
-\item{min_date, max_date}{Optional. A date-like object. See details for more
-information on specification.}
+\item{min_date, max_date}{Optional. Date-like objects specifying the start
+and
+end of the prediction range. See \strong{Details} for more information on
+their usage.}
 
-\item{horizon}{Optional. Integer specifying forecast days from the last date
-in the fit. For example, \code{horizon = 7} returns a 7-day forecast.}
+\item{horizon}{Optional. An integer indicating the number of days to forecast
+beyond the last date in the model fit. For example, \code{horizon = 7} predicts
+the next 7 days.}
 
 \item{call}{The calling environment to be reflected in the error message}
 }

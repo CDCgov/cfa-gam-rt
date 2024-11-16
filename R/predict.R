@@ -1,40 +1,96 @@
 #' Predict Method for RtGam Models
 #'
-#' Generates predictions from an `RtGam` fit. Prediction dates can be specified
-#' flexibly using multiple approaches.
+#' Generates posterior draws from an `RtGam` fit. Prediction dates can be
+#' specified
+#' flexibly using various approaches, and predictions can be drawn for
+#' different
+#' model parameters.
 #'
-#' @param object An `RtGam` object from [RtGam()].
-#' @param parameter A string specifying the prediction parameter. Options are
-#'   `"obs_cases"`, `"r"`, and `"Rt"`. Defaults to `"obs_cases"`.
-#' @param horizon Optional. Integer specifying forecast days from the last date
-#'   in the fit. For example, `horizon = 7` returns a 7-day forecast.
-#' @param min_date,max_date Optional. A date-like object. See details for more
-#'   information on specification.
-#' @param n Number of posterior samples to use. Default is 100.
-#' @param mean_delay Optional. Numeric mean delay used in the prediction.
-#' @param gi_pmf Optional. A vector representing the generation interval PMF.
-#' @param seed Random seed for reproducibility. Default is 12345.
-#' @param ... Additional arguments passed to lower-level functions.
+#' @param object An `RtGam` object created using the [RtGam()]
+#' function.
+#' @param parameter A character string specifying the prediction target.
+#' Options
+#'   are `"obs_cases"` (observed cases), `"r"` (growth rate), or `"Rt"`
+#' reproduction number).
+#'   Default is `"obs_cases"`.
+#' @param horizon Optional. An integer indicating the number of days to forecast
+#'   beyond the last date in the model fit. For example, `horizon = 7` predicts
+#'   the next 7 days.
+#' @param min_date,max_date Optional. Date-like objects specifying the start
+#' and
+#'   end of the prediction range. See **Details** for more information on
+#' their usage.
+#' @param n An integer specifying the number of posterior samples to use
+#' for
+#'   predictions. Default is 100.
+#' @param mean_delay Optional. An integer specifying the mean number of days
+#' between
+#'   an individual becoming infected and their case being observed (e.g.,
+#' through
+#'   an emergency department visit or hospitalization). This value shifts the
+#' predictions
+#'   to account for reporting delays. It is required when
+#'   predicting `"r"` (growth rate) or `"Rt"` (reproduction number).
+#' @param gi_pmf Optional. A numeric vector specifying the generation
+#' interval
+#'   probability mass function (PMF), required when `parameter = "Rt"`. The
+#' PMF
+#'   must be a proper probability distribution (summing to one) with the first
+#' element
+#'   set to zero to exclude same-day transmission, as required by the renewal
+#' equation.
+#'   For more information and tools to handle delay distributions, see
+#' the
+#'   [primarycensored](https://CRAN.R-project.org/package=primarycensored)
+#' package.
+#' @param seed An integer specifying the random seed for reproducibility.
+#' Default
+#'   is 12345.
+#' @param ... Additional arguments passed to the underlying sampling
+#' functions:
+#'   - When `parameter = "obs_cases"`, arguments are passed to `gratia:
+#' posterior_samples`.
+#'   - When `parameter = "r"` or `"Rt"`, arguments are passed to `gratia:
+#' fitted_samples`.
 #'
 #' @details
-#' Prediction dates can be set in four ways:
+#' Prediction dates can be defined in four ways:
 #'
-#' 1. **Using Fit Object Alone**: Predictions span the full date range in the
-#'    original model fit.
-#' 2. **Using `horizon`**: Forecasts extend `horizon` days from the fit’s last
-#'    date.
-#' 3. **Using `min_date` and `horizon`**: Predictions start at `min_date` and
-#'    end `horizon` days after the fit’s last date.
-#' 4. **Using `min_date` and `max_date`**: Predictions span all dates between
-#'    these two (inclusive).
+#' 1. **Default Date Range**: By using only the fit object, predictions are made
+#'    across the full date range in the original model.
+#' 2. **Using `horizon`**: Extends predictions up to `horizon` days beyond the
+#'    last date in the model fit.
+#' 3. **Using `min_date` and `horizon`**: Predictions start from `min_date` and
+#'    extend up to `horizon` days after the fit’s last date.
+#' 4. **Using `min_date` and `max_date`**: Generates predictions for all dates
+#'    within this specified range, inclusive.
+#'
+#' The `mean_delay` parameter adjusts predictions for the
+#' temporal lag between infection and case observation. For example, if
+#' `mean_delay = 5`,
+#' the model assumes that observed cases reflect infections that occurred on
+#' average five days
+#' earlier. This adjustment ensures that estimates of growth rates (`"r"`) and
+#' reproduction
+#' numbers (`"Rt"`) align with the correct underlying temporal dynamics.
+#'
+#' The `parameter` argument determines the type of predictions:
+#' - `"obs_cases"`: Observed cases, including uncertainty from the model's
+#' fit.
+#' - `"r"`: Growth rate, calculated using the centered difference between time
+#' steps.
+#' - `"Rt"`: Reproduction number, incorporating delay distributions and
+#' convolution.
 #'
 #' @return
-#' A dataframe in [tidy format](https://www.jstatsoft.org/article/view/v059i10),
-#' with each row representing a draw for a specific date:
+#' A data frame in
+#' [tidy format](https://www.jstatsoft.org/article/view/v059i10),
+#' where each row represents a posterior draw for a specific date, with the
+#' following columns:
 #'
-#' - `reference_date`: Date of the prediction.
-#' - `.response`: Predicted value (e.g., observed cases).
-#' - `.draw`: ID of the posterior draw.
+#' - `reference_date`: The prediction date.
+#' - `.response`: The predicted value for the target parameter.
+#' - `.draw`: The index of the posterior draw.
 #'
 #' Example output:
 #' ```
@@ -45,7 +101,7 @@
 #' 4     2023-01-01        11     2
 #' 5     2023-01-02        19     2
 #' 6     2023-01-03        24     2
-##' ```
+#' ```
 #'
 #' @export
 predict.RtGam <- function(

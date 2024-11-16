@@ -46,33 +46,66 @@ predict_rt(
 )
 }
 \arguments{
-\item{object}{An \code{RtGam} object from \code{\link[=RtGam]{RtGam()}}.}
+\item{object}{An \code{RtGam} object created using the \code{\link[=RtGam]{RtGam()}}
+function.}
 
-\item{horizon}{Optional. Integer specifying forecast days from the last date
-in the fit. For example, \code{horizon = 7} returns a 7-day forecast.}
+\item{horizon}{Optional. An integer indicating the number of days to forecast
+beyond the last date in the model fit. For example, \code{horizon = 7} predicts
+the next 7 days.}
 
-\item{min_date, max_date}{Optional. A date-like object. See details for more
-information on specification.}
+\item{min_date, max_date}{Optional. Date-like objects specifying the start
+and
+end of the prediction range. See \strong{Details} for more information on
+their usage.}
 
-\item{n}{Number of posterior samples to use. Default is 100.}
+\item{n}{An integer specifying the number of posterior samples to use
+for
+predictions. Default is 100.}
 
-\item{gi_pmf}{Optional. A vector representing the generation interval PMF.}
+\item{gi_pmf}{Optional. A numeric vector specifying the generation
+interval
+probability mass function (PMF), required when \code{parameter = "Rt"}. The
+PMF
+must be a proper probability distribution (summing to one) with the first
+element
+set to zero to exclude same-day transmission, as required by the renewal
+equation.
+For more information and tools to handle delay distributions, see
+the
+\href{https://CRAN.R-project.org/package=primarycensored}{primarycensored}
+package.}
 
-\item{seed}{Random seed for reproducibility. Default is 12345.}
+\item{seed}{An integer specifying the random seed for reproducibility.
+Default
+is 12345.}
 
 \item{call}{The calling environment to pass to error messages}
 
-\item{...}{Additional arguments passed to lower-level functions.}
+\item{...}{Additional arguments passed to the underlying sampling
+functions:
+\itemize{
+\item When \code{parameter = "obs_cases"}, arguments are passed to \code{gratia: posterior_samples}.
+\item When \code{parameter = "r"} or \code{"Rt"}, arguments are passed to \code{gratia: fitted_samples}.
+}}
 
-\item{mean_delay}{Optional. Numeric mean delay used in the prediction.}
+\item{mean_delay}{Optional. An integer specifying the mean number of days
+between
+an individual becoming infected and their case being observed (e.g.,
+through
+an emergency department visit or hospitalization). This value shifts the
+predictions
+to account for reporting delays. It is required when
+predicting \code{"r"} (growth rate) or \code{"Rt"} (reproduction number).}
 }
 \value{
-A dataframe in \href{https://www.jstatsoft.org/article/view/v059i10}{tidy format},
-with each row representing a draw for a specific date:
+A data frame in
+\href{https://www.jstatsoft.org/article/view/v059i10}{tidy format},
+where each row represents a posterior draw for a specific date, with the
+following columns:
 \itemize{
-\item \code{reference_date}: Date of the prediction.
-\item \code{.response}: Predicted value (e.g., observed cases).
-\item \code{.draw}: ID of the posterior draw.
+\item \code{reference_date}: The prediction date.
+\item \code{.response}: The predicted value for the target parameter.
+\item \code{.draw}: The index of the posterior draw.
 }
 
 Example output:
@@ -87,20 +120,42 @@ Example output:
 }\if{html}{\out{</div>}}
 }
 \description{
-Generates predictions from an \code{RtGam} fit. Prediction dates can be specified
-flexibly using multiple approaches.
+Generates posterior draws from an \code{RtGam} fit. Prediction dates can be
+specified
+flexibly using various approaches, and predictions can be drawn for
+different
+model parameters.
 }
 \details{
-Prediction dates can be set in four ways:
+Prediction dates can be defined in four ways:
 \enumerate{
-\item \strong{Using Fit Object Alone}: Predictions span the full date range in the
-original model fit.
-\item \strong{Using \code{horizon}}: Forecasts extend \code{horizon} days from the fit’s last
-date.
-\item \strong{Using \code{min_date} and \code{horizon}}: Predictions start at \code{min_date} and
-end \code{horizon} days after the fit’s last date.
-\item \strong{Using \code{min_date} and \code{max_date}}: Predictions span all dates between
-these two (inclusive).
+\item \strong{Default Date Range}: By using only the fit object, predictions are made
+across the full date range in the original model.
+\item \strong{Using \code{horizon}}: Extends predictions up to \code{horizon} days beyond the
+last date in the model fit.
+\item \strong{Using \code{min_date} and \code{horizon}}: Predictions start from \code{min_date} and
+extend up to \code{horizon} days after the fit’s last date.
+\item \strong{Using \code{min_date} and \code{max_date}}: Generates predictions for all dates
+within this specified range, inclusive.
+}
+
+The \code{mean_delay} parameter adjusts predictions for the
+temporal lag between infection and case observation. For example, if
+\code{mean_delay = 5},
+the model assumes that observed cases reflect infections that occurred on
+average five days
+earlier. This adjustment ensures that estimates of growth rates (\code{"r"}) and
+reproduction
+numbers (\code{"Rt"}) align with the correct underlying temporal dynamics.
+
+The \code{parameter} argument determines the type of predictions:
+\itemize{
+\item \code{"obs_cases"}: Observed cases, including uncertainty from the model's
+fit.
+\item \code{"r"}: Growth rate, calculated using the centered difference between time
+steps.
+\item \code{"Rt"}: Reproduction number, incorporating delay distributions and
+convolution.
 }
 }
 \keyword{internal}
