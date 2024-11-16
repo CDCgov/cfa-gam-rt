@@ -3,7 +3,6 @@
 \name{predictor}
 \alias{predictor}
 \alias{predict_obs_cases}
-\alias{predict_obs_incidence}
 \alias{predict_growth_rate}
 \alias{predict_rt}
 \title{Parameter-specific posterior predictions}
@@ -16,19 +15,6 @@ predict_obs_cases(
   n = 10,
   gi_pmf = NULL,
   seed = 12345,
-  call = rlang::caller_env(),
-  ...
-)
-
-predict_obs_incidence(
-  object,
-  horizon = NULL,
-  min_date = NULL,
-  max_date = NULL,
-  n = 10,
-  gi_pmf = NULL,
-  seed = 12345,
-  mean_delay,
   call = rlang::caller_env(),
   ...
 )

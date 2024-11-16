@@ -11,55 +11,6 @@ test_that("predict can handle string dates", {
   expect_equal(max(actual[["reference_date"]]), as.Date("2023-01-10"))
 })
 
-test_that("predict_obs_incidence predicts observed incidence", {
-  fit <- readRDS(test_path("data", "fit.rds"))
-  expected <- data.frame(
-    reference_date = as.Date(c(
-      "2023-01-01",
-      "2023-01-02",
-      "2023-01-03",
-      "2023-01-04",
-      "2023-01-05",
-      "2023-01-06",
-      "2023-01-07",
-      "2023-01-08",
-      "2023-01-09",
-      "2023-01-10"
-    )),
-    .response = c(
-      32,
-      24,
-      46,
-      29,
-      23,
-      30,
-      15,
-      74,
-      101,
-      62
-    ),
-    .draw = c(
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L
-    )
-  )
-  actual <- predict.RtGam(fit,
-    n = 1,
-    seed = 12345,
-    parameter = "obs_incidence",
-    mean_delay = 3
-  )
-  expect_equal(actual, expected)
-})
-
 test_that("predict_obs_cases predicts observed cases", {
   fit <- readRDS(test_path("data", "fit.rds"))
   expected <- data.frame(
@@ -171,18 +122,6 @@ test_that("Newdata dataframe generated correctly", {
   expect_equal(colnames(actual), expected_cols)
   expect_equal(nrow(actual), expected_nrows)
 
-  # Incidence
-  actual <- create_newdata_dataframe(
-    object = object,
-    min_date = min_date,
-    max_date = max_date,
-    horizon = NULL,
-    parameter = "obs_incidence",
-    mean_delay = mean_delay
-  )
-  expect_equal(colnames(actual), expected_cols)
-  expect_equal(nrow(actual), expected_nrows)
-
   # r
   actual <- create_newdata_dataframe(
     object = object,
@@ -237,18 +176,11 @@ test_that("Dates are shifted correctly", {
   )
   expect_equal(actual_cases_dates, expected_cases_dates)
 
-  # Test case (2): incidence and growth rate has a mean shift
+  # Test case (2): growth rate has a mean shift
   expected_incidence_dates <- seq.Date(
     from = desired_min_date + mean_delay,
     to = desired_max_date + mean_delay,
     by = "day"
-  )
-  actual_incidence_dates <- shift_desired_dates(
-    parameter = "obs_incidence",
-    desired_min_date = desired_min_date,
-    desired_max_date = desired_max_date,
-    mean_delay = mean_delay,
-    gi_pmf = gi_pmf
   )
   actual_growth_dates <- shift_desired_dates(
     parameter = "r",
@@ -257,7 +189,6 @@ test_that("Dates are shifted correctly", {
     mean_delay = mean_delay,
     gi_pmf = gi_pmf
   )
-  expect_equal(actual_incidence_dates, expected_incidence_dates)
   expect_equal(actual_growth_dates, expected_incidence_dates)
 
   # Test case (3): Rt has a delay shift and GI length padding

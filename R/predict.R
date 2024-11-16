@@ -5,7 +5,7 @@
 #'
 #' @param object An `RtGam` object from [RtGam()].
 #' @param parameter A string specifying the prediction parameter. Options are
-#'   `"obs_cases"`, `"incidence"`, `"r"`, and `"Rt"`. Defaults to `"obs_cases"`.
+#'   `"obs_cases"`, `"r"`, and `"Rt"`. Defaults to `"obs_cases"`.
 #' @param horizon Optional. Integer specifying forecast days from the last date
 #'   in the fit. For example, `horizon = 7` returns a 7-day forecast.
 #' @param min_date,max_date Optional. A date-like object. See details for more
@@ -76,17 +76,6 @@ predict.RtGam <- function(
       seed = seed,
       ...
     )
-  } else if (parameter == "obs_incidence") {
-    predict_obs_incidence(
-      object = object,
-      horizon = horizon,
-      min_date = min_date,
-      max_date = max_date,
-      n = n,
-      mean_delay = mean_delay,
-      seed = seed,
-      ...
-    )
   } else if (parameter == "r") {
     predict_growth_rate(
       object = object,
@@ -153,44 +142,6 @@ predict_obs_cases <- function(
     ...
   )
   format_predicted_dataframe(fitted, newdata)
-}
-
-#' @rdname predictor
-#' @export
-#' @export
-predict_obs_incidence <- function(
-    object,
-    horizon = NULL,
-    min_date = NULL,
-    max_date = NULL,
-    n = 10,
-    gi_pmf = NULL,
-    seed = 12345,
-    mean_delay,
-    call = rlang::caller_env(),
-    ...) {
-  newdata <- create_newdata_dataframe(
-    object = object,
-    parameter = "obs_incidence",
-    mean_delay = mean_delay,
-    min_date = min_date,
-    max_date = max_date,
-    horizon = horizon,
-    call = call
-  )
-  # Use `posterior_samples()` over `fitted_samples()` to get response
-  # w/ obs uncertainty
-  fitted <- gratia::posterior_samples(
-    object[["model"]],
-    data = newdata,
-    unconditional = TRUE,
-    n = n,
-    seed = seed,
-    ...
-  )
-  format_predicted_dataframe(
-    fitted, newdata
-  )
 }
 
 #' @rdname predictor
@@ -355,7 +306,7 @@ shift_desired_dates <- function(
   if (parameter == "obs_cases") {
     applied_min_date <- desired_min_date
     applied_max_date <- desired_max_date
-  } else if (parameter == "obs_incidence" || parameter == "r") {
+  } else if (parameter == "r") {
     # Shift cases up by mean delay to get projected incidence on day
     applied_min_date <- desired_min_date + mean_delay
     applied_max_date <- desired_max_date + mean_delay

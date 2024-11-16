@@ -27,15 +27,6 @@
 # validate_predict_inputs requires mean_delay for non-obs_cases parameters
 
     Code
-      validate_predict_inputs(parameter = "obs_incidence", mean_delay = NULL, gi_pmf = c(
-        0.5, 0.5))
-    Condition
-      Error:
-      ! `parameter` "obs_incidence" requires `mean_delay`
-
----
-
-    Code
       validate_predict_inputs(parameter = "r", mean_delay = NULL, gi_pmf = c(0.5, 0.5))
     Condition
       Error:
@@ -73,5 +64,5 @@
         0.5))
     Condition
       Error:
-      ! `parameter` must be one of "obs_cases", "obs_incidence", "r", or "Rt", not "unknown".
+      ! `parameter` must be one of "obs_cases", "r", or "Rt", not "unknown".
 

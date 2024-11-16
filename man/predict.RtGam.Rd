@@ -21,7 +21,7 @@
 \item{object}{An \code{RtGam} object from \code{\link[=RtGam]{RtGam()}}.}
 
 \item{parameter}{A string specifying the prediction parameter. Options are
-\code{"obs_cases"}, \code{"incidence"}, \code{"r"}, and \code{"Rt"}. Defaults to \code{"obs_cases"}.}
+\code{"obs_cases"}, \code{"r"}, and \code{"Rt"}. Defaults to \code{"obs_cases"}.}
 
 \item{horizon}{Optional. Integer specifying forecast days from the last date
 in the fit. For example, \code{horizon = 7} returns a 7-day forecast.}

@@ -142,15 +142,6 @@ test_that(
   {
     expect_snapshot(
       validate_predict_inputs(
-        parameter = "obs_incidence",
-        mean_delay = NULL,
-        gi_pmf = c(0.5, 0.5)
-      ),
-      error = TRUE
-    )
-
-    expect_snapshot(
-      validate_predict_inputs(
         parameter = "r",
         mean_delay = NULL,
         gi_pmf = c(0.5, 0.5)
@@ -160,7 +151,15 @@ test_that(
 
     expect_silent(
       validate_predict_inputs(
-        parameter = "obs_incidence",
+        parameter = "r",
+        mean_delay = 2,
+        gi_pmf = c(0.5, 0.5)
+      )
+    )
+
+    expect_silent(
+      validate_predict_inputs(
+        parameter = "Rt",
         mean_delay = 2,
         gi_pmf = c(0.5, 0.5)
       )

@@ -86,7 +86,6 @@ validate_predict_inputs <- function(
   rlang::arg_match(parameter,
     values = c(
       "obs_cases",
-      "obs_incidence",
       "r",
       "Rt"
     ),
