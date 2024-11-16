@@ -118,6 +118,7 @@ predict.RtGam <- function(
 #' @inherit predict.RtGam
 #' @param call The calling environment to pass to error messages
 #' @name predictor
+#' @keywords internal
 NULL
 
 #' @rdname predictor

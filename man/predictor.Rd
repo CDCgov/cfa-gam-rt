@@ -117,3 +117,4 @@ end \code{horizon} days after the fit’s last date.
 these two (inclusive).
 }
 }
+\keyword{internal}
