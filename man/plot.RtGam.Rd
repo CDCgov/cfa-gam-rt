@@ -4,7 +4,7 @@
 \alias{plot.RtGam}
 \title{Plot method for RtGam fits}
 \usage{
-\method{plot}{RtGam}(x, parameter = "obs_cases", alpha = 0.1, ...)
+\method{plot}{RtGam}(x, parameter = "obs_cases", alpha = 0.05, ...)
 }
 \arguments{
 \item{x}{An \code{RtGam} object created using the \code{\link[=RtGam]{RtGam()}}

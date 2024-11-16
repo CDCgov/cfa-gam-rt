@@ -29,7 +29,7 @@
 #'   gi_pmf = sir_gt_pmf
 #' )
 #' @export
-plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.08, ...) {
+plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.05, ...) {
   preds <- predict.RtGam(x, parameter = parameter, ...)
 
   # Hack to get around lint warnings for NSE
