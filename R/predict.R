@@ -217,6 +217,10 @@ predict_growth_rate <- function(
     delta = delta,
     call = call
   )
+  # Amend the returned newdata row IDs to make paired timmestep groups
+  # transparent. We have 1, 2, 3, ... and map to 1, NA, 2, NA, ...
+  # to show that the timesteps are (t0, t2), (t1, t3), ...
+  newdata[".row"] <- interleave(seq(1, nrow(newdata) / 2, 1), NA)
   fitted <- gratia::fitted_samples(
     object[["model"]],
     data = newdata,
@@ -226,7 +230,6 @@ predict_growth_rate <- function(
     scale = "linear_predictor",
     ...
   )
-  # Difference calculation for `r` parameter
   timestep_first_row <- which((fitted[[".row"]] - 1) %% 2 == 0)
   fitted <- data.frame(
     .row = (fitted[timestep_first_row, ".row"] + 1) / 2,
@@ -405,21 +408,23 @@ create_newdata_dataframe <- function(
     max_supplied_date = object[["max_date"]]
   )
   if (parameter == "r") {
+    # Centered difference timesteps
+    # t1: (t0, t2), t2: (t1, t3), ...
     timesteps <- interleave(timesteps - delta, timesteps + delta)
     desired_dates <- interleave(desired_dates, NA)
   } else if (parameter == "Rt") {
-    # Use NA padding to mark incomplete sections to remove
+    # Use NA padding to mark incomplete (biased) convolution steps to remove
     na_pad <- rep(NA, length(gi_pmf))
     desired_dates <- as.Date(
       c(na_pad, desired_dates, na_pad)
     )
   }
-  format_newdata_dataframe(
-    fit = object,
-    parameter = parameter,
-    desired_dates = desired_dates,
-    timesteps = timesteps
-  )
+
+  newdata <- gratia::data_slice(object[["model"]], timestep = timesteps)
+  newdata[".row"] <- seq_along(timesteps)
+  newdata["reference_date"] <- desired_dates
+
+  newdata
 }
 
 #' Format predicted data frame with uniform minimal specification
@@ -438,28 +443,6 @@ format_predicted_dataframe <- function(
   )]
   merged$reference_date <- as.Date(merged$reference_date)
   merged[which(!is.na(merged[["reference_date"]])), ]
-}
-
-#' Turn input parameters into a dataframe to pass to model
-#' @noRd
-format_newdata_dataframe <- function(
-    fit,
-    parameter,
-    desired_dates,
-    timesteps,
-    gi_pmf,
-    delta) {
-  newdata <- gratia::data_slice(fit[["model"]], timestep = timesteps)
-
-  if (parameter == "r") {
-    # Join key when adding metadata to posterior sim. Setting
-    # every other row to NA ensures we get one row per date-draw.
-    newdata[".row"] <- interleave(seq(1, length(timesteps) / 2, 1), NA)
-  } else {
-    newdata[".row"] <- seq_along(timesteps)
-  }
-  newdata["reference_date"] <- desired_dates
-  return(newdata)
 }
 
 #' Centered difference derivative.
