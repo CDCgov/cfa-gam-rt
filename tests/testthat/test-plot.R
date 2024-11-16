@@ -3,17 +3,17 @@ test_that("Plots look the same", {
 
   # Obs cases
   p <- plot(fit)
-  expect_snapshot_file(save_plot(p, "obs_cases.jpg"))
+  vdiffr::expect_doppelganger("obs_cases", p)
 
   # r
   p <- plot(fit, parameter = "r", mean_delay = 0)
-  expect_snapshot_file(save_plot(p, "r.jpg"))
+  vdiffr::expect_doppelganger("r", p)
 
   # Rt
   p <- plot(fit, parameter = "Rt", mean_delay = 0, gi_pmf = sir_gt_pmf)
-  expect_snapshot_file(save_plot(p, "Rt.jpg"))
+  vdiffr::expect_doppelganger("Rt", p)
 
   # Can just plot forecast
   p <- plot(fit, horizon = 10)
-  expect_snapshot_file(save_plot(p, "forecast.jpg"))
+  vdiffr::expect_doppelganger("forecast", p)
 })
