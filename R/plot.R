@@ -29,7 +29,7 @@
 #'   gi_pmf = sir_gt_pmf
 #' )
 #' @export
-plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.1, ...) {
+plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.08, ...) {
   preds <- predict.RtGam(x, parameter = parameter, ...)
 
   # Hack to get around lint warnings for NSE
@@ -50,6 +50,10 @@ plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.1, ...) {
   }
   if (parameter == "r") {
     p <- ggplot2::ggplot(preds) +
+      ggplot2::geom_hline(
+        ggplot2::aes(yintercept = 0),
+        alpha = 0.5
+      ) +
       ggplot2::geom_line(
         ggplot2::aes(reference_date, .response, group = .draw),
         alpha = alpha
@@ -69,7 +73,10 @@ plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.1, ...) {
       ) +
       ggplot2::theme_bw() +
       ggplot2::labs(x = "Reference date", y = "Rt") +
-      ggplot2::scale_y_continuous(trans = "log")
+      ggplot2::scale_y_continuous(
+        trans = "log",
+        labels = scales::number_format(accuracy = 0.01)
+      )
   }
   return(p)
 }

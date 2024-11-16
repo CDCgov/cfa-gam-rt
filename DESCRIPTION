@@ -39,7 +39,8 @@ Imports:
     gratia,
     mgcv,
     rlang,
-    ggplot2
+    ggplot2,
+    scales
 Depends:
     R (>= 3.50)
 LazyData: true
