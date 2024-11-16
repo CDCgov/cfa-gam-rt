@@ -152,7 +152,7 @@ predict_obs_cases <- function(
     seed = seed,
     ...
   )
-  format_predicted_dataframe(parameter = "obs_cases", fitted, newdata)
+  format_predicted_dataframe(fitted, newdata)
 }
 
 #' @rdname predictor
@@ -189,7 +189,6 @@ predict_obs_incidence <- function(
     ...
   )
   format_predicted_dataframe(
-    parameter = "obs_incidence",
     fitted, newdata
   )
 }
@@ -235,7 +234,6 @@ predict_growth_rate <- function(
     .draw = fitted[timestep_first_row, ".draw"]
   )
   format_predicted_dataframe(
-    parameter = "r",
     fitted = fitted,
     newdata = newdata
   )
@@ -280,7 +278,6 @@ predict_rt <- function(
     vec = gi_pmf
   )
   format_predicted_dataframe(
-    parameter = "Rt",
     fitted = fitted,
     newdata = newdata
   )
@@ -428,7 +425,6 @@ create_newdata_dataframe <- function(
 #' Format predicted data frame with uniform minimal specification
 #' @noRd
 format_predicted_dataframe <- function(
-    parameter,
     fitted,
     newdata) {
   # Merge with newdata and select required columns
