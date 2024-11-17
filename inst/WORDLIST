@@ -5,6 +5,7 @@ CMD
 CRC
 CoV
 Dependabot
+GHA
 Justfile
 MERCHANTABILITY
 Mellor
