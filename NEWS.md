@@ -26,6 +26,7 @@
 * Cancel in-progress GHA runs on subsequent push (#71)
 * Cancel in-progress GHA runs on subsequent push to a PR (#71)
 * Cancel in-progress GitHub Actions runs on subsequent push to a PR (#72)
+* Set default merge strategy for WORDLIST to `union` to limit merge conflicts (#78)
 
 # RtGam v0.1.0
 
