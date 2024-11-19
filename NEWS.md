@@ -2,6 +2,7 @@
 
 ## Features
 * Predict method for RtGam models, with parameters `obs_cases`, `obs_incidence`, `r`, and `Rt` (#48)
+* Plot method for RtGam models built off the predict method (#76)
 
 * Cast dates passed as strings to a `Date` if possible (#67)
 
