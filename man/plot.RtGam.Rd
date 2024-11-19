@@ -19,15 +19,15 @@ Default is \code{"obs_cases"}.}
 \item{alpha}{The opacity of the lines on the plot. Should be between 0 and 1,
 with values closer to 0 producing more transparent lines.}
 
-\item{...}{Additional options to pass to \link{predict.RtGam}}
+\item{...}{Additional options to pass to \code{\link[=predict.RtGam]{predict.RtGam()}}}
 }
 \value{
 A ggplot2 object
 }
 \description{
 Generates predicted draws from \link{predict.RtGam} and plots them with ggplot2.
-See
-the documentation on \link{predict.RtGam} for options on how to specify draws.
+See the documentation on \link{predict.RtGam} for options on how to specify
+draws.
 }
 \examples{
 fit <- RtGam(

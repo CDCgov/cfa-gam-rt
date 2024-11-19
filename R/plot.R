@@ -1,15 +1,15 @@
 #' Plot method for RtGam fits
 #'
 #' Generates predicted draws from [predict.RtGam] and plots them with ggplot2.
-#' See
-#' the documentation on [predict.RtGam] for options on how to specify draws.
+#' See the documentation on [predict.RtGam] for options on how to specify
+#' draws.
 #'
 #' @inheritParams predict.RtGam
 #' @param x An `RtGam` object created using the [RtGam()]
 #' function.
 #' @param alpha The opacity of the lines on the plot. Should be between 0 and 1,
 #' with values closer to 0 producing more transparent lines.
-#' @param ... Additional options to pass to [predict.RtGam]
+#' @param ... Additional options to pass to [predict.RtGam()]
 #' @returns A ggplot2 object
 #' @examples
 #' fit <- RtGam(
