@@ -1,5 +1,7 @@
 # RtGam v0.2.0
 
+This release introduces significant new functionality for working with RtGam models, including S3 methods for prediction and plotting `RtGam` models. It also includes bug fixes, improved handling of input data, and enhanced developer tooling to streamline contributions and maintenance.
+
 ## Features
 * Predict method for RtGam models, with parameters `obs_cases`, `obs_incidence`, `r`, and `Rt` (#48)
 * Plot method for RtGam models built off the predict method (#76)
