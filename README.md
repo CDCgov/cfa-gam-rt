@@ -26,7 +26,7 @@ It has not yet been benchmarked relative to other approaches.
 The package can be installed from GitHub:
 
 ```r
-remotes::install_github("cdcgov/cfa-gam-rt@v0.1.0")
+remotes::install_github("cdcgov/cfa-gam-rt@v0.2.0")
 ```
 
 ## Use
