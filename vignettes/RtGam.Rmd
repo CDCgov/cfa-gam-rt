@@ -25,8 +25,7 @@ It walks through how to fit a model to an epidemic timeseries and interpret the 
 ## Setup
 
 This vignette assumes you have the RtGam package installed and loaded.
-It also uses ggplot2
-
+This vignette uses `ggplot2`.
 
 ```{r setup}
 # Install with remotes::install_github("CDCGov/cfa-gam-rt")
@@ -34,11 +33,9 @@ library(RtGam)
 library(ggplot2)
 ```
 
-This vignette also makes uses of `ggplot2`.
-
 ## Data
 
-The `RtGam` package requires a time series of observed incidence data.
+The `RtGam` package requires a time series of observed incident case counts.
 For demonstration purposes, the package includes a simulated epidemic dataset, `stochastic_sir_rt`, adapted from @gostic2020practical.
 
 In this example dataset, `obs_incidence` is the vector of observed case counts, and `date` is the corresponding vector of dates.
@@ -80,9 +77,10 @@ fit <- RtGam(
 print(fit)
 ```
 
-If you want to select a smoothing or penalty basis dimension you can provide those to the model.
+To select your own smoothing or penalty basis dimension you can provide those parameters to the model.
 The penalty basis dimension can be specified with the `k` argument and the smooth basis dimension can be specified with the `m` argument.
-For example, we can refit the model to be non-adaptive by setting `m` to 1.
+For example, we can decrease the penalty basis dimension of the model by setting `m` to 1.
+See `?smooth_dim_heuristic()` and `penalty_dim_heuristic()` for more on how these basis dimensions are set and when to change them.
 
 ```{r fit model again}
 fit_non_adaptive <- RtGam(
@@ -100,14 +98,14 @@ See `?RtGam` for more details on how to specify a model and `?check_diagnostics`
 
 ### Posterior predicted cases
 
-The `predict()` method draws samples from the model's fitted posterior distribution.
-By default it draws 100 sampled timeseries of the posterior predicted cases.
+The `predict()` method draws samples from the posterior distribution of the fitted model.
+By default it draws 100 sampled timeseries of posterior predicted cases.
 
 ```{r predict obs cases}
 head(predict(fit))
 ```
 
-Calling `plot` on the fitted model object also draws samples and plots them against the provided timeseries of cases.
+Calling `plot` on the fitted model object also draws posterior samples and plots them against the provided timeseries of cases.
 
 ```{r plot obs cases}
 plot(fit)
@@ -118,9 +116,9 @@ plot(fit)
 Producing an estimate of $R_t$ requires some additional information.
 It needs the `mean_delay`, which is the expected number of days from a case's _infection_ to the case being counted.
 For example in a timeseries of hospitalizations, it's the average number of days between infection and being hospitalized.
-It also requires an estimate of the generation interval, which needs to be draws from the literature or estimated separately using data on paired cases.
+It also requires an estimate of the generation interval, which can be drawn from the literature or estimated separately using data on paired cases.
 RtGam expects the GI to be formatted as a probability mass function.
-We recommend using the package [primarycensored](https://primarycensored.epinowcast.org) to format a generation interval distribution as a PMF.
+We recommend using the package [primarycensored](https://primarycensored.epinowcast.org) to format a known generation interval distribution as a PMF.
 
 In this simulated example, cases are observed immediately so the mean delay is 0.
 We have pre-generated the generation interval probability mass function (see more with `?sir_gt_pmf`).
