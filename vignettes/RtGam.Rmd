@@ -123,7 +123,7 @@ RtGam expects the GI to be formatted as a probability mass function.
 We recommend using the package [primarycensored](https://primarycensored.epinowcast.org) to format a generation interval distribution as a PMF.
 
 In this simulated example, cases are observed immediately so the mean delay is 0.
-We have pre-generated the generation interval pmf (see more with `?sir_gt_pmf`).
+We have pre-generated the generation interval probability mass function (see more with `?sir_gt_pmf`).
 
 ```{r plot Rt}
 plot(
