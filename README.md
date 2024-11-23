@@ -18,7 +18,7 @@ This R package aims to become an opinionated re-implementation of the literature
 Development effort is optimized around real-time use-cases, with potential for right-truncation, noisy reporting, and uncertain data-generating processes.
 It is meant to be a simple drop-in tool to be run alongside more computationally intensive implementations like [`{EpiNow2}`](https://github.com/epiforecasts/EpiNow2).
 
-At the moment, the package has some simple functionality to fit a adaptive smooth trend to a single epidemic timeseries and produce a short forecast.
+At the moment, the package has some simple functionality to fit an adaptive smooth trend to a single epidemic timeseries and produce a short forecast.
 It has not yet been benchmarked relative to other approaches.
 
 ## Installation
