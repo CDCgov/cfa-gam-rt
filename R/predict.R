@@ -1,53 +1,39 @@
-#' Predict Method for RtGam Models
+#' Draw posterior samples from a fitted RtGam model
 #'
-#' Generates posterior draws from an `RtGam` fit. Prediction dates can be
-#' specified
-#' flexibly using various approaches, and predictions can be drawn for
-#' different
-#' model parameters.
+#' Generate posterior draws from an `RtGam` fit. Prediction dates can be
+#' specified flexibly using various approaches, and predictions can be drawn for
+#' different model parameters.
 #'
 #' @param object An `RtGam` object created using the [RtGam()]
 #' function.
 #' @param parameter A character string specifying the prediction target.
-#' Options
-#'   are `"obs_cases"` (observed cases), `"r"` (growth rate), or `"Rt"`
-#' reproduction number).
-#'   Default is `"obs_cases"`.
-#' @param horizon Optional. An integer indicating the number of days to forecast
-#'   beyond the last date in the model fit. For example, `horizon = 7` predicts
-#'   the next 7 days.
+#'   Options are `"obs_cases"` (observed cases), `"r"` (growth rate), or
+#'   `"Rt"` (reproduction number). Default is `"obs_cases"`.
+#' @param horizon Optional. An integer indicating the number of days to
+#'   forecast beyond the last date in the model fit. For example, `horizon = 7`
+#'   predicts the next 7 days.
 #' @param min_date,max_date Optional. Date-like objects specifying the start
-#' and
-#'   end of the prediction range. See **Details** for more information on
-#' their usage.
+#'   and end of the prediction range. See **Details** for more information on
+#'   their usage.
 #' @param n An integer specifying the number of posterior samples to use
-#' for
-#'   predictions. Default is 100.
+#'   for predictions. Default is 100.
 #' @param mean_delay Optional. An integer specifying the mean number of days
-#' between
-#'   an individual becoming infected and their case being observed (e.g.,
-#' through
-#'   an emergency department visit or hospitalization). This value shifts the
-#' predictions
-#'   to account for reporting delays. It is required when
-#'   predicting `"r"` (growth rate) or `"Rt"` (reproduction number).
-#' @param gi_pmf Optional. A numeric vector specifying the generation
-#' interval
-#'   probability mass function (PMF), required when `parameter = "Rt"`. The
-#' PMF
+#'   between an individual becoming infected and their case being observed
+#'   (e.g., through an emergency department visit or hospitalization). This
+#'   value shifts the predictions to account for reporting delays. It is
+#'   required when predicting `"r"` (growth rate) or `"Rt"` (reproduction
+#'   number).
+#' @param gi_pmf Optional. A numeric vector specifying the generation interval
+#'   probability mass function (PMF), required when `parameter = "Rt"`. The PMF
 #'   must be a proper probability distribution (summing to one) with the first
-#' element
-#'   set to zero to exclude same-day transmission, as required by the renewal
-#' equation.
-#'   For more information and tools to handle delay distributions, see
-#' the
+#'   element set to zero to exclude same-day transmission, as required by the
+#'   renewal equation. For more information and tools to handle delay
+#'   distributions, see the
 #'   [primarycensored](https://CRAN.R-project.org/package=primarycensored)
-#' package.
+#'   package.
 #' @param seed An integer specifying the random seed for reproducibility.
-#' Default
-#'   is 12345.
-#' @param ... Additional arguments passed to the underlying sampling
-#' functions:
+#'   Default is 12345.
+#' @param ... Additional arguments passed to the underlying sampling functions:
 #'   - When `parameter = "obs_cases"`, arguments are passed to `gratia:
 #' posterior_samples`.
 #'   - When `parameter = "r"` or `"Rt"`, arguments are passed to `gratia:
@@ -82,6 +68,39 @@
 #' - `"Rt"`: Reproduction number, incorporating delay distributions and
 #' convolution.
 #'
+#' Samples are drawn from the posterior distribution of the fitted model using
+#' the `gratia` package. The model estimates basis function coefficients on the
+#' smooth terms \eqn{\hat \beta} and smoothing parameter(s) \eqn{\lambda}. The
+#' has posterior distribution
+#' \deqn{\beta | \lambda \sim N(\hat \beta, \mathbf{V}_{\hat \beta}}
+#' where \eqn{\mathbf{V}_{\hat \beta}} is the smoothing-parameter uncertainty
+#' corrected covariance matrix of the basis function coefficients. We draw
+#' samples from \eqn{\mathbf{V}_{\hat \beta}} and multiply them by the dates of
+#' interest to generate posterior estimates.
+#'
+#' For the intrinsic growth rate, we draw one day before and one day after every
+#' day of interest. We difference these two days within the smooth to get and
+#' divide by two to generate the discrete centered derivative.
+#'
+#' For the Rt we map the estimated values back to the response scale with the
+#' inverse link function (\eqn{I}) and use the generation interval probability
+#' mass function (\eqn{w}) to estimate Rt via the Cori method:
+#' \deqn{I_t / \sum_{s = 1}^t{I_{t - s} w_s}}
+#'
+#' For observed incident cases, we apply observation error to the posterior
+#' expected incidence to generate posterior predicted incidence.
+#'
+#' @seealso [gratia::fitted_samples()], [gratia::posterior_samples()]
+#' @references Miller, David L. "Bayesian views of generalized additive
+#'    modelling." arXiv preprint arXiv:1902.01330 (2019).
+#' Gostic, Katelyn M., et al. "Practical considerations for measuring the
+#'   effective reproductive number, R t." PLoS computational biology 16.12
+#'   (2020): e1008409.
+#' Simpson, Gavin L. "Gratia: An R package for exploring generalized additive
+#'   models." arXiv preprint arXiv:2406.19082 (2024).
+#' Cori A, Ferguson NM, Fraser C, Cauchemez S. A New Framework and Software to
+#'  Estimate Time-Varying Reproduction Numbers During Epidemics. Am J Epidemiol.
+#'    2013;178(9):1505–12. pmid:24043437
 #' @return
 #' A data frame in
 #' [tidy format](https://www.jstatsoft.org/article/view/v059i10),

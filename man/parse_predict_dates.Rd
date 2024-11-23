@@ -17,13 +17,12 @@ parse_predict_dates(
 function.}
 
 \item{min_date, max_date}{Optional. Date-like objects specifying the start
-and
-end of the prediction range. See \strong{Details} for more information on
+and end of the prediction range. See \strong{Details} for more information on
 their usage.}
 
-\item{horizon}{Optional. An integer indicating the number of days to forecast
-beyond the last date in the model fit. For example, \code{horizon = 7} predicts
-the next 7 days.}
+\item{horizon}{Optional. An integer indicating the number of days to
+forecast beyond the last date in the model fit. For example, \code{horizon = 7}
+predicts the next 7 days.}
 
 \item{call}{The calling environment to be reflected in the error message}
 }
