@@ -24,8 +24,6 @@
 * Add slash-command to update WORDLIST in a PR (#64)
 * Remove pre-commit hooks from extraneous languages
 * Add Justfile recipe to locally update PR with rebase (#75)
-* Cancel in-progress GHA runs on subsequent push (#71)
-* Cancel in-progress GHA runs on subsequent push to a PR (#71)
 * Cancel in-progress GitHub Actions runs on subsequent push to a PR (#72)
 * Set default merge strategy for WORDLIST to `union` to limit merge conflicts (#78)
 
