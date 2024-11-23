@@ -380,3 +380,4 @@ docs/site/
 # applications that require a static environment.
 #Manifest.toml
 docs
+inst/doc

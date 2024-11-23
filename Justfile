@@ -40,3 +40,8 @@ update:
     git switch -
     git rebase main
     git push --force-with-lease --force-if-includes
+
+# Build and open vignette
+vignette which='RtGam':
+	Rscript -e "devtools::build_rmd('vignettes/{{which}}.Rmd')"
+	open 'vignettes/{{which}}.html'

@@ -29,7 +29,9 @@ Suggests:
     withr,
     usethis,
     primarycensored,
-    vdiffr
+    vdiffr,
+    knitr,
+    rmarkdown
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -48,3 +50,4 @@ LazyData: true
 Additional_repositories:
     https://epinowcast.r-universe.dev
 Language: en-US
+VignetteBuilder: knitr
