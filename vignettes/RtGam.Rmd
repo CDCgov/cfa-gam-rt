@@ -117,7 +117,7 @@ Producing an estimate of $R_t$ requires some additional information.
 It needs the `mean_delay`, which is the expected number of days from a case's _infection_ to the case being counted.
 For example in a timeseries of hospitalizations, it's the average number of days between infection and being hospitalized.
 It also requires an estimate of the generation interval, which can be drawn from the literature or estimated separately using data on paired cases.
-RtGam expects the GI to be formatted as a probability mass function.
+`RtGam` expects the GI to be formatted as a probability mass function.
 We recommend using the package [primarycensored](https://primarycensored.epinowcast.org) to format a known generation interval distribution as a PMF.
 
 In this simulated example, cases are observed immediately so the mean delay is 0.
