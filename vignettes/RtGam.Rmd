@@ -66,7 +66,7 @@ For more on this dataset see `?stochastic_sir_rt`.
 
 ## Fitting the Model
 
-To fit an RtGam model, provide a vector of observed case counts and their corresponding dates.
+To fit an `RtGam` model, provide a vector of observed case counts and their corresponding dates.
 The model can automatically select hyperparameters like the smoothing basis dimension and the penalty basis dimension.
 
 ```{r fit model}
