@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">RtGam</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -141,8 +141,8 @@ provide those parameters to the model. The penalty basis dimension can
 be specified with the <code>k</code> argument and the smooth basis
 dimension can be specified with the <code>m</code> argument. For
 example, we can decrease the penalty basis dimension of the model by
-setting <code>m</code> to 1. See <code>?smooth_dim_heuristic()</code>
-and <code><a href="../reference/penalty_dim_heuristic.html">penalty_dim_heuristic()</a></code> for more on how these basis
+setting <code>m</code> to 1. See <code><a href="../reference/smooth_dim_heuristic.html">smooth_dim_heuristic()</a></code> and
+<code><a href="../reference/penalty_dim_heuristic.html">penalty_dim_heuristic()</a></code> for more on how these basis
 dimensions are set and when to change them.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_non_adaptive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/RtGam.html">RtGam</a></span><span class="op">(</span></span>
@@ -201,11 +201,11 @@ requires some additional information. It needs the
 <code>mean_delay</code>, which is the expected number of days from a
 case’s <em>infection</em> to the case being counted. For example in a
 timeseries of hospitalizations, it’s the average number of days between
-infection and being hospitalized. It also requires an estimate of the
-generation interval, which can be drawn from the literature or estimated
-separately using data on paired cases. <code>RtGam</code> expects the GI
-to be formatted as a probability mass function. We recommend using the
-package <a href="https://primarycensored.epinowcast.org" class="external-link">primarycensored</a> to
+infection and being hospitalized.</p>
+<p>It also requires an estimate of the generation interval, which can be
+drawn from the literature or estimated separately using data on paired
+cases. <code>RtGam</code> expects the GI to be formatted as a
+probability mass function. We recommend using the package <a href="https://primarycensored.epinowcast.org" class="external-link">primarycensored</a> to
 format a known generation interval distribution as a PMF. The
 probability mass function should have the first element dropped and
 replaced with a 0 because the underlying renewal-equation based approach

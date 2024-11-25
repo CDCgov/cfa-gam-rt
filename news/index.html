@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">RtGam</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,6 +35,7 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="rtgam-v020">RtGam v0.2.0<a class="anchor" aria-label="anchor" href="#rtgam-v020"></a></h2>
+<p>This release introduces new functionality for working with RtGam models, including S3 methods for prediction and plotting. It also includes bug fixes, improved handling of input data, and enhanced developer tooling to streamline contributions and maintenance.</p>
 <div class="section level3">
 <h3 id="features-0-2-0">Features<a class="anchor" aria-label="anchor" href="#features-0-2-0"></a></h3>
 <ul><li>Predict method for RtGam models, with parameters <code>obs_cases</code>, <code>obs_incidence</code>, <code>r</code>, and <code>Rt</code> (<a href="https://github.com/cdcgov/cfa-gam-rt/issues/48" class="external-link">#48</a>)</li>
@@ -60,8 +61,6 @@
 <li>Add slash-command to update WORDLIST in a PR (<a href="https://github.com/cdcgov/cfa-gam-rt/issues/64" class="external-link">#64</a>)</li>
 <li>Remove pre-commit hooks from extraneous languages</li>
 <li>Add Justfile recipe to locally update PR with rebase (<a href="https://github.com/cdcgov/cfa-gam-rt/issues/75" class="external-link">#75</a>)</li>
-<li>Cancel in-progress GHA runs on subsequent push (<a href="https://github.com/cdcgov/cfa-gam-rt/issues/71" class="external-link">#71</a>)</li>
-<li>Cancel in-progress GHA runs on subsequent push to a PR (<a href="https://github.com/cdcgov/cfa-gam-rt/issues/71" class="external-link">#71</a>)</li>
 <li>Cancel in-progress GitHub Actions runs on subsequent push to a PR (<a href="https://github.com/cdcgov/cfa-gam-rt/issues/72" class="external-link">#72</a>)</li>
 <li>Set default merge strategy for WORDLIST to <code>union</code> to limit merge conflicts (<a href="https://github.com/cdcgov/cfa-gam-rt/issues/78" class="external-link">#78</a>)</li>
 </ul></div>
