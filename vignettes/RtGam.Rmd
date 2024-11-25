@@ -1,0 +1,161 @@
+---
+title: "Introduction to RtGam"
+output: rmarkdown::html_vignette
+bibliography: references.bib
+vignette: >
+  %\VignetteIndexEntry{Introduction to RtGam}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+RtGam is an R package for real-time estimation of epidemic growth rates.
+The package fits a smooth trend over time to an epidemic timeseries with a generalized additive model (GAM).
+From this fitted trend, it generates a short-term forecast and estimates the time-varying effective reproductive number, $R_t$ and intrinsic growth rate, $r$.
+
+This vignette gives a brief overview of RtGam.
+It walks through how to fit a model to an epidemic timeseries and interpret the results.
+
+## Setup
+
+This vignette assumes you have the RtGam package installed and loaded.
+This vignette uses `ggplot2`.
+
+```{r setup}
+# Install with remotes::install_github("CDCGov/cfa-gam-rt")
+library(RtGam)
+library(ggplot2)
+```
+
+## Data
+
+The `RtGam` package requires a time series of observed incident case counts.
+For demonstration purposes, the package includes a simulated epidemic dataset, `stochastic_sir_rt`, adapted from @gostic2020practical.
+
+In this example dataset, `obs_incidence` is the vector of observed case counts, and `date` is the corresponding vector of dates.
+The dataset has a timeseries of 299 days that we'll subset to 60 days to make plotting easier.
+
+
+```{r plot data}
+data <- stochastic_sir_rt[41:100, ]
+ggplot(data) +
+  geom_point(aes(date, obs_incidence)) +
+  theme_bw() +
+  labs(x = "Reference date", y = "Observed cases")
+```
+
+Because this dataset was simulated, we know the true $R_t$ that generated the epidemic timeseries.
+```{r plot true rt}
+ggplot(data) +
+  geom_point(aes(date, true_rt)) +
+  theme_bw() +
+  labs(x = "Reference date", y = "True Rt") +
+  scale_y_continuous(
+    trans = "log",
+    labels = scales::number_format(accuracy = 0.01)
+  )
+```
+
+For more on this dataset see `?stochastic_sir_rt`.
+
+## Fitting the Model
+
+To fit an `RtGam` model, provide a vector of observed case counts and their corresponding dates.
+The model can automatically select hyperparameters like the smoothing basis dimension and the penalty basis dimension.
+
+```{r fit model}
+fit <- RtGam(
+  cases = data[["obs_incidence"]],
+  reference_date = data[["date"]]
+)
+print(fit)
+```
+
+To select your own smoothing or penalty basis dimension you can provide those parameters to the model.
+The penalty basis dimension can be specified with the `k` argument and the smooth basis dimension can be specified with the `m` argument.
+For example, we can decrease the penalty basis dimension of the model by setting `m` to 1.
+See `?smooth_dim_heuristic()` and `penalty_dim_heuristic()` for more on how these basis dimensions are set and when to change them.
+
+```{r fit model again}
+fit_non_adaptive <- RtGam(
+  cases = data[["obs_incidence"]],
+  reference_date = data[["date"]],
+  m = 1
+)
+print(fit_non_adaptive)
+```
+
+Note that RtGam throws warnings if diagnostic issues are detected.
+See `?RtGam` for more details on how to specify a model and `?check_diagnostics` for more on model diagnostics.
+
+## Analyzing Results
+
+### Posterior predicted cases
+
+The `predict()` method draws samples from the posterior distribution of the fitted model.
+By default it draws 100 sampled timeseries of posterior predicted cases.
+
+```{r predict obs cases}
+head(predict(fit))
+```
+
+Calling `plot` on the fitted model object also draws posterior samples and plots them against the provided timeseries of cases.
+
+```{r plot obs cases}
+plot(fit)
+```
+
+### Expected $R_t$
+
+Producing an estimate of $R_t$ requires some additional information.
+It needs the `mean_delay`, which is the expected number of days from a case's _infection_ to the case being counted.
+For example in a timeseries of hospitalizations, it's the average number of days between infection and being hospitalized.
+It also requires an estimate of the generation interval, which can be drawn from the literature or estimated separately using data on paired cases.
+`RtGam` expects the GI to be formatted as a probability mass function.
+We recommend using the package [primarycensored](https://primarycensored.epinowcast.org) to format a known generation interval distribution as a PMF.
+The probability mass function should have the first element dropped and replaced with a 0 because the underlying renewal-equation based approach assumes no same-day transmission.
+
+In this simulated example, cases are observed immediately so the mean delay is 0.
+We have pre-generated the generation interval probability mass function (see more with `?sir_gt_pmf`).
+
+```{r plot Rt}
+plot(
+  fit,
+  parameter = "Rt",
+  mean_delay = 0,
+  gi_pmf = sir_gt_pmf
+)
+```
+
+## Model validation
+
+Comparing the posterior draws from the fitted model posterior to the simulated ground truth suggests that the model is able to recover $R_t$ from this timeseries.
+The model is able to identify and correctly time the sharp drop in $R_t$ in early March.
+However, we can see that the model has high uncertainty during initialization and struggles to adjust to the abrupt increase in $R_t$ in early April.
+
+```{r plot Rt against data}
+plot(
+  fit,
+  parameter = "Rt",
+  mean_delay = 0,
+  gi_pmf = sir_gt_pmf
+) +
+  geom_point(aes(date, true_rt), data = data)
+```
+
+Future development effort will aim to improve model performance on challenging datasets like this example.
+
+## Additional Resources
+
+To provide feedback or ask questions, refer to the package's [GitHub repository](https://github.com/CDCgov/cfa-gam-rt).
+
+*Note: This package is in early development.
+Outputs may be misleading or incorrect. Use with caution and refer to the repository for updates.*
+
+## References
