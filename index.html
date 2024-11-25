@@ -31,6 +31,7 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/RtGam.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
@@ -77,9 +78,10 @@
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/RtGam.html">RtGam</a></span><span class="op">(</span></span>
 <span>        cases <span class="op">=</span> <span class="va">stochastic_sir_rt</span><span class="op">[[</span><span class="st">"obs_incidence"</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>        <span class="co"># Randomly chosen date</span></span>
-<span>        reference_date <span class="op">=</span> <span class="va">stochastic_sir_rt</span><span class="op">[[</span><span class="st">"time"</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2023-01-01"</span><span class="op">)</span></span>
+<span>        reference_date <span class="op">=</span> <span class="va">stochastic_sir_rt</span><span class="op">[[</span><span class="st">"date"</span><span class="op">]</span><span class="op">]</span></span>
 <span>       <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
+<p>For more, see the Getting started vignette.</p>
 </div>
 <div class="section level2">
 <h2 id="project-admin">Project Admin<a class="anchor" aria-label="anchor" href="#project-admin"></a>
