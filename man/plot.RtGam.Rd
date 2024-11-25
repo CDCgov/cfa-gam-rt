@@ -11,10 +11,8 @@
 function.}
 
 \item{parameter}{A character string specifying the prediction target.
-Options
-are \code{"obs_cases"} (observed cases), \code{"r"} (growth rate), or \code{"Rt"}
-reproduction number).
-Default is \code{"obs_cases"}.}
+Options are \code{"obs_cases"} (observed cases), \code{"r"} (growth rate), or
+\code{"Rt"} (reproduction number). Default is \code{"obs_cases"}.}
 
 \item{alpha}{The opacity of the lines on the plot. Should be between 0 and 1,
 with values closer to 0 producing more transparent lines.}

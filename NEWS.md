@@ -1,5 +1,7 @@
 # RtGam v0.2.0
 
+This release introduces new functionality for working with RtGam models, including S3 methods for prediction and plotting. It also includes bug fixes, improved handling of input data, and enhanced developer tooling to streamline contributions and maintenance.
+
 ## Features
 * Predict method for RtGam models, with parameters `obs_cases`, `obs_incidence`, `r`, and `Rt` (#48)
 * Plot method for RtGam models built off the predict method (#76)
@@ -24,8 +26,6 @@
 * Add slash-command to update WORDLIST in a PR (#64)
 * Remove pre-commit hooks from extraneous languages
 * Add Justfile recipe to locally update PR with rebase (#75)
-* Cancel in-progress GHA runs on subsequent push (#71)
-* Cancel in-progress GHA runs on subsequent push to a PR (#71)
 * Cancel in-progress GitHub Actions runs on subsequent push to a PR (#72)
 * Set default merge strategy for WORDLIST to `union` to limit merge conflicts (#78)
 
