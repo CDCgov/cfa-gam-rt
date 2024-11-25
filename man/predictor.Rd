@@ -149,24 +149,27 @@ convolution.
 Samples are drawn from the posterior distribution of the fitted model using
 the \code{gratia} package. The model estimates basis function coefficients on the
 smooth terms \eqn{\hat \beta} and smoothing parameter(s) \eqn{\lambda}. The
-has posterior distribution
+coefficients have the joint posterior distribution
 \deqn{\beta | \lambda \sim N(\hat \beta, \mathbf{V}_{\hat \beta}}
 where \eqn{\mathbf{V}_{\hat \beta}} is the smoothing-parameter uncertainty
 corrected covariance matrix of the basis function coefficients. We draw
 samples from \eqn{\mathbf{V}_{\hat \beta}} and multiply them by the dates of
-interest to generate posterior estimates.
+interest to generate posterior draws.
 
 For the intrinsic growth rate, we draw one day before and one day after every
-day of interest. We difference these two days within the smooth to get and
-divide by two to generate the discrete centered derivative.
+day of interest. We difference these two days within the smooth to get growth
+in
+the period and divide by two to generate the discrete centered derivative.
 
-For the Rt we map the estimated values back to the response scale with the
-inverse link function (\eqn{I}) and use the generation interval probability
-mass function (\eqn{w}) to estimate Rt via the Cori method:
-\deqn{I_t / \sum_{s = 1}^t{I_{t - s} w_s}}
+For the Rt we map the estimated values on the linear predictor scale back to
+the response scale and shift the estimated cases by the mean delay to get
+the estimated incident infections (\eqn{I}). We use the incident infections
+and the generation interval probability mass function (\eqn{w}) to estimate
+Rt via the Cori method: \deqn{I_t / \sum_{s = 1}^t{I_{t - s} w_s}}
 
-For observed incident cases, we apply observation error to the posterior
-expected incidence to generate posterior predicted incidence.
+For observed incident cases, we apply the estimated negative binomial
+observation error to the posterior expected incident cases to generate
+posterior predicted incident cases.
 }
 \references{
 Miller, David L. "Bayesian views of generalized additive
