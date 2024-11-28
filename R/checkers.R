@@ -41,12 +41,10 @@ check_vectors_equal_length <- function(
   equal_length <- sapply(args, \(arg) length(arg) == length(reference_date))
 
   # Error if not
+  args <- names(equal_length)
   if (!all(equal_length)) {
     cli::cli_abort(
-      c(
-        "{.arg {names(equal_length)}} is not the same length",
-        "as {.arg reference_date}"
-      ),
+      "{.arg {args}} is not the same length as {.arg reference_date}",
       class = "RtGam_invalid_input",
       call = call
     )

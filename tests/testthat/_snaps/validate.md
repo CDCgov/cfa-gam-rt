@@ -1,3 +1,12 @@
+# Wrong length fails
+
+    Code
+      validate(cases = cases, reference_date = dates, group = groups, day_of_week = day_of_week,
+        k = k, m = m)
+    Condition
+      Error:
+      ! `day_of_week` is not the same length as `reference_date`
+
 # `validate_dates()` is successful
 
     Code
@@ -6,6 +15,16 @@
       Error in `throw_type_error()`:
       ! `dates` is a list
       i Must be of type Date
+
+# validate_day_of_week is successful
+
+    Code
+      validate_day_of_week(c(NA, "a"))
+    Condition
+      Error in `check_no_missingness()`:
+      ! `day_of_week` has missing values
+      i Missing values are not supported in `day_of_week`
+      ! Missing element(s) index: 1
 
 # validate_predict_inputs handles 'obs_cases' correctly
 

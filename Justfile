@@ -45,3 +45,6 @@ update:
 vignette which='RtGam':
 	Rscript -e "devtools::build_rmd('vignettes/{{which}}.Rmd')"
 	open 'vignettes/{{which}}.html'
+
+covr:
+	Rscript -e "covr::report()"
