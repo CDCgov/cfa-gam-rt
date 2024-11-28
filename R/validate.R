@@ -8,6 +8,7 @@
 validate <- function(cases,
                      reference_date,
                      group,
+                     day_of_week,
                      k,
                      m,
                      call = rlang::caller_env()) {
@@ -15,6 +16,7 @@ validate <- function(cases,
   validate_cases(cases, call)
   reference_date <- validate_dates(reference_date, "reference_date", call)
   validate_group(group, call)
+  validate_day_of_week(day_of_week, call)
   validate_min_dimensionality(k,
     arg = "k",
     min_dim = 3,
@@ -29,7 +31,20 @@ validate <- function(cases,
   )
 
   # Per-group checks
-  check_vectors_equal_length(cases, reference_date, group, call)
+  check_vectors_equal_length(
+    reference_date = reference_date,
+    cases = cases,
+    group = group,
+    call = call
+  )
+  # Only check day of week length if it's not a bool
+  if (length(day_of_week) > 1) {
+    check_vectors_equal_length(
+      reference_date = reference_date,
+      day_of_week = day_of_week,
+      call = call
+    )
+  }
   check_dates_unique(reference_date, group, call)
 
   invisible(reference_date)
@@ -59,6 +74,17 @@ validate_group <- function(group, call) {
       class = "RtGam_not_implemented"
     )
   }
+}
+
+#' Check day of week is a bare bool or is vector of corresponding elements
+validate_day_of_week <- function(day_of_week, call) {
+  arg <- "day_of_week"
+  # If `day_of_week` is a bare bool, pass
+  if (!(rlang::is_true(day_of_week) || rlang::is_false(day_of_week))) {
+    check_vector(day_of_week, arg, call)
+    check_no_missingness(day_of_week, arg, call)
+  }
+  invisible()
 }
 
 #' Used by both dimensionality_heuristic() and RtGam()

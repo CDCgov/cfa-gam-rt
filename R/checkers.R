@@ -30,28 +30,22 @@ check_vector_length <- function(
 }
 
 check_vectors_equal_length <- function(
-    cases,
     reference_date,
-    group,
+    ...,
     call = rlang::caller_env()) {
-  if (rlang::is_null(group)) {
-    args <- c("cases", "reference_date")
-    lengths <- c(length(cases), length(reference_date))
-    all_equal <- length(cases) == length(reference_date)
-  } else {
-    args <- c("cases", "reference_date", "group")
-    lengths <- c(length(cases), length(reference_date), length(group))
-    all_equal <- all(
-      length(cases) == length(reference_date),
-      length(cases) == length(group)
-    )
-  }
+  # Drop NULL elements
+  raw_args <- list(...)
+  args <- raw_args[which(sapply(raw_args, \(x) !rlang::is_null(x)))]
 
-  if (!all_equal) {
+  # Check equal length
+  equal_length <- sapply(args, \(arg) length(arg) == length(reference_date))
+
+  # Error if not
+  if (!all(equal_length)) {
     cli::cli_abort(
       c(
-        "{.arg {args}} must be the same length",
-        "i" = "{.arg {args}} are of lengths {.val {lengths}}"
+        "{.arg {names(equal_length)}} is not the same length",
+        "as {.arg reference_date}"
       ),
       class = "RtGam_invalid_input",
       call = call
@@ -109,6 +103,7 @@ check_required_inputs_provided <- function(
     cases,
     reference_date,
     group,
+    day_of_week,
     k,
     m,
     backend,
@@ -116,6 +111,7 @@ check_required_inputs_provided <- function(
   rlang::check_required(cases, "cases", call = call)
   rlang::check_required(reference_date, "reference_date", call = call)
   rlang::check_required(group, "group", call = call)
+  rlang::check_required(day_of_week, "day_of_week", call = call)
   rlang::check_required(k, "k", call = call)
   rlang::check_required(m, "m", call = call)
 

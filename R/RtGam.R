@@ -73,6 +73,7 @@
 RtGam <- function(cases,
                   reference_date,
                   group = NULL,
+                  day_of_week = FALSE,
                   k = smooth_dim_heuristic(length(cases)),
                   m = penalty_dim_heuristic(length(unique(reference_date))),
                   backend = "gam",
@@ -82,17 +83,25 @@ RtGam <- function(cases,
     cases,
     reference_date,
     group,
+    day_of_week,
     k,
     m,
     backend
   )
-  reference_date <- validate(cases, reference_date, group, k, m)
+  reference_date <- validate(cases, reference_date, group, day_of_week, k, m)
 
-  df <- dataset_creator(cases, reference_date, group, backend)
+  df <- dataset_creator(
+    cases = cases,
+    reference_date = reference_date,
+    group = group,
+    day_of_week = day_of_week,
+    backend = backend
+  )
   formula <- formula_creator(
     k = k,
     m = m,
-    is_grouped = !rlang::is_null(group)
+    is_grouped = !rlang::is_null(group),
+    day_of_week = df[["day_of_week"]]
   )
 
   fit <- do.call(

@@ -4,7 +4,12 @@
 #' @return A dataframe for mgcv
 #' @export
 #' @keywords internal
-dataset_creator <- function(cases, reference_date, group, backend) {
+dataset_creator <- function(
+    cases,
+    reference_date,
+    group,
+    day_of_week,
+    backend) {
   cases_int <- integerify_cases(cases)
 
   timestep <- dates_to_timesteps(
@@ -21,7 +26,11 @@ dataset_creator <- function(cases, reference_date, group, backend) {
     cases = cases_int,
     timestep = timestep,
     reference_date = reference_date,
-    group = group
+    group = group,
+    day_of_week = set_day_of_week_factor(
+      day_of_week,
+      reference_date
+    )
   )
 
   class(dat) <- c(glue::glue("RtGam_{backend}"), class(dat))
@@ -74,4 +83,18 @@ dates_to_timesteps <- function(reference_date,
   max_int <- as.integer(max_supplied_date)
 
   (ref_date_int - min_int) / (max_int - min_int)
+}
+
+set_day_of_week_factor <- function(day_of_week, reference_date) {
+  if (rlang::is_true(day_of_week)) {
+    as.factor(format(reference_date, "%A"))
+  } else if (rlang::is_false(day_of_week)) {
+    FALSE
+  } else if (rlang::is_bare_vector(day_of_week)) {
+    as.factor(day_of_week)
+  } else {
+    cli::cli_abort(c(
+      "{.arg day_of_week} has an unexpected type. See {.code ?RtGam()}"
+    ))
+  }
 }

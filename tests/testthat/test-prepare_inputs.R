@@ -1,6 +1,7 @@
 test_that("Dataframe constructed appropriately", {
   cases <- c(1L, 2L, 3L)
   reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
+  day_of_week <- FALSE
   timestep <- c(0, 0.5, 1)
 
   # Without groups
@@ -8,11 +9,18 @@ test_that("Dataframe constructed appropriately", {
     cases = cases,
     timestep = c(0, 0.5, 1),
     reference_date = reference_date,
-    group = rep(NA, 3)
+    group = rep(NA, 3),
+    day_of_week = FALSE
   )
   class(expected) <- c("RtGam_gam", class(expected))
 
-  actual <- dataset_creator(cases, reference_date, NULL, "gam")
+  actual <- dataset_creator(
+    cases = cases,
+    reference_date = reference_date,
+    group = NULL,
+    day_of_week = day_of_week,
+    backend = "gam"
+  )
   expect_equal(actual, expected)
 
   # With groups
@@ -21,11 +29,17 @@ test_that("Dataframe constructed appropriately", {
     cases = cases,
     timestep = c(0, 0.5, 1),
     reference_date = reference_date,
-    group = group
+    group = group,
+    day_of_week = FALSE
   )
   class(expected) <- c("RtGam_gam", class(expected))
 
-  actual <- dataset_creator(cases, reference_date, group, backend = "gam")
+  actual <- dataset_creator(cases,
+    reference_date,
+    group,
+    day_of_week,
+    backend = "gam"
+  )
   expect_equal(actual, expected)
 })
 

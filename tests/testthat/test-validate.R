@@ -1,12 +1,20 @@
 test_that("`validate()` is successful", {
   cases <- c(1, 2, 3)
   dates <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
+  day_of_week <- TRUE
   groups <- NULL
   k <- 3
   m <- 1
 
   expect_equal(
-    validate(cases, dates, groups, k, m),
+    validate(
+      cases = cases,
+      reference_date = dates,
+      group = groups,
+      day_of_week = day_of_week,
+      k = k,
+      m = m
+    ),
     dates
   )
 })
