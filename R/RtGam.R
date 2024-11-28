@@ -23,11 +23,11 @@
 #'   implemented and a value other than `NULL` will throw an error.
 #' @param day_of_week A boolean or a vector of custom values to be applied to the
 #'    model as a random effect. If `TRUE`, then `RtGam` will use the parsed
-#'    `reference_date` values to infer the day of week of the observed date.
-#'    If a vector, the values will be coerced to a factor and the values will
-#'    be used as a custom day-of-week effect implementation. This could be used
-#'    to create a weekend/weekday-only effect or adjust for a holiday. If `FALSE`
-#'    no day of week effect is applied.
+#'    `reference_date` values to infer the day of week. If a vector of the same
+#'    length as `reference_date`, then the user-supplied values are used as the
+#'    day-of-week effect, overriding the actual day of week. This approach can
+#'    be used to, for example, adjust for atypical reporting due to a holiday.
+#'    If `FALSE` no day of week effect is applied.
 #' @param k An integer, the _total_ dimension of all the smoothing basis
 #'   functions. Defaults to `smooth_dim_heuristic(length(cases))`, which picks a
 #'   reasonable estimate based on the number of provided data points. This total
@@ -66,6 +66,12 @@
 #'   * backend: The user-provided `backend` argument
 #'   * formula: The formula object provided to the model
 #'   * diagnostics: The quantitative diagnostics of the model fit
+#' @references
+#' Mellor, Jonathon, et al. "An Application of Nowcasting Methods: Cases of
+#'    Norovirus during the Winter 2023/2024 in England." medRxiv (2024): 2024-07. \cr
+#' Ward, Thomas, et al. "Growth, reproduction numbers and factors affecting the
+#'    spread of SARS-CoV-2 novel variants of concern in the UK from October 2020
+#'    to July 2021: a modelling analysis." BMJ open 11.11 (2021): e056636. \cr
 #' @export
 #' @examples
 #' withr::with_seed(12345, {

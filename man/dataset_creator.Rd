@@ -19,11 +19,11 @@ implemented and a value other than \code{NULL} will throw an error.}
 
 \item{day_of_week}{A boolean or a vector of custom values to be applied to the
 model as a random effect. If \code{TRUE}, then \code{RtGam} will use the parsed
-\code{reference_date} values to infer the day of week of the observed date.
-If a vector, the values will be coerced to a factor and the values will
-be used as a custom day-of-week effect implementation. This could be used
-to create a weekend/weekday-only effect or adjust for a holiday. If \code{FALSE}
-no day of week effect is applied.}
+\code{reference_date} values to infer the day of week. If a vector of the same
+length as \code{reference_date}, then the user-supplied values are used as the
+day-of-week effect, overriding the actual day of week. This approach can
+be used to, for example, adjust for atypical reporting due to a holiday.
+If \code{FALSE} no day of week effect is applied.}
 
 \item{backend}{One of \code{gam} or \code{bam}; defaults to \code{gam}. In general, models
 should be fit with \code{\link[mgcv:gam]{mgcv::gam()}}. If \code{\link[mgcv:gam]{mgcv::gam()}} is too slow,

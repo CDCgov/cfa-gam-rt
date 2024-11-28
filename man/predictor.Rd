@@ -150,11 +150,12 @@ Samples are drawn from the posterior distribution of the fitted model using
 the \code{gratia} package. The model estimates basis function coefficients on the
 smooth terms \eqn{\hat \beta} and smoothing parameter(s) \eqn{\lambda}. The
 coefficients have the joint posterior distribution
-\deqn{\beta | \lambda \sim N(\hat \beta, \mathbf{V}_{\hat \beta}}
+\deqn{\beta | \lambda \sim N(\hat \beta, \mathbf{V}_{\hat \beta})}
 where \eqn{\mathbf{V}_{\hat \beta}} is the smoothing-parameter uncertainty
 corrected covariance matrix of the basis function coefficients. We draw
 samples from \eqn{\mathbf{V}_{\hat \beta}} and multiply them by the dates of
-interest to generate posterior draws.
+interest to generate posterior draws. If estimating \code{"Rt"} or \code{"r"}
+the day-of-week effect is excluded (i.e., set to zero).
 
 For the intrinsic growth rate, we draw one day before and one day after every
 day of interest. We difference these two days within the smooth to get growth
