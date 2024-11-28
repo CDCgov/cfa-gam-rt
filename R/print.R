@@ -80,6 +80,9 @@ print.RtGam <- function(x, ...) {
   } else {
     cat(length(unique(x[["data"]][["group"]])))
   }
+  if (is.factor(x[["data"]][["day_of_week"]])) {
+    cat("\nUsing day-of-week effects")
+  }
   cat("\n\n")
   invisible(x)
 }

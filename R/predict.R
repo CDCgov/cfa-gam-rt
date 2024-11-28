@@ -250,14 +250,21 @@ predict_growth_rate <- function(
   # transparent. We have 1, 2, 3, ... and map to 1, NA, 2, NA, ...
   # to show that the timesteps are (t0, t2), (t1, t3), ...
   newdata[".row"] <- interleave(seq(1, nrow(newdata) / 2, 1), NA)
-  fitted <- gratia::fitted_samples(
-    object[["model"]],
+  args <- list(
+    model = object[["model"]],
     data = newdata,
     n = n,
     seed = seed,
     unconditional = TRUE,
     scale = "linear_predictor",
     ...
+  )
+  if (is.factor(object[["data"]][["day_of_week"]])) {
+    args[["exclude"]] <- "s(day_of_week)"
+  }
+  fitted <- do.call(
+    what = gratia::fitted_samples,
+    args = args
   )
   timestep_first_row <- which((fitted[[".row"]] - 1) %% 2 == 0)
   fitted <- data.frame(
@@ -294,14 +301,21 @@ predict_rt <- function(
     gi_pmf = gi_pmf,
     call = call
   )
-  fitted <- gratia::fitted_samples(
-    object[["model"]],
+  args <- list(
+    model = object[["model"]],
     data = newdata,
     n = n,
     seed = seed,
     unconditional = TRUE,
     scale = "response",
     ...
+  )
+  if (is.factor(object[["data"]][["day_of_week"]])) {
+    args[["exclude"]] <- "s(day_of_week)"
+  }
+  fitted <- do.call(
+    what = gratia::fitted_samples,
+    args = args
   )
   # Rt calculation
   fitted <- rt_by_group(fitted,

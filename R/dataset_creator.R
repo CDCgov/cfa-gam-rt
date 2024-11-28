@@ -89,7 +89,8 @@ dates_to_timesteps <- function(reference_date,
 #' Downstream the type of the return is used as a sentinel for
 #' whether to implement a day of week effect. If a factor, then
 #' the day of week effect is added to the model. Otherwise, the
-#' day of week effect is excluuded.
+#' day of week effect is excluded.
+#' @noRd
 set_day_of_week_factor <- function(day_of_week, reference_date) {
   if (rlang::is_true(day_of_week)) {
     as.factor(format(reference_date, "%A"))
