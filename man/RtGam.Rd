@@ -8,6 +8,7 @@ RtGam(
   cases,
   reference_date,
   group = NULL,
+  day_of_week = FALSE,
   k = smooth_dim_heuristic(length(cases)),
   m = penalty_dim_heuristic(length(unique(reference_date))),
   backend = "gam",
@@ -25,6 +26,14 @@ once.}
 
 \item{group}{The grouping variable for the case/reference-date pair. Not yet
 implemented and a value other than \code{NULL} will throw an error.}
+
+\item{day_of_week}{A boolean or a vector of custom values to be applied to the
+model as a random effect. If \code{TRUE}, then \code{RtGam} will use the parsed
+\code{reference_date} values to infer the day of week of the observed date.
+If a vector, the values will be coerced to a factor and the values will
+be used as a custom day-of-week effect implementation. This could be used
+to create a weekend/weekday-only effect or adjust for a holiday. If \code{FALSE}
+no day of week effect is applied.}
 
 \item{k}{An integer, the \emph{total} dimension of all the smoothing basis
 functions. Defaults to \code{smooth_dim_heuristic(length(cases))}, which picks a
@@ -76,10 +85,10 @@ familiarity with \code{mgcv} may be helpful.
 \section{Model specification}{
 Incident cases (\eqn{y}) are modeled as smoothly changing over time:
 
-\deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}}(t)}
+\deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}}(t) + \omega(\text{wday}(t))}
 
-where incidence is negative-binomially distributed and \eqn{f(t)} is a smooth
-function of time.
+where incidence is negative-binomially distributed, \eqn{f(t)} is a smooth
+function of time, and \eqn{\omega(\text{wday}(t))} is a random day-of-week effect.
 }
 
 \examples{

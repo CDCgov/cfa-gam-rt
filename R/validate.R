@@ -77,6 +77,7 @@ validate_group <- function(group, call) {
 }
 
 #' Check day of week is a bare bool or is vector of corresponding elements
+#' @noRd
 validate_day_of_week <- function(day_of_week, call) {
   arg <- "day_of_week"
   # If `day_of_week` is a bare bool, pass

@@ -1,3 +1,4 @@
+# nolint start: line_length_linter
 #' Fit a generalized additive model to incident cases
 #'
 #' Incident cases are modeled as a smooth function of time with a generalized
@@ -8,10 +9,10 @@
 #'
 #' Incident cases (\eqn{y}) are modeled as smoothly changing over time:
 #'
-#' \deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}}(t)}
+#' \deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}}(t) + \omega(\text{wday}(t))}
 #'
-#' where incidence is negative-binomially distributed and \eqn{f(t)} is a smooth
-#' function of time.
+#' where incidence is negative-binomially distributed, \eqn{f(t)} is a smooth
+#' function of time, and \eqn{\omega(\text{wday}(t))} is a random day-of-week effect.
 #'
 #' @param cases A vector of non-negative incident case counts occurring on an
 #'   associated `reference_date`. Missing values (NAs) are not allowed.
@@ -20,6 +21,13 @@
 #'   once.
 #' @param group The grouping variable for the case/reference-date pair. Not yet
 #'   implemented and a value other than `NULL` will throw an error.
+#' @param day_of_week A boolean or a vector of custom values to be applied to the
+#'    model as a random effect. If `TRUE`, then `RtGam` will use the parsed
+#'    `reference_date` values to infer the day of week of the observed date.
+#'    If a vector, the values will be coerced to a factor and the values will
+#'    be used as a custom day-of-week effect implementation. This could be used
+#'    to create a weekend/weekday-only effect or adjust for a holiday. If `FALSE`
+#'    no day of week effect is applied.
 #' @param k An integer, the _total_ dimension of all the smoothing basis
 #'   functions. Defaults to `smooth_dim_heuristic(length(cases))`, which picks a
 #'   reasonable estimate based on the number of provided data points. This total
@@ -70,6 +78,7 @@
 #' )
 #' fit <- RtGam(cases, reference_date)
 #' fit
+# nolint end: line_length_linter
 RtGam <- function(cases,
                   reference_date,
                   group = NULL,
