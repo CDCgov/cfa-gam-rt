@@ -94,4 +94,10 @@ test_that("Day of week parsed appropriately", {
     set_day_of_week_factor(day_of_week_manual, reference_date),
     expected
   )
+
+  # Case 4: Surprise unreachable
+  expect_snapshot(
+    set_day_of_week_factor(NULL, reference_date),
+    error = TRUE
+  )
 })
