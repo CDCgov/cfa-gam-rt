@@ -85,14 +85,20 @@ dates_to_timesteps <- function(reference_date,
   (ref_date_int - min_int) / (max_int - min_int)
 }
 
+#' Map user input to model-expected format
+#' Downstream the type of the return is used as a sentinel for
+#' whether to implement a day of week effect. If a factor, then
+#' the day of week effect is added to the model. Otherwise, the
+#' day of week effect is excluuded.
 set_day_of_week_factor <- function(day_of_week, reference_date) {
   if (rlang::is_true(day_of_week)) {
     as.factor(format(reference_date, "%A"))
   } else if (rlang::is_false(day_of_week)) {
-    FALSE
+    rep(FALSE, length(reference_date))
   } else if (rlang::is_bare_vector(day_of_week)) {
     as.factor(day_of_week)
   } else {
+    # This case shouldn't be reachable by the user
     cli::cli_abort(c(
       "{.arg day_of_week} has an unexpected type. See {.code ?RtGam()}"
     ))
