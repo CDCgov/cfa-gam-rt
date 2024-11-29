@@ -1,9 +1,12 @@
+# nolint start: line_length_linter
 #' Synthetic dataset of stochastic SIR system with known Rt
 #'
-#' A dataset from Gostic, Katelyn M., et al. "Practical considerations for
-#' measuring the effective reproductive number, Rt." PLoS Computational Biology
-#' 16.12 (2020): e1008409. The data are simulated from a stochastic SEIR
-#' compartmental model.
+#' A simulated dataset derived from Gostic, Katelyn M., et al. "Practical
+#' considerations for measuring the effective reproductive number, Rt."
+#' PLoS Computational Biology 16.12 (2020): e1008409. The data are simulated
+#' from a stochastic SEIR compartmental model. The original timeseries and Rt
+#' are available in the `incidence` and `true_rt` columns and with other
+#' added or modified to increase noise and add a day-of-week effect.
 #'
 #' This synthetic dataset has a number of desirable properties:
 #'
@@ -25,33 +28,28 @@
 #' incidence and/or observed cases is often undesirably low for testing. Many
 #' empirical datasets are much noisier. As a result, models built with these
 #' settings in mind can perform poorly on this dataset or fail to converge. We
-#' manually add observation noise with `rnbinom(299, mu =
-#' stochastic_sir_rt[["obs_cases"]], size = 10)` and the random seed 123456 and
-#' store it in the `obs_incidence` column.
+#' manually add observation noise and a day-of-week reporting effect.
 #'
 #' @name stochastic_sir_rt
-#' @format `stochastic_sir_rt` A data frame with 301 rows and 12 columns:
+#' @format `stochastic_sir_rt` A data frame with 299 rows and 6 columns:
 #' \describe{
-#'    \item{time}{Timestep of the discrete-time stochastic SEIR simulation}
-#'    \item{date}{Added from the original Gostic, 2020 dataset. A date
-#'    corresponding to the assigned `time`. Arbitrarily starts on January 1st,
-#'    2023.}
-#'    \item{S, E, I, R}{The realized state of the stochastic SEIR system}
-#'    \item{dS, dEI, DIR}{The stochastic transition between compartments}
-#'    \item{incidence}{The true incidence in the `I` compartment at time t}
-#'    \item{obs_cases}{The observed number of cases at time t from
-#'    forward-convolved incidence.}
-#'    \item{obs_incidence}{Added from the original Gostic, 2020 dataset. The
-#'     `incidence` column with added negative-binomial observation noise.
-#'     Created with `set.seed(123456)` and the call
-#'      `rnbinom(299, mu = [["incidence"]], size = 10)` Useful for
-#'       testing.}
-#'    \item{true_r0}{The initial R0 of the system (i.e., 2)}
-#'    \item{true_rt}{The known, true Rt of the epidemic system}
+#'    \item{reference_date}{The date the cases were observed.}
+#'    \item{true_rt}{The known, true Rt of the epidemic system.}
+#'    \item{dow}{The magnitude of the day-of-week effect added to the log of `incidence`.}
+#'    \item{incidence}{The true number of cases occurring on the `date` in the
+#'       simulated system.}
+#'    \item{obs_cases}{The observed number of cases on `date` after the day-of-week
+#'      reporting effect and observation noise have been applied to `incidence`.}
+#'    \item{obs_cases_no_dow}{The observed number of cases on `date` after observation
+#'      noise has been applied to `incidence`. It does not include a day of week effect.}
 #' }
 #' @source
-#' <https://github.com/cobeylab/Rt_estimation/tree/d9d8977ba8492ac1a3b8287d2f470b313bfb9f1d> # nolint
-#' <https://github.com/CDCgov/cfa-epinow2-pipeline/pull/17> # nolint
+#' <https://github.com/cobeylab/Rt_estimation/tree/d9d8977ba8492ac1a3b8287d2f470b313bfb9f1d>
+#' <https://github.com/CDCgov/cfa-epinow2-pipeline/pull/91>
+#' <https://github.com/CDCgov/cfa-epinow2-pipeline/pull/17>
+#' @references Gostic, Katelyn M., et al. "Practical considerations for measuring the
+#'   effective reproductive number, R t." PLoS computational biology 16.12
+#'   (2020): e1008409.
 "stochastic_sir_rt"
 
 #' Generation interval corresponding to the sample `stochastic_sir_rt` dataset
@@ -73,4 +71,8 @@
 #' @name sir_gt_pmf
 #' @format `sir_gt_pmf` A numeric vector of length 26 that sums to one within
 #'   numerical tolerance
+#' @references Gostic, Katelyn M., et al. "Practical considerations for measuring the
+#'   effective reproductive number, R t." PLoS computational biology 16.12
+#'   (2020): e1008409.
+# nolint end: line_length_linter
 "sir_gt_pmf"
