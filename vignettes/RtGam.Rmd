@@ -38,14 +38,14 @@ library(ggplot2)
 The `RtGam` package requires a time series of observed incident case counts.
 For demonstration purposes, the package includes a simulated epidemic dataset, `stochastic_sir_rt`, adapted from @gostic2020practical.
 
-In this example dataset, `obs_incidence` is the vector of observed case counts, and `date` is the corresponding vector of dates.
+In this example dataset, `obs_cases` is the vector of observed case counts, and `reference_date` is the corresponding vector of dates.
 The dataset has a timeseries of 299 days that we'll subset to 60 days to make plotting easier.
 
 
 ```{r plot data}
 data <- stochastic_sir_rt[41:100, ]
 ggplot(data) +
-  geom_point(aes(date, obs_incidence)) +
+  geom_point(aes(reference_date, obs_cases)) +
   theme_bw() +
   labs(x = "Reference date", y = "Observed cases")
 ```
@@ -53,7 +53,7 @@ ggplot(data) +
 Because this dataset was simulated, we know the true $R_t$ that generated the epidemic timeseries.
 ```{r plot true rt}
 ggplot(data) +
-  geom_point(aes(date, true_rt)) +
+  geom_point(aes(reference_date, true_rt)) +
   theme_bw() +
   labs(x = "Reference date", y = "True Rt") +
   scale_y_continuous(
@@ -71,8 +71,8 @@ The model can automatically select hyperparameters like the smoothing basis dime
 
 ```{r fit model}
 fit <- RtGam(
-  cases = data[["obs_incidence"]],
-  reference_date = data[["date"]]
+  cases = data[["obs_cases"]],
+  reference_date = data[["reference_date"]]
 )
 print(fit)
 ```
@@ -84,8 +84,8 @@ See `smooth_dim_heuristic()` and `penalty_dim_heuristic()` for more on how these
 
 ```{r fit model again}
 fit_non_adaptive <- RtGam(
-  cases = data[["obs_incidence"]],
-  reference_date = data[["date"]],
+  cases = data[["obs_cases"]],
+  reference_date = data[["reference_date"]],
   m = 1
 )
 print(fit_non_adaptive)
@@ -147,7 +147,7 @@ plot(
   mean_delay = 0,
   gi_pmf = sir_gt_pmf
 ) +
-  geom_point(aes(date, true_rt), data = data)
+  geom_point(aes(reference_date, true_rt), data = data)
 ```
 
 Future development effort will aim to improve model performance on challenging datasets like this example.
