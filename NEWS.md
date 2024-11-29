@@ -1,3 +1,8 @@
+# RtGam v0.3.0
+
+## Features
+* Add day of week effect to simulated timeseries (#91)
+
 # RtGam v0.2.0
 
 This release introduces new functionality for working with RtGam models, including S3 methods for prediction and plotting. It also includes bug fixes, improved handling of input data, and enhanced developer tooling to streamline contributions and maintenance.
