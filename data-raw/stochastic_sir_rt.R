@@ -7,9 +7,10 @@ gostic2020["reference_date"] <- gostic2020[["time"]] + as.Date("2023-01-01") - 1
 # Add an outcome col with a day of week effect
 
 # Use a sine curve to make effect large and obvious
-dow_effect <- 0.25 * cos(seq(from = 0, to = pi, length.out = 7))
+dow_effect <- 0.5 * cos(seq(from = 0, to = pi, length.out = 7))
+nrep <- ceiling(nrow(gostic2020) / 7)
 # Get dims to match
-dow_col <- rep(dow_effect, ceiling(nrow(gostic2020) / 7))[seq_along(gostic2020)]
+dow_col <- rep(dow_effect, nrep)[seq_len(nrow(gostic2020))]
 gostic2020["dow"] <- dow_col
 
 # Apply dow to log expected cases
