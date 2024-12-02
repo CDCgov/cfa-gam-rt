@@ -8,7 +8,7 @@ RtGam(
   cases,
   reference_date,
   group = NULL,
-  day_of_week = FALSE,
+  day_of_week = TRUE,
   k = smooth_dim_heuristic(length(cases)),
   m = penalty_dim_heuristic(length(unique(reference_date))),
   backend = "gam",

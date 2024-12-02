@@ -3,6 +3,7 @@
 new_RtGam <- function(fit,
                       df,
                       group,
+                      day_of_week,
                       k,
                       m,
                       backend,
@@ -17,7 +18,8 @@ new_RtGam <- function(fit,
     m = m,
     backend = backend,
     formula = formula,
-    diagnostics = diagnostics
+    diagnostics = diagnostics,
+    day_of_week = day_of_week
   )
 
   structure(formatted, class = "RtGam")

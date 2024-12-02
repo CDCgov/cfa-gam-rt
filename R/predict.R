@@ -15,6 +15,15 @@
 #' @param min_date,max_date Optional. Date-like objects specifying the start
 #'   and end of the prediction range. See **Details** for more information on
 #'   their usage.
+#' @param day_of_week How to handle day-of-week effects when predicting
+#'   `obs_cases`. Defaults to `TRUE`, which identifies and applies the fitted
+#'   day-of-week effect, if possible. When automatic detection fails or
+#'   different levels are desirable, custom levels can be applied with a vector
+#'   of equal length to the number of desired dates. If `FALSE`, the day-of-week
+#'   effect is turned off (i.e., set to zero). When predicting parameters other
+#'   than `obs_cases` or `object` is an `RtGam` model that did not include
+#'   day-of-week effects, the day-of-week effect is turned off and this argument
+#'   is silently ignored.
 #' @param n An integer specifying the number of posterior samples to use
 #'   for predictions. Default is 100.
 #' @param mean_delay Optional. An integer specifying the mean number of days
@@ -134,6 +143,7 @@ predict.RtGam <- function(
     horizon = NULL,
     min_date = NULL,
     max_date = NULL,
+    day_of_week = TRUE,
     n = 100,
     mean_delay = NULL,
     gi_pmf = NULL,
@@ -150,6 +160,7 @@ predict.RtGam <- function(
       horizon = horizon,
       min_date = min_date,
       max_date = max_date,
+      day_of_week = day_of_week,
       n = n,
       mean_delay = mean_delay,
       gi_pmf = gi_pmf,
@@ -197,6 +208,7 @@ predict_obs_cases <- function(
     horizon = NULL,
     min_date = NULL,
     max_date = NULL,
+    day_of_week = TRUE,
     n = 10,
     gi_pmf = NULL,
     seed = 12345,
@@ -208,19 +220,31 @@ predict_obs_cases <- function(
     min_date = min_date,
     max_date = max_date,
     horizon = horizon,
+    day_of_week = day_of_week,
     call = call
   )
 
-  # Use `posterior_samples()` over `fitted_samples()` to get response
-  # w/ obs uncertainty
-  fitted <- gratia::posterior_samples(
-    object[["model"]],
+  args <- list(
+    model = object[["model"]],
     data = newdata,
-    unconditional = TRUE,
     n = n,
     seed = seed,
+    unconditional = TRUE,
     ...
   )
+  # Turn off day of week only if requested and also
+  # was set to on in the model fitting
+  if (
+    is.factor(object[["data"]][["day_of_week"]]) && rlang::is_false(day_of_week)
+  ) {
+    args[["exclude"]] <- "s(day_of_week)"
+  }
+  fitted <- do.call(
+    what = gratia::posterior_samples,
+    args = args
+  )
+  fitted[".response"] <- as.integer(fitted[[".response"]])
+
   format_predicted_dataframe(fitted, newdata)
 }
 
@@ -429,6 +453,7 @@ create_newdata_dataframe <- function(
     min_date,
     max_date,
     horizon,
+    day_of_week,
     mean_delay,
     gi_pmf,
     delta = delta,
@@ -465,9 +490,17 @@ create_newdata_dataframe <- function(
     )
   }
 
+
   newdata <- gratia::data_slice(object[["model"]], timestep = timesteps)
   newdata[".row"] <- seq_along(timesteps)
   newdata["reference_date"] <- desired_dates
+
+  if (parameter == "obs_cases") {
+    if (!rlang::is_false(day_of_week)) {
+      dow <- extract_dow_for_predict(object, day_of_week, desired_dates, call)
+      newdata["day_of_week"] <- dow
+    }
+  }
 
   newdata
 }
@@ -536,4 +569,76 @@ rt_by_group <- function(df, group_cols, value_col, vec) {
   })
 
   do.call(rbind, grouped_rt)
+}
+
+#' Manually map day-of-week effects, imputing where possible and outputting
+#' an informative error message where not.
+#' @noRd
+extract_dow_for_predict <- function(object, day_of_week, desired_dates, call) {
+  validate_day_of_week(day_of_week)
+
+  fit_data <- object[["data"]]
+  matching_dates <- desired_dates %in% fit_data[["reference_date"]]
+  all_desired_dates_in_fit <- all(matching_dates)
+  is_custom_vec <- !rlang::is_true(day_of_week) && !rlang::is_false(day_of_week)
+  if (
+    rlang::is_true(day_of_week) && all_desired_dates_in_fit
+  ) {
+    desired_dates <- fit_data[
+      which(matching_dates),
+      c("day_of_week", "reference_date")
+    ]
+    # dedupe in case of groups
+    deduped <- unique(desired_dates)
+    as.factor(deduped[["day_of_week"]])
+  } else if (
+    rlang::is_true(object[["day_of_week"]]) && rlang::is_true(day_of_week)
+  ) {
+    # If using default, we can impute day of week pattern
+    set_day_of_week_factor(object[["day_of_week"]], desired_dates)
+  } else if (
+    is_custom_vec && length(day_of_week) == length(desired_dates)
+  ) {
+    # If user passes an appropriate length vector and is using
+    # a custom day of week, use their input
+
+    # First check that all the levels were used in the fit
+    factor_dow <- as.factor(day_of_week)
+    known <- all(factor_dow %in% object[["data"]][["day_of_week"]])
+    if (!all(known)) {
+      cli::cli_abort(c(
+        "{.arg day_of_week} provided unknown level",
+        "!" = "Known levels: {.val {unique(fit_data[['day_of_week']])}}",
+        "x" = "Provided but unknown: {.val {unique(day_of_week[!known])}}"
+      ), call = call)
+    }
+    # If yes, return user-provided custom vector
+    factor_dow
+  } else if (!rlang::is_true(day_of_week)) {
+    # If vector provided but malformed error out with fix
+    n <- length(desired_dates)
+    mind <- min(desired_dates)
+    maxd <- max(desired_dates)
+    missing <- desired_dates[which(!matching_dates)]
+
+    cli::cli_abort(c(
+      "{.arg day_of_week} was provided a vector of the wrong length",
+      ">" = "Provide {.val {n}} values, for {.val {mind}} to {.val {maxd}}",
+      "x" = "Was provided {.val {length(day_of_week)}} values instead"
+    ))
+  } else {
+    # Error out with informative message about custom day of week levels
+    n <- length(desired_dates)
+    mind <- min(desired_dates)
+    maxd <- max(desired_dates)
+    missing <- desired_dates[which(!matching_dates)]
+
+    # Else tell user what we need
+    cli::cli_abort(c(
+      "{.arg day_of_week} required when using custom levels and new dates",
+      "x" = "{.val {missing}} {?wasn't/weren't} in the call to {.fn RtGam}",
+      "i" = "Pass {.fn predict} {.arg day_of_week} a vector of values to use",
+      ">" = "Provide {.val {n}} values, for {.val {mind}} to {.val {maxd}}"
+    ))
+  }
 }

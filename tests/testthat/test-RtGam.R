@@ -16,7 +16,8 @@ test_that("RtGam parses inputs successfully", {
     "m",
     "backend",
     "formula",
-    "diagnostics"
+    "diagnostics",
+    "day_of_week"
   )
 
   expect_s3_class(fit, "RtGam")

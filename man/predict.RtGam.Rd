@@ -10,6 +10,7 @@
   horizon = NULL,
   min_date = NULL,
   max_date = NULL,
+  day_of_week = TRUE,
   n = 100,
   mean_delay = NULL,
   gi_pmf = NULL,
@@ -32,6 +33,16 @@ predicts the next 7 days.}
 \item{min_date, max_date}{Optional. Date-like objects specifying the start
 and end of the prediction range. See \strong{Details} for more information on
 their usage.}
+
+\item{day_of_week}{How to handle day-of-week effects when predicting
+\code{obs_cases}. Defaults to \code{TRUE}, which identifies and applies the fitted
+day-of-week effect, if possible. When automatic detection fails or
+different levels are desirable, custom levels can be applied with a vector
+of equal length to the number of desired dates. If \code{FALSE}, the day-of-week
+effect is turned off (i.e., set to zero). When predicting parameters other
+than \code{obs_cases} or \code{object} is an \code{RtGam} model that did not include
+day-of-week effects, the day-of-week effect is turned off and this argument
+is silently ignored.}
 
 \item{n}{An integer specifying the number of posterior samples to use
 for predictions. Default is 100.}

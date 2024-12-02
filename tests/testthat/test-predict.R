@@ -1,5 +1,5 @@
 test_that("predict can handle string dates", {
-  fit <- readRDS(test_path("data", "fit.rds"))
+  fit <- readRDS(test_path("data", "stochastic_sir_fit.rds"))
 
   # Throws properly formatted warnings
   expect_snapshot(
@@ -12,47 +12,19 @@ test_that("predict can handle string dates", {
 })
 
 test_that("predict_obs_cases predicts observed cases", {
-  fit <- readRDS(test_path("data", "fit.rds"))
-  expected <- data.frame(
-    reference_date = as.Date(c(
-      "2023-01-01",
-      "2023-01-02",
-      "2023-01-03",
-      "2023-01-04",
-      "2023-01-05",
-      "2023-01-06",
-      "2023-01-07",
-      "2023-01-08",
-      "2023-01-09",
-      "2023-01-10"
-    )),
-    .response = c(
-      49,
-      32,
-      52,
-      30,
-      23,
-      24,
-      8,
-      34,
-      46,
-      23
-    ),
-    .draw = c(
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L
-    )
+  fit <- readRDS(test_path("data", "stochastic_sir_fit.rds"))
+
+  actual <- predict(fit,
+    min_date = "2023-01-01",
+    max_date = "2023-01-10",
+    n = 2,
+    day_of_week = TRUE
   )
-  actual <- predict.RtGam(fit, n = 1, seed = 12345, parameter = "obs_cases")
-  expect_equal(actual, expected)
+
+  expect_equal(nrow(actual), 20)
+  expect_setequal(colnames(actual), c("reference_date", ".response", ".draw"))
+  expect_true(rlang::is_integer(actual[[".response"]]))
+  expect_setequal(unique(actual[[".draw"]]), c(1, 2))
 })
 
 test_that("predicting little r is on correct scale", {
@@ -117,6 +89,7 @@ test_that("Newdata dataframe generated correctly", {
     min_date = NULL,
     max_date = NULL,
     horizon = NULL,
+    day_of_week = FALSE,
     mean_delay = mean_delay
   )
   expect_equal(colnames(actual), expected_cols)
