@@ -27,4 +27,9 @@ distribution. We produce the PMF using
 https://doi.org/10.1101/2024.01.12.24301247 for more information on
 double-censoring biases and corrections.
 }
+\references{
+Gostic, Katelyn M., et al. "Practical considerations for measuring the
+effective reproductive number, R t." PLoS computational biology 16.12
+(2020): e1008409.
+}
 \keyword{datasets}

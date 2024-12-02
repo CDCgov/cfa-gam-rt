@@ -5,46 +5,41 @@
 \alias{stochastic_sir_rt}
 \title{Synthetic dataset of stochastic SIR system with known Rt}
 \format{
-\code{stochastic_sir_rt} A data frame with 301 rows and 12 columns:
+\code{stochastic_sir_rt} A data frame with 299 rows and 6 columns:
 \describe{
-\item{time}{Timestep of the discrete-time stochastic SEIR simulation}
-\item{date}{Added from the original Gostic, 2020 dataset. A date
-corresponding to the assigned \code{time}. Arbitrarily starts on January 1st,
-2023.}
-\item{S, E, I, R}{The realized state of the stochastic SEIR system}
-\item{dS, dEI, DIR}{The stochastic transition between compartments}
-\item{incidence}{The true incidence in the \code{I} compartment at time t}
-\item{obs_cases}{The observed number of cases at time t from
-forward-convolved incidence.}
-\item{obs_incidence}{Added from the original Gostic, 2020 dataset. The
-\code{incidence} column with added negative-binomial observation noise.
-Created with \code{set.seed(123456)} and the call
-\verb{rnbinom(299, mu = [["incidence"]], size = 10)} Useful for
-testing.}
-\item{true_r0}{The initial R0 of the system (i.e., 2)}
-\item{true_rt}{The known, true Rt of the epidemic system}
+\item{reference_date}{The date cases were observed.}
+\item{true_rt}{The known, true Rt of the epidemic system.}
+\item{dow}{The magnitude of the day-of-week effect added to the log of \code{incidence}.}
+\item{true_cases}{The true number of cases occurring on the \code{date} in the
+simulated system before observation noise or day-of-week effects.}
+\item{obs_cases}{The observed number of cases on \code{date} after the day-of-week
+reporting effect and observation noise have been applied to \code{true_cases}.}
+\item{obs_cases_no_dow}{The observed number of cases on \code{date} after observation
+noise has been applied to \code{true_cases}. It does not include a day of week effect.}
 }
 }
 \source{
-\url{https://github.com/cobeylab/Rt_estimation/tree/d9d8977ba8492ac1a3b8287d2f470b313bfb9f1d} # nolint
-\url{https://github.com/CDCgov/cfa-epinow2-pipeline/pull/17} # nolint
+\url{https://github.com/cobeylab/Rt_estimation/tree/d9d8977ba8492ac1a3b8287d2f470b313bfb9f1d}
+\url{https://github.com/CDCgov/cfa-epinow2-pipeline/pull/91}
+\url{https://github.com/CDCgov/cfa-epinow2-pipeline/pull/17}
 }
 \usage{
 stochastic_sir_rt
 }
 \description{
-A dataset from Gostic, Katelyn M., et al. "Practical considerations for
-measuring the effective reproductive number, Rt." PLoS Computational Biology
-16.12 (2020): e1008409. The data are simulated from a stochastic SEIR
-compartmental model.
+A simulated dataset derived from Gostic, Katelyn M., et al. "Practical
+considerations for measuring the effective reproductive number, Rt."
+PLoS Computational Biology 16.12 (2020): e1008409. The data are simulated
+from a stochastic SEIR compartmental model. The original timeseries and Rt
+are available in the \code{incidence} and \code{true_rt} columns and with additional
+columns added or modified to increase noise and add a day-of-week effect.
 }
 \details{
 This synthetic dataset has a number of desirable properties:
 \enumerate{
 \item The force of infection changes depending on the Rt, allowing for sudden
 changes in the Rt. This allows for modeling of sudden changes in infection
-dynamics, which might otherwise be difficult to capture. Rt estimation
-framework
+dynamics, which might otherwise be difficult to capture.
 \item The realized Rt is known at each timepoint
 \item The dataset incorporates a simple generation interval and a reporting
 delay.
@@ -54,11 +49,15 @@ Gostic et al. benchmark the performance of a number of Rt estimation
 frameworks, providing practical guidance on how to use this dataset to
 evaluate Rt estimates.
 
-In practice, we've found that the amount of observation noise in the
-incidence and/or observed cases is often undesirably low for testing. Many
-empirical datasets are much noisier. As a result, models built with these
-settings in mind can perform poorly on this dataset or fail to converge. We
-manually add observation noise with \code{rnbinom(299, mu = stochastic_sir_rt[["obs_cases"]], size = 10)} and the random seed 123456 and
-store it in the \code{obs_incidence} column.
+In practice, we've found that the amount of observation noise is often
+undesirably low for testing. Many empirical datasets are much noisier. As a
+result, models built with these realistically noisy settings in mind can
+perform poorly on this dataset or fail to converge. To better reflect realistic
+settings, we manually add observation noise and a day-of-week reporting effect.
+}
+\references{
+Gostic, Katelyn M., et al. "Practical considerations for measuring the
+effective reproductive number, R t." PLoS computational biology 16.12
+(2020): e1008409.
 }
 \keyword{datasets}

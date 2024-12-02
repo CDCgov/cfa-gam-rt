@@ -13,8 +13,8 @@
 #' @returns A ggplot2 object
 #' @examples
 #' fit <- RtGam(
-#'   stochastic_sir_rt[["obs_incidence"]],
-#'   stochastic_sir_rt[["date"]]
+#'   stochastic_sir_rt[["obs_cases"]],
+#'   stochastic_sir_rt[["reference_date"]]
 #' )
 #' # Plot draws from the fitted model against the data
 #' plot(fit)

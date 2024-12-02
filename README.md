@@ -39,7 +39,7 @@ This snippet uses the simulated dataset to demonstrate how to use the main model
 library(RtGam)
 
 fit <- RtGam(
-        cases = stochastic_sir_rt[["obs_incidence"]],
+        cases = stochastic_sir_rt[["obs_cases"]],
         # Randomly chosen date
         reference_date = stochastic_sir_rt[["date"]]
        )
