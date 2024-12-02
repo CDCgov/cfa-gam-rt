@@ -31,7 +31,8 @@ Suggests:
     primarycensored,
     vdiffr,
     knitr,
-    rmarkdown
+    rmarkdown,
+    pkgload
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
