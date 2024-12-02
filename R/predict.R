@@ -585,7 +585,7 @@ extract_dow_for_predict <- function(object, day_of_week, desired_dates, call) {
     rlang::is_true(day_of_week) && all_desired_dates_in_fit
   ) {
     desired_dates <- fit_data[
-      which(matching_dates),
+      fit_data[["reference_date"]] %in% desired_dates,
       c("day_of_week", "reference_date")
     ]
     # dedupe in case of groups
@@ -604,7 +604,7 @@ extract_dow_for_predict <- function(object, day_of_week, desired_dates, call) {
 
     # First check that all the levels were used in the fit
     factor_dow <- as.factor(day_of_week)
-    known <- all(factor_dow %in% object[["data"]][["day_of_week"]])
+    known <- factor_dow %in% object[["data"]][["day_of_week"]]
     if (!all(known)) {
       cli::cli_abort(c(
         "{.arg day_of_week} provided unknown level",

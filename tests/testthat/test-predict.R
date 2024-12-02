@@ -317,3 +317,109 @@ test_that("Bad dates throw appropriate status messages", {
     seq.Date(from = min_date, to = max_date, by = "day")
   )
 })
+
+test_that("Day of week parses good cases correctly", {
+  object <- list(
+    data = data.frame(
+      reference_date = as.Date(c("2023-01-01", "2023-01-02", "2023-01-03")),
+      day_of_week = as.factor(c("Sunday", "Monday", "Tuesday"))
+    ),
+    day_of_week = TRUE
+  )
+
+  # First case: happy path needed day of week in object
+  actual <- extract_dow_for_predict(
+    object = object,
+    day_of_week = TRUE,
+    desired_dates = "2023-01-01"
+  )
+  # Need to test properties because new factor obj doesn't have
+  # all the levels
+  expect_true(is.factor(actual))
+  expect_equal(as.character(actual), "Sunday")
+
+  # Second case: happy path day of week can be imputed
+  actual <- extract_dow_for_predict(
+    object = object,
+    day_of_week = TRUE,
+    desired_dates = as.Date("2023-01-04")
+  )
+  expect_equal(actual, as.factor("Wednesday"))
+
+  # Third case: New levels override default
+  actual <- extract_dow_for_predict(
+    object = object,
+    day_of_week = c("Monday"),
+    desired_dates = as.Date("2023-01-04")
+  )
+  expect_equal(actual, as.factor("Monday"))
+})
+
+test_that("Day of week prediction handles custom levels", {
+  object <- list(
+    data = data.frame(
+      reference_date = as.Date(c("2023-01-01", "2023-01-02", "2023-01-03")),
+      day_of_week = as.factor(c("Sun", "Mon", "Holiday"))
+    ),
+    day_of_week = as.factor(c("Sun", "Mon", "Holiday"))
+  )
+
+  # Can lookup dates where possible
+  actual <- extract_dow_for_predict(
+    object = object,
+    day_of_week = TRUE,
+    desired_dates = as.Date(c("2023-01-01", "2023-01-03"))
+  )
+  expect_true(is.factor(actual))
+  expect_equal(as.character(actual), c("Sun", "Holiday"))
+
+  # Can override with custom vec
+  custom <- c("Holiday", "Holiday", "Mon")
+  actual <- extract_dow_for_predict(
+    object = object,
+    day_of_week = custom,
+    desired_dates = as.Date(c("2023-01-02", "2023-01-03", "2023-01-04"))
+  )
+  expect_true(is.factor(actual))
+  expect_equal(as.character(actual), custom)
+})
+
+test_that("Day of week throws correctly formatted errors", {
+  object <- list(
+    data = data.frame(
+      reference_date = as.Date(c("2023-01-01", "2023-01-02", "2023-01-03")),
+      day_of_week = as.factor(c("Sun", "Mon", "Holiday"))
+    ),
+    day_of_week = as.factor(c("Sun", "Mon", "Holiday"))
+  )
+
+  # New level
+  expect_snapshot(
+    error = TRUE,
+    extract_dow_for_predict(
+      object = object,
+      day_of_week = c("Holiday", "New level"),
+      desired_dates = as.Date(c("2023-01-02", "2023-01-03"))
+    )
+  )
+
+  # Malformed vector
+  expect_snapshot(
+    error = TRUE,
+    extract_dow_for_predict(
+      object = object,
+      day_of_week = "Holiday",
+      desired_dates = as.Date(c("2023-01-02", "2023-01-03"))
+    )
+  )
+
+  # New dates but no vec provided
+  expect_snapshot(
+    error = TRUE,
+    extract_dow_for_predict(
+      object = object,
+      day_of_week = TRUE,
+      desired_dates = as.Date(c("2023-01-04", "2023-01-05"))
+    )
+  )
+})
