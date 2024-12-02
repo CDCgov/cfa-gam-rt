@@ -7,15 +7,15 @@
 \format{
 \code{stochastic_sir_rt} A data frame with 299 rows and 6 columns:
 \describe{
-\item{reference_date}{The date the cases were observed.}
+\item{reference_date}{The date cases were observed.}
 \item{true_rt}{The known, true Rt of the epidemic system.}
 \item{dow}{The magnitude of the day-of-week effect added to the log of \code{incidence}.}
-\item{incidence}{The true number of cases occurring on the \code{date} in the
-simulated system.}
+\item{true_cases}{The true number of cases occurring on the \code{date} in the
+simulated system before observation noise or day-of-week effects.}
 \item{obs_cases}{The observed number of cases on \code{date} after the day-of-week
-reporting effect and observation noise have been applied to \code{incidence}.}
+reporting effect and observation noise have been applied to \code{true_cases}.}
 \item{obs_cases_no_dow}{The observed number of cases on \code{date} after observation
-noise has been applied to \code{incidence}. It does not include a day of week effect.}
+noise has been applied to \code{true_cases}. It does not include a day of week effect.}
 }
 }
 \source{
@@ -31,16 +31,15 @@ A simulated dataset derived from Gostic, Katelyn M., et al. "Practical
 considerations for measuring the effective reproductive number, Rt."
 PLoS Computational Biology 16.12 (2020): e1008409. The data are simulated
 from a stochastic SEIR compartmental model. The original timeseries and Rt
-are available in the \code{incidence} and \code{true_rt} columns and with other
-added or modified to increase noise and add a day-of-week effect.
+are available in the \code{incidence} and \code{true_rt} columns and with additional
+columns added or modified to increase noise and add a day-of-week effect.
 }
 \details{
 This synthetic dataset has a number of desirable properties:
 \enumerate{
 \item The force of infection changes depending on the Rt, allowing for sudden
 changes in the Rt. This allows for modeling of sudden changes in infection
-dynamics, which might otherwise be difficult to capture. Rt estimation
-framework
+dynamics, which might otherwise be difficult to capture.
 \item The realized Rt is known at each timepoint
 \item The dataset incorporates a simple generation interval and a reporting
 delay.
@@ -50,11 +49,11 @@ Gostic et al. benchmark the performance of a number of Rt estimation
 frameworks, providing practical guidance on how to use this dataset to
 evaluate Rt estimates.
 
-In practice, we've found that the amount of observation noise in the
-incidence and/or observed cases is often undesirably low for testing. Many
-empirical datasets are much noisier. As a result, models built with these
-settings in mind can perform poorly on this dataset or fail to converge. We
-manually add observation noise and a day-of-week reporting effect.
+In practice, we've found that the amount of observation noise is often
+undesirably low for testing. Many empirical datasets are much noisier. As a
+result, models built with these realistically noisy settings in mind can
+perform poorly on this dataset or fail to converge. To better reflect realistic
+settings, we manually add observation noise and a day-of-week reporting effect.
 }
 \references{
 Gostic, Katelyn M., et al. "Practical considerations for measuring the
