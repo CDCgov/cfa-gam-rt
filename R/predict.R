@@ -81,18 +81,18 @@
 #' Samples are drawn from the posterior distribution of the fitted model using
 #' the `gratia` package. The model estimates basis function coefficients on the
 #' smooth terms \eqn{\widehat{\beta}} and smoothing parameter(s) \eqn{\lambda}. The
-#' coefficients have the joint posterior distribution
+#' coefficients have the approximate joint posterior distribution
 #' \deqn{\beta | \lambda \sim N(\widehat{\beta}, \mathbf{V}_{\widehat{\beta}})}
 #' where \eqn{\mathbf{V}_{\widehat{\beta}}} is the smoothing-parameter uncertainty
 #' corrected covariance matrix of the basis function coefficients. We draw
-#' samples from \eqn{\mathbf{V}_{\widehat{\beta}}} and multiply them by the dates of
+#' samples from this approximate posterior and multiply them by the dates of
 #' interest to generate posterior draws. If estimating `"Rt"` or `"r"`
-#' the day-of-week effect is excluded (i.e., set to zero).
+#' the day-of-week effect is excluded (i.e., set to zero). Further processing
+#' of these draws to generate parameters of interest is described below.
 #'
 #' For the intrinsic growth rate, we draw one day before and one day after every
 #' day of interest. We difference these two days within the smooth to get growth
-#' in
-#' the period and divide by two to generate the discrete centered derivative.
+#' in the period and divide by two to generate the discrete centered derivative.
 #'
 #' For the Rt we map the estimated values on the linear predictor scale back to
 #' the response scale and shift the estimated cases by the mean delay to get
@@ -107,7 +107,7 @@
 #'
 #' @seealso [gratia::fitted_samples()], [gratia::posterior_samples()]
 #' @references Miller, David L. "Bayesian views of generalized additive
-#'    modelling." arXiv preprint arXiv:1902.01330 (2019). \cr \cr
+#'    modelling." arXiv preprint arXiv:1902.01330 (2021). \cr \cr
 #' Gostic, Katelyn M., et al. "Practical considerations for measuring the
 #'   effective reproductive number, Rt." PLoS computational biology 16.12
 #'   (2020): e1008409. \cr \cr
@@ -116,6 +116,8 @@
 #' Cori A, Ferguson NM, Fraser C, Cauchemez S. A New Framework and Software to
 #'  Estimate Time-Varying Reproduction Numbers During Epidemics. Am J Epidemiol.
 #'    2013;178(9):1505–12. pmid:24043437 \cr \cr
+#' Wood, Simon N. Generalized additive models: an introduction with R. chapman
+#'    and hall/CRC, 2017.
 #' @return
 #' A data frame in
 #' [tidy format](https://www.jstatsoft.org/article/view/v059i10),
