@@ -46,7 +46,7 @@ fit <- RtGam(
 print(fit)
 ```
 
-For more, see the Getting started vignette.
+For more, see the [Getting Started](https://cdcgov.github.io/cfa-gam-rt/articles/RtGam.html) vignette.
 
 ## Project Admin
 
