@@ -133,12 +133,12 @@ convolution.
 
 Samples are drawn from the posterior distribution of the fitted model using
 the \code{gratia} package. The model estimates basis function coefficients on the
-smooth terms \eqn{\hat \beta} and smoothing parameter(s) \eqn{\lambda}. The
+smooth terms \eqn{\widehat{\beta}} and smoothing parameter(s) \eqn{\lambda}. The
 coefficients have the joint posterior distribution
-\deqn{\beta | \lambda \sim N(\hat \beta, \mathbf{V}_{\hat \beta})}
-where \eqn{\mathbf{V}_{\hat \beta}} is the smoothing-parameter uncertainty
+\deqn{\beta | \lambda \sim N(\widehat{\beta}, \mathbf{V}_{\widehat{\beta}})}
+where \eqn{\mathbf{V}_{\widehat{\beta}}} is the smoothing-parameter uncertainty
 corrected covariance matrix of the basis function coefficients. We draw
-samples from \eqn{\mathbf{V}_{\hat \beta}} and multiply them by the dates of
+samples from \eqn{\mathbf{V}_{\widehat{\beta}}} and multiply them by the dates of
 interest to generate posterior draws. If estimating \code{"Rt"} or \code{"r"}
 the day-of-week effect is excluded (i.e., set to zero).
 
@@ -151,7 +151,7 @@ For the Rt we map the estimated values on the linear predictor scale back to
 the response scale and shift the estimated cases by the mean delay to get
 the estimated incident infections (\eqn{I}). We use the incident infections
 and the generation interval probability mass function (\eqn{w}) to estimate
-Rt via the Cori method: \deqn{I_t / \sum_{s = 1}^t{I_{t - s} w_s}}
+Rt via the Cori method: \eqn{I_t / \sum_{s = 1}^{t} I_{t - s} w_s}
 
 For observed incident cases, we apply the estimated negative binomial
 observation error to the posterior expected incident cases to generate
