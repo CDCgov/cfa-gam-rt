@@ -105,10 +105,10 @@ fit
 }
 \references{
 Mellor, Jonathon, et al. "An Application of Nowcasting Methods: Cases of
-Norovirus during the Winter 2023/2024 in England." medRxiv (2024): 2024-07. \cr
+Norovirus during the Winter 2023/2024 in England." medRxiv (2024): 2024-07. \cr \cr
 Ward, Thomas, et al. "Growth, reproduction numbers and factors affecting the
 spread of SARS-CoV-2 novel variants of concern in the UK from October 2020
-to July 2021: a modelling analysis." BMJ open 11.11 (2021): e056636. \cr
+to July 2021: a modelling analysis." BMJ open 11.11 (2021): e056636. \cr \cr
 }
 \seealso{
 \code{\link[=smooth_dim_heuristic]{smooth_dim_heuristic()}} more information on the smoothing basis

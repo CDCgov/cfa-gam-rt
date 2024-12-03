@@ -57,7 +57,7 @@ settings, we manually add observation noise and a day-of-week reporting effect.
 }
 \references{
 Gostic, Katelyn M., et al. "Practical considerations for measuring the
-effective reproductive number, R t." PLoS computational biology 16.12
+effective reproductive number, Rt." PLoS computational biology 16.12
 (2020): e1008409.
 }
 \keyword{datasets}

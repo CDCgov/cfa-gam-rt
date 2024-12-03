@@ -106,15 +106,15 @@
 #'
 #' @seealso [gratia::fitted_samples()], [gratia::posterior_samples()]
 #' @references Miller, David L. "Bayesian views of generalized additive
-#'    modelling." arXiv preprint arXiv:1902.01330 (2019).
+#'    modelling." arXiv preprint arXiv:1902.01330 (2019). \cr \cr
 #' Gostic, Katelyn M., et al. "Practical considerations for measuring the
-#'   effective reproductive number, R t." PLoS computational biology 16.12
-#'   (2020): e1008409.
+#'   effective reproductive number, Rt." PLoS computational biology 16.12
+#'   (2020): e1008409. \cr \cr
 #' Simpson, Gavin L. "Gratia: An R package for exploring generalized additive
-#'   models." arXiv preprint arXiv:2406.19082 (2024).
+#'   models." arXiv preprint arXiv:2406.19082 (2024). \cr \cr
 #' Cori A, Ferguson NM, Fraser C, Cauchemez S. A New Framework and Software to
 #'  Estimate Time-Varying Reproduction Numbers During Epidemics. Am J Epidemiol.
-#'    2013;178(9):1505–12. pmid:24043437
+#'    2013;178(9):1505–12. pmid:24043437 \cr \cr
 #' @return
 #' A data frame in
 #' [tidy format](https://www.jstatsoft.org/article/view/v059i10),
