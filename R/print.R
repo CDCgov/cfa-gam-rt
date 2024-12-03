@@ -3,6 +3,7 @@
 new_RtGam <- function(fit,
                       df,
                       group,
+                      day_of_week,
                       k,
                       m,
                       backend,
@@ -17,7 +18,8 @@ new_RtGam <- function(fit,
     m = m,
     backend = backend,
     formula = formula,
-    diagnostics = diagnostics
+    diagnostics = diagnostics,
+    day_of_week = day_of_week
   )
 
   structure(formatted, class = "RtGam")
@@ -65,6 +67,9 @@ print.RtGam <- function(x, ...) {
   cat(x$k, "\n")
   cat("Family:", x$model$family$family, "\n")
   cat("Link function:", x$model$family$link)
+  if (is.factor(x[["data"]][["day_of_week"]])) {
+    cat("\nUsing day-of-week effects")
+  }
 
   cat("\n===============================\n")
   # Data
@@ -80,6 +85,11 @@ print.RtGam <- function(x, ...) {
   } else {
     cat(length(unique(x[["data"]][["group"]])))
   }
+  if (is.factor(x[["data"]][["day_of_week"]])) {
+    cat("\nDay-of-week levels: ")
+    cat(nlevels(x[["data"]][["day_of_week"]]))
+  }
+
   cat("\n\n")
   invisible(x)
 }

@@ -8,12 +8,13 @@ CoV
 Cori
 Dependabot
 Epidemiol
-GHA
 Gratia
 Justfile
 MERCHANTABILITY
 Mellor
 NOTEs
+Norovirus
+Nowcasting
 PLoS
 PMF
 README
@@ -35,9 +36,9 @@ ggplot
 http
 https
 md
+medRxiv
 mgcv
 modelling
-mutliply
 nolint
 nowcast
 oversmoothing

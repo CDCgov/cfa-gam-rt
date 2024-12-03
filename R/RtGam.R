@@ -1,3 +1,4 @@
+# nolint start: line_length_linter
 #' Fit a generalized additive model to incident cases
 #'
 #' Incident cases are modeled as a smooth function of time with a generalized
@@ -8,10 +9,10 @@
 #'
 #' Incident cases (\eqn{y}) are modeled as smoothly changing over time:
 #'
-#' \deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}}(t)}
+#' \deqn{\text{log}\{E(y)\} = \alpha + f_{\text{global}}(t) + \omega(\text{wday}(t))}
 #'
-#' where incidence is negative-binomially distributed and \eqn{f(t)} is a smooth
-#' function of time.
+#' where incidence is negative-binomially distributed, \eqn{f(t)} is a smooth
+#' function of time, and \eqn{\omega(\text{wday}(t))} is a random day-of-week effect.
 #'
 #' @param cases A vector of non-negative incident case counts occurring on an
 #'   associated `reference_date`. Missing values (NAs) are not allowed.
@@ -20,6 +21,13 @@
 #'   once.
 #' @param group The grouping variable for the case/reference-date pair. Not yet
 #'   implemented and a value other than `NULL` will throw an error.
+#' @param day_of_week A boolean or a vector of custom values to be applied to the
+#'    model as a random effect. If `TRUE`, then `RtGam` will use the parsed
+#'    `reference_date` values to infer the day of week. If a vector of the same
+#'    length as `reference_date`, then the user-supplied values are used as the
+#'    day-of-week effect, overriding the actual day of week. This approach can
+#'    be used to, for example, adjust for atypical reporting due to a holiday.
+#'    If `FALSE` no day of week effect is applied.
 #' @param k An integer, the _total_ dimension of all the smoothing basis
 #'   functions. Defaults to `smooth_dim_heuristic(length(cases))`, which picks a
 #'   reasonable estimate based on the number of provided data points. This total
@@ -58,6 +66,12 @@
 #'   * backend: The user-provided `backend` argument
 #'   * formula: The formula object provided to the model
 #'   * diagnostics: The quantitative diagnostics of the model fit
+#' @references
+#' Mellor, Jonathon, et al. "An Application of Nowcasting Methods: Cases of
+#'    Norovirus during the Winter 2023/2024 in England." medRxiv (2024): 2024-07. \cr
+#' Ward, Thomas, et al. "Growth, reproduction numbers and factors affecting the
+#'    spread of SARS-CoV-2 novel variants of concern in the UK from October 2020
+#'    to July 2021: a modelling analysis." BMJ open 11.11 (2021): e056636. \cr
 #' @export
 #' @examples
 #' withr::with_seed(12345, {
@@ -70,9 +84,11 @@
 #' )
 #' fit <- RtGam(cases, reference_date)
 #' fit
+# nolint end: line_length_linter
 RtGam <- function(cases,
                   reference_date,
                   group = NULL,
+                  day_of_week = TRUE,
                   k = smooth_dim_heuristic(length(cases)),
                   m = penalty_dim_heuristic(length(unique(reference_date))),
                   backend = "gam",
@@ -82,17 +98,25 @@ RtGam <- function(cases,
     cases,
     reference_date,
     group,
+    day_of_week,
     k,
     m,
     backend
   )
-  reference_date <- validate(cases, reference_date, group, k, m)
+  reference_date <- validate(cases, reference_date, group, day_of_week, k, m)
 
-  df <- dataset_creator(cases, reference_date, group, backend)
+  df <- dataset_creator(
+    cases = cases,
+    reference_date = reference_date,
+    group = group,
+    day_of_week = day_of_week,
+    backend = backend
+  )
   formula <- formula_creator(
     k = k,
     m = m,
-    is_grouped = !rlang::is_null(group)
+    is_grouped = !rlang::is_null(group),
+    day_of_week = df[["day_of_week"]]
   )
 
   fit <- do.call(
@@ -109,6 +133,7 @@ RtGam <- function(cases,
     fit = fit,
     df = df,
     group = group,
+    day_of_week = day_of_week,
     k = k,
     m = m,
     backend = backend,

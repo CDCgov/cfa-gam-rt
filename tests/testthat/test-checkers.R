@@ -89,7 +89,7 @@ test_that("Required input check works", {
   group <- c(1, 2)
   k <- 2
   m <- 1
-
+  day_of_week <- FALSE
 
   expect_error(
     check_required_inputs_provided(
@@ -156,6 +156,7 @@ test_that("Required input check works", {
       cases = cases,
       reference_date = reference_date,
       group = group,
+      day_of_week = day_of_week,
       k = k,
       m = m,
       backend = "gam",

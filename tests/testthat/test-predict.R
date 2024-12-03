@@ -1,5 +1,23 @@
+test_that("Can turn off day of week", {
+  fit <- readRDS(test_path("data", "stochastic_sir_fit.rds"))
+  # Much easier to tell visually
+  p <- plot(fit, day_of_week = FALSE)
+  vdiffr::expect_doppelganger("day_of_week_off", p)
+})
+
+test_that("Can simulate all the way through", {
+  data <- stochastic_sir_rt[41:100, ]
+  fit <- RtGam(data[["obs_cases"]],
+    data[["reference_date"]],
+    day_of_week = TRUE
+  )
+  preds <- predict(fit)
+
+  expect_true(is.data.frame(preds))
+})
+
 test_that("predict can handle string dates", {
-  fit <- readRDS(test_path("data", "fit.rds"))
+  fit <- readRDS(test_path("data", "stochastic_sir_fit.rds"))
 
   # Throws properly formatted warnings
   expect_snapshot(
@@ -12,47 +30,19 @@ test_that("predict can handle string dates", {
 })
 
 test_that("predict_obs_cases predicts observed cases", {
-  fit <- readRDS(test_path("data", "fit.rds"))
-  expected <- data.frame(
-    reference_date = as.Date(c(
-      "2023-01-01",
-      "2023-01-02",
-      "2023-01-03",
-      "2023-01-04",
-      "2023-01-05",
-      "2023-01-06",
-      "2023-01-07",
-      "2023-01-08",
-      "2023-01-09",
-      "2023-01-10"
-    )),
-    .response = c(
-      49,
-      32,
-      52,
-      30,
-      23,
-      24,
-      8,
-      34,
-      46,
-      23
-    ),
-    .draw = c(
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L,
-      1L
-    )
+  fit <- readRDS(test_path("data", "stochastic_sir_fit.rds"))
+
+  actual <- predict(fit,
+    min_date = "2023-01-01",
+    max_date = "2023-01-10",
+    n = 2,
+    day_of_week = TRUE
   )
-  actual <- predict.RtGam(fit, n = 1, seed = 12345, parameter = "obs_cases")
-  expect_equal(actual, expected)
+
+  expect_equal(nrow(actual), 20)
+  expect_setequal(colnames(actual), c("reference_date", ".response", ".draw"))
+  expect_true(rlang::is_integer(actual[[".response"]]))
+  expect_setequal(unique(actual[[".draw"]]), c(1, 2))
 })
 
 test_that("predicting little r is on correct scale", {
@@ -117,6 +107,7 @@ test_that("Newdata dataframe generated correctly", {
     min_date = NULL,
     max_date = NULL,
     horizon = NULL,
+    day_of_week = FALSE,
     mean_delay = mean_delay
   )
   expect_equal(colnames(actual), expected_cols)
@@ -342,5 +333,130 @@ test_that("Bad dates throw appropriate status messages", {
   expect_equal(
     actual,
     seq.Date(from = min_date, to = max_date, by = "day")
+  )
+})
+
+test_that("Day of week parses good cases correctly", {
+  object <- list(
+    data = data.frame(
+      reference_date = as.Date(c("2023-01-01", "2023-01-02", "2023-01-03")),
+      day_of_week = as.factor(c("Sunday", "Monday", "Tuesday"))
+    ),
+    day_of_week = TRUE
+  )
+
+  # First case: happy path needed day of week in object
+  actual <- extract_dow_for_predict(
+    object = object,
+    day_of_week = TRUE,
+    desired_dates = "2023-01-01"
+  )
+  # Need to test properties because new factor obj doesn't have
+  # all the levels
+  expect_true(is.factor(actual))
+  expect_equal(as.character(actual), "Sunday")
+
+  # Second case: happy path day of week can be imputed
+  actual <- extract_dow_for_predict(
+    object = object,
+    day_of_week = TRUE,
+    desired_dates = as.Date("2023-01-04")
+  )
+  expect_equal(actual, as.factor("Wednesday"))
+
+  # Third case: New levels override default
+  actual <- extract_dow_for_predict(
+    object = object,
+    day_of_week = c("Monday"),
+    desired_dates = as.Date("2023-01-04")
+  )
+  expect_equal(actual, as.factor("Monday"))
+})
+
+test_that("Day of week prediction handles custom levels", {
+  object <- list(
+    data = data.frame(
+      reference_date = as.Date(c("2023-01-01", "2023-01-02", "2023-01-03")),
+      day_of_week = as.factor(c("Sun", "Mon", "Holiday"))
+    ),
+    day_of_week = as.factor(c("Sun", "Mon", "Holiday"))
+  )
+
+  # Can lookup dates where possible
+  actual <- extract_dow_for_predict(
+    object = object,
+    day_of_week = TRUE,
+    desired_dates = as.Date(c("2023-01-01", "2023-01-03"))
+  )
+  expect_true(is.factor(actual))
+  expect_equal(as.character(actual), c("Sun", "Holiday"))
+
+  # Can override with custom vec
+  custom <- c("Holiday", "Holiday", "Mon")
+  actual <- extract_dow_for_predict(
+    object = object,
+    day_of_week = custom,
+    desired_dates = as.Date(c("2023-01-02", "2023-01-03", "2023-01-04"))
+  )
+  expect_true(is.factor(actual))
+  expect_equal(as.character(actual), custom)
+})
+
+test_that("Day of week throws correctly formatted errors", {
+  object <- list(
+    data = data.frame(
+      reference_date = as.Date(c("2023-01-01", "2023-01-02", "2023-01-03")),
+      day_of_week = as.factor(c("Sun", "Mon", "Holiday"))
+    ),
+    day_of_week = as.factor(c("Sun", "Mon", "Holiday"))
+  )
+
+  # New level
+  expect_snapshot(
+    error = TRUE,
+    extract_dow_for_predict(
+      object = object,
+      day_of_week = c("Holiday", "New level"),
+      desired_dates = as.Date(c("2023-01-02", "2023-01-03"))
+    )
+  )
+
+  # Malformed vector
+  expect_snapshot(
+    error = TRUE,
+    extract_dow_for_predict(
+      object = object,
+      day_of_week = "Holiday",
+      desired_dates = as.Date(c("2023-01-02", "2023-01-03"))
+    )
+  )
+
+  # New dates but no vec provided
+  expect_snapshot(
+    error = TRUE,
+    extract_dow_for_predict(
+      object = object,
+      day_of_week = TRUE,
+      desired_dates = as.Date(c("2023-01-04", "2023-01-05"))
+    )
+  )
+})
+
+test_that("suppress_factor_warning only supresses the one warning", {
+  throw_warning <- function(warning_text) {
+    warning(warning_text)
+    2 + 2
+  }
+  expect_equal(
+    suppress_factor_warning(
+      throw_warning("factor levels 1 not in original fit")
+    ),
+    4
+  )
+
+  expect_warning(
+    suppress_factor_warning(
+      throw_warning("some other warning")
+    )
   )
 })

@@ -2,6 +2,7 @@
 
 ## Features
 * Add day of week effect to simulated timeseries (#91)
+* Estimate day-of-week effects as a random effect in the fitted model and correct for them in growth rate estimation (#89)
 
 # RtGam v0.2.0
 

@@ -1,15 +1,45 @@
 test_that("`validate()` is successful", {
   cases <- c(1, 2, 3)
   dates <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
+  day_of_week <- TRUE
   groups <- NULL
   k <- 3
   m <- 1
 
   expect_equal(
-    validate(cases, dates, groups, k, m),
+    validate(
+      cases = cases,
+      reference_date = dates,
+      group = groups,
+      day_of_week = day_of_week,
+      k = k,
+      m = m
+    ),
     dates
   )
 })
+
+test_that("Wrong length fails", {
+  cases <- c(1, 2, 3)
+  dates <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
+  day_of_week <- c(1, 2)
+  groups <- NULL
+  k <- 3
+  m <- 1
+
+  expect_snapshot(
+    validate(
+      cases = cases,
+      reference_date = dates,
+      group = groups,
+      day_of_week = day_of_week,
+      k = k,
+      m = m
+    ),
+    error = TRUE
+  )
+})
+
 
 test_that("`validate_cases()` is successful", {
   cases <- c(1, 2, 3)
@@ -109,6 +139,24 @@ test_that("`validate_min_dimensionality()` is successful", {
     min_dim,
     max_val = 3
   ))
+})
+
+test_that("validate_day_of_week is successful", {
+  # Case 1: Day of week is true
+  expect_invisible(validate_day_of_week(TRUE))
+
+  # Case 2: Day of week is false
+  expect_invisible(validate_day_of_week(FALSE))
+
+  # Case 3: Use a good vector
+  expect_invisible(validate_day_of_week(c(1, 2)))
+
+  # Case 4: Errors for a bad vector
+  expect_snapshot(
+    error = TRUE,
+    # Can't have NAs
+    validate_day_of_week(c(NA, "a"))
+  )
 })
 
 test_that("validate_predict_inputs handles 'obs_cases' correctly", {

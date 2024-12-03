@@ -20,7 +20,7 @@
 #' @param is_grouped Whether to use a hierarchical model. Not yet supported.
 #' @return A formula to be used by [`mgcv::gam()`]
 #' @noRd
-formula_creator <- function(k, m, is_grouped) {
+formula_creator <- function(k, m, is_grouped, day_of_week) {
   outcome <- "cases"
   intercept <- "1"
 
@@ -42,9 +42,15 @@ formula_creator <- function(k, m, is_grouped) {
                                          k = {smooth_basis_dim[['global_trend']]},
                                          bs = 'tp')")
   }
-  # nolint end
 
-  f <- glue::glue("{outcome} ~ {intercept} {plus_global_trend}")
+  if (is.factor(day_of_week)) {
+    plus_day_of_week <- "+ s(day_of_week, bs = 're')"
+  } else {
+    plus_day_of_week <- ""
+  }
+
+  f <- glue::glue("{outcome} ~ {intercept} {plus_global_trend} {plus_day_of_week}")
+  # nolint end
   stats::as.formula(f)
 }
 

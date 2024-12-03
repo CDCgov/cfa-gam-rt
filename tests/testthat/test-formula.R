@@ -1,26 +1,42 @@
+test_that("Adds day of week", {
+  k <- 10
+  m <- 2
+  is_grouped <- FALSE
+  day_of_week <- as.factor(c("a", "b"))
+  expected <- as.formula("cases ~ 1 + s(timestep, k = 10, m = 2, bs = \"ad\") + s(day_of_week, bs = \"re\")") # nolint
+
+  f <- formula_creator(k, m, is_grouped, day_of_week)
+
+  expect_type(f, "language")
+  expect_equal(deparse(f), deparse(expected))
+})
+
 test_that("Formula created more than 3 weeks", {
   k <- 10
   m <- 2
   is_grouped <- FALSE
-  expected <- "cases ~ 1 + s(timestep, k = 10, m = 2, bs = \"ad\")"
+  day_of_week <- c(NA, NA)
+  expected <- as.formula("cases ~ 1 + s(timestep, k = 10, m = 2, bs = \"ad\")")
 
-  f <- formula_creator(k, m, is_grouped)
+  f <- formula_creator(k, m, is_grouped, day_of_week)
 
   expect_type(f, "language")
-  expect_equal(expected, deparse(f))
+  expect_equal(deparse(expected), deparse(f))
 })
 
 test_that("Formula created fewer than 3 weeks", {
   k <- 10
   m <- 1
+  day_of_week <- c(NA, NA)
   is_grouped <- FALSE
-  expected <- "cases ~ 1 + s(timestep, k = 10, bs = \"tp\")"
+  expected <- as.formula("cases ~ 1 + s(timestep, k = 10, bs = \"tp\")")
 
 
-  f <- formula_creator(k, m, is_grouped)
+  f <- formula_creator(k, m, is_grouped, day_of_week)
 
   expect_type(f, "language")
-  expect_equal(expected, deparse(f))
+  # formula and deparse to standardize whitespace
+  expect_equal(deparse(expected), deparse(f))
 })
 
 test_that("Smooth basis dim created successfully", {
