@@ -441,3 +441,22 @@ test_that("Day of week throws correctly formatted errors", {
     )
   )
 })
+
+test_that("suppress_factor_warning only supresses the one warning", {
+  throw_warning <- function(warning_text) {
+    warning(warning_text)
+    2 + 2
+  }
+  expect_equal(
+    suppress_factor_warning(
+      throw_warning("factor levels 1 not in original fit")
+    ),
+    4
+  )
+
+  expect_warning(
+    suppress_factor_warning(
+      throw_warning("some other warning")
+    )
+  )
+})

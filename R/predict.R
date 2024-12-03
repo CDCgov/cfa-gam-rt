@@ -240,11 +240,7 @@ predict_obs_cases <- function(
   ) {
     args[["exclude"]] <- "s(day_of_week)"
   }
-  # Suppress mgcv::gam warning that factor levels are far from the data
-  # "factor levels 1 not in original fit". This warning is spurious bc
-  # we're explicitiy excluding the day-of-week random effect smooth but
-  # need to have some placeholder value in the dataset
-  fitted <- suppressWarnings(do.call(
+  fitted <- suppress_factor_warning(do.call(
     what = gratia::posterior_samples,
     args = args
   ))
@@ -294,11 +290,7 @@ predict_growth_rate <- function(
   if (is.factor(object[["data"]][["day_of_week"]])) {
     args[["exclude"]] <- "s(day_of_week)"
   }
-  # Suppress mgcv::gam warning that factor levels are far from the data
-  # "factor levels 1 not in original fit". This warning is spurious bc
-  # we're explicitiy excluding the day-of-week random effect smooth but
-  # need to have some placeholder value in the dataset
-  fitted <- suppressWarnings(do.call(
+  fitted <- suppress_factor_warning(do.call(
     what = gratia::fitted_samples,
     args = args
   ))
@@ -350,11 +342,7 @@ predict_rt <- function(
   if (is.factor(object[["data"]][["day_of_week"]])) {
     args[["exclude"]] <- "s(day_of_week)"
   }
-  # Suppress mgcv::gam warning that factor levels are far from the data
-  # "factor levels 1 not in original fit". This warning is spurious bc
-  # we're explicitiy excluding the day-of-week random effect smooth but
-  # need to have some placeholder value in the dataset
-  fitted <- suppressWarnings(do.call(
+  fitted <- suppress_factor_warning(do.call(
     what = gratia::fitted_samples,
     args = args
   ))
@@ -671,4 +659,32 @@ extract_dow_for_predict <- function(object, day_of_week, desired_dates, call) {
       ">" = "Provide {.val {n}} values, for {.val {mind}} to {.val {maxd}}"
     ))
   }
+}
+
+#' Suppress mgcv warning that factor levels are far from the data
+#' "factor levels 1 not in original fit". This warning is spurious.
+#' We're explicitly excluding the day-of-week random effect smooth but
+#' need to have some placeholder value in the dataset.
+#' @noRd
+suppress_factor_warning <- function(expr, call = rlang::caller_env()) {
+  rlang::try_fetch(
+    expr = expr,
+    warning = function(cnd) {
+      cnd_text <- as.character(cnd)
+      matched <- grepl(
+        pattern = "factor level?[s] [0-9]* not in original fit",
+        x = cnd_text
+      )
+      # Rethrow
+      if (matched) {
+        # https://stackoverflow.com/questions/49817935
+        invokeRestart("muffleWarning")
+      } else {
+        cli::cli_warn("Problem while drawing samples",
+          parent = cnd,
+          call = call
+        )
+      }
+    }
+  )
 }
