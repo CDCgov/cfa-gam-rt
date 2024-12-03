@@ -1,5 +1,7 @@
 # RtGam v0.3.0
 
+This release introduces support for modeling and correcting day-of-week effects in case reporting. It allows for default day-of-week detection or user-specified custom day-of-week levels, such as for holidays.
+
 ## Features
 * Add day of week effect to simulated timeseries (#91)
 * Estimate day-of-week effects as a random effect in the fitted model and correct for them in growth rate estimation (#89)
