@@ -41,7 +41,7 @@ library(RtGam)
 fit <- RtGam(
         cases = stochastic_sir_rt[["obs_cases"]],
         # Randomly chosen date
-        reference_date = stochastic_sir_rt[["date"]]
+        reference_date = stochastic_sir_rt[["reference_date"]]
        )
 print(fit)
 ```
