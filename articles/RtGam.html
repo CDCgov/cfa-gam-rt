@@ -122,11 +122,6 @@ dimension.</p>
 <span>  cases <span class="op">=</span> <span class="va">data</span><span class="op">[[</span><span class="st">"obs_cases"</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>  reference_date <span class="op">=</span> <span class="va">data</span><span class="op">[[</span><span class="st">"reference_date"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> k-index for one or more smooths is below 1</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> k-index: <span style="color: #0000BB;">0.752</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Associated p-value: <span style="color: #0000BB;">0.03</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Suggests potential unmodeled residual trend. Inspect model and/or consider</span></span>
-<span><span class="co">#&gt;   increasing `k`</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ===============================</span></span>
 <span><span class="co">#&gt; Fitted RtGam model object (gam)</span></span>
@@ -134,13 +129,15 @@ dimension.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Model type: Adaptive (m = 3)</span></span>
 <span><span class="co">#&gt; Specified maximum smoothing basis dimension: 25 </span></span>
-<span><span class="co">#&gt; Family: Negative Binomial(4.741) </span></span>
+<span><span class="co">#&gt; Family: Negative Binomial(12.248) </span></span>
 <span><span class="co">#&gt; Link function: log</span></span>
+<span><span class="co">#&gt; Using day-of-week effects</span></span>
 <span><span class="co">#&gt; ===============================</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Observed data points: 60</span></span>
 <span><span class="co">#&gt; Distinct reference dates: 60</span></span>
-<span><span class="co">#&gt; Distinct groups: 1</span></span></code></pre></div>
+<span><span class="co">#&gt; Distinct groups: 1</span></span>
+<span><span class="co">#&gt; Day-of-week levels: 7</span></span></code></pre></div>
 <p>To select your own smoothing or penalty basis dimension you can
 provide those parameters to the model. The penalty basis dimension can
 be specified with the <code>k</code> argument and the smooth basis
@@ -162,13 +159,15 @@ dimensions are set and when to change them.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Model type: Non-adaptive (m = 1)</span></span>
 <span><span class="co">#&gt; Specified maximum smoothing basis dimension: 25 </span></span>
-<span><span class="co">#&gt; Family: Negative Binomial(4.842) </span></span>
+<span><span class="co">#&gt; Family: Negative Binomial(12.703) </span></span>
 <span><span class="co">#&gt; Link function: log</span></span>
+<span><span class="co">#&gt; Using day-of-week effects</span></span>
 <span><span class="co">#&gt; ===============================</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Observed data points: 60</span></span>
 <span><span class="co">#&gt; Distinct reference dates: 60</span></span>
-<span><span class="co">#&gt; Distinct groups: 1</span></span></code></pre></div>
+<span><span class="co">#&gt; Distinct groups: 1</span></span>
+<span><span class="co">#&gt; Day-of-week levels: 7</span></span></code></pre></div>
 <p>Note that RtGam throws warnings if diagnostic issues are detected.
 See <code><a href="../reference/RtGam.html">?RtGam</a></code> for more details on how to specify a model and
 <code><a href="../reference/check_diagnostics.html">?check_diagnostics</a></code> for more on model diagnostics.</p>
@@ -185,12 +184,12 @@ timeseries of posterior predicted cases.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   reference_date .response .draw</span></span>
-<span><span class="co">#&gt; 1     2023-02-10       849     1</span></span>
-<span><span class="co">#&gt; 2     2023-02-10      1812    86</span></span>
-<span><span class="co">#&gt; 3     2023-02-10       247    84</span></span>
-<span><span class="co">#&gt; 4     2023-02-10       217    82</span></span>
-<span><span class="co">#&gt; 5     2023-02-10       826    80</span></span>
-<span><span class="co">#&gt; 6     2023-02-10       320    24</span></span></code></pre></div>
+<span><span class="co">#&gt; 1     2023-02-10       616     1</span></span>
+<span><span class="co">#&gt; 2     2023-02-10       285    86</span></span>
+<span><span class="co">#&gt; 3     2023-02-10       902    84</span></span>
+<span><span class="co">#&gt; 4     2023-02-10       688    82</span></span>
+<span><span class="co">#&gt; 5     2023-02-10       348    80</span></span>
+<span><span class="co">#&gt; 6     2023-02-10       522    24</span></span></code></pre></div>
 <p>Calling <code>plot</code> on the fitted model object also draws
 posterior samples and plots them against the provided timeseries of
 cases.</p>

@@ -51,6 +51,7 @@ different model parameters.</p>
 <span>  horizon <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  min_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  max_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  day_of_week <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  n <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  gi_pmf <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">12345</span>,</span>
@@ -104,6 +105,18 @@ predicts the next 7 days.</p></dd>
 <dd><p>Optional. Date-like objects specifying the start
 and end of the prediction range. See <strong>Details</strong> for more information on
 their usage.</p></dd>
+
+
+<dt id="arg-day-of-week">day_of_week<a class="anchor" aria-label="anchor" href="#arg-day-of-week"></a></dt>
+<dd><p>How to handle day-of-week effects when predicting
+<code>obs_cases</code>. Defaults to <code>TRUE</code>, which identifies and applies the fitted
+day-of-week effect, if possible. When automatic detection fails or
+different levels are desirable, custom levels can be applied with a vector
+of equal length to the number of desired dates. If <code>FALSE</code>, the day-of-week
+effect is turned off (i.e., set to zero). When predicting parameters other
+than <code>obs_cases</code> or <code>object</code> is an <code>RtGam</code> model that did not include
+day-of-week effects, the day-of-week effect is turned off and this argument
+is silently ignored.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
@@ -191,11 +204,12 @@ convolution.</p></li>
 the <code>gratia</code> package. The model estimates basis function coefficients on the
 smooth terms \(\hat \beta\) and smoothing parameter(s) \(\lambda\). The
 coefficients have the joint posterior distribution
-$$\beta | \lambda \sim N(\hat \beta, \mathbf{V}_{\hat \beta}$$
+$$\beta | \lambda \sim N(\hat \beta, \mathbf{V}_{\hat \beta})$$
 where \(\mathbf{V}_{\hat \beta}\) is the smoothing-parameter uncertainty
 corrected covariance matrix of the basis function coefficients. We draw
 samples from \(\mathbf{V}_{\hat \beta}\) and multiply them by the dates of
-interest to generate posterior draws.</p>
+interest to generate posterior draws. If estimating <code>"Rt"</code> or <code>"r"</code>
+the day-of-week effect is excluded (i.e., set to zero).</p>
 <p>For the intrinsic growth rate, we draw one day before and one day after every
 day of interest. We difference these two days within the smooth to get growth
 in

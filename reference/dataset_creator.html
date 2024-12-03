@@ -40,7 +40,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dataset_creator</span><span class="op">(</span><span class="va">cases</span>, <span class="va">reference_date</span>, <span class="va">group</span>, <span class="va">backend</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dataset_creator</span><span class="op">(</span><span class="va">cases</span>, <span class="va">reference_date</span>, <span class="va">group</span>, <span class="va">day_of_week</span>, <span class="va">backend</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -61,6 +61,16 @@ once.</p></dd>
 <dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
 <dd><p>The grouping variable for the case/reference-date pair. Not yet
 implemented and a value other than <code>NULL</code> will throw an error.</p></dd>
+
+
+<dt id="arg-day-of-week">day_of_week<a class="anchor" aria-label="anchor" href="#arg-day-of-week"></a></dt>
+<dd><p>A boolean or a vector of custom values to be applied to the
+model as a random effect. If <code>TRUE</code>, then <code>RtGam</code> will use the parsed
+<code>reference_date</code> values to infer the day of week. If a vector of the same
+length as <code>reference_date</code>, then the user-supplied values are used as the
+day-of-week effect, overriding the actual day of week. This approach can
+be used to, for example, adjust for atypical reporting due to a holiday.
+If <code>FALSE</code> no day of week effect is applied.</p></dd>
 
 
 <dt id="arg-backend">backend<a class="anchor" aria-label="anchor" href="#arg-backend"></a></dt>
