@@ -1,3 +1,10 @@
+test_that("Can turn off day of week", {
+  fit <- readRDS(test_path("data", "stochastic_sir_fit.rds"))
+  # Much easier to tell visually
+  p <- plot(fit, day_of_week = FALSE)
+  vdiffr::expect_doppelganger("day_of_week_off", p)
+})
+
 test_that("Can simulate all the way through", {
   data <- stochastic_sir_rt[41:100, ]
   fit <- RtGam(data[["obs_cases"]],

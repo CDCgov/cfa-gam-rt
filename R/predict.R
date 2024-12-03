@@ -240,10 +240,14 @@ predict_obs_cases <- function(
   ) {
     args[["exclude"]] <- "s(day_of_week)"
   }
-  fitted <- do.call(
+  # Suppress mgcv::gam warning that factor levels are far from the data
+  # "factor levels 1 not in original fit". This warning is spurious bc
+  # we're explicitiy excluding the day-of-week random effect smooth but
+  # need to have some placeholder value in the dataset
+  fitted <- suppressWarnings(do.call(
     what = gratia::posterior_samples,
     args = args
-  )
+  ))
   fitted[".response"] <- as.integer(fitted[[".response"]])
 
   format_predicted_dataframe(fitted, newdata)
