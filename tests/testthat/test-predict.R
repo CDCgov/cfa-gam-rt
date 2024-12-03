@@ -1,3 +1,14 @@
+test_that("Can simulate all the way through", {
+  data <- stochastic_sir_rt[41:100, ]
+  fit <- RtGam(data[["obs_cases"]],
+    data[["reference_date"]],
+    day_of_week = TRUE
+  )
+  preds <- predict(fit)
+
+  expect_true(is.data.frame(preds))
+})
+
 test_that("predict can handle string dates", {
   fit <- readRDS(test_path("data", "stochastic_sir_fit.rds"))
 

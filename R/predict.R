@@ -230,6 +230,7 @@ predict_obs_cases <- function(
     n = n,
     seed = seed,
     unconditional = TRUE,
+    newdata.guaranteed = TRUE,
     ...
   )
   # Turn off day of week only if requested and also
@@ -283,15 +284,20 @@ predict_growth_rate <- function(
     seed = seed,
     unconditional = TRUE,
     scale = "linear_predictor",
+    newdata.guaranteed = TRUE,
     ...
   )
   if (is.factor(object[["data"]][["day_of_week"]])) {
     args[["exclude"]] <- "s(day_of_week)"
   }
-  fitted <- do.call(
+  # Suppress mgcv::gam warning that factor levels are far from the data
+  # "factor levels 1 not in original fit". This warning is spurious bc
+  # we're explicitiy excluding the day-of-week random effect smooth but
+  # need to have some placeholder value in the dataset
+  fitted <- suppressWarnings(do.call(
     what = gratia::fitted_samples,
     args = args
-  )
+  ))
   timestep_first_row <- which((fitted[[".row"]] - 1) %% 2 == 0)
   fitted <- data.frame(
     .row = (fitted[timestep_first_row, ".row"] + 1) / 2,
@@ -334,15 +340,20 @@ predict_rt <- function(
     seed = seed,
     unconditional = TRUE,
     scale = "response",
+    newdata.guaranteed = TRUE,
     ...
   )
   if (is.factor(object[["data"]][["day_of_week"]])) {
     args[["exclude"]] <- "s(day_of_week)"
   }
-  fitted <- do.call(
+  # Suppress mgcv::gam warning that factor levels are far from the data
+  # "factor levels 1 not in original fit". This warning is spurious bc
+  # we're explicitiy excluding the day-of-week random effect smooth but
+  # need to have some placeholder value in the dataset
+  fitted <- suppressWarnings(do.call(
     what = gratia::fitted_samples,
     args = args
-  )
+  ))
   # Rt calculation
   fitted <- rt_by_group(fitted,
     group_cols = ".draw",
@@ -491,10 +502,25 @@ create_newdata_dataframe <- function(
   }
 
 
-  newdata <- gratia::data_slice(object[["model"]], timestep = timesteps)
+  args <- list(
+    object = object[["model"]],
+    timestep = timesteps
+  )
+
+  # Handle day of week explictly to work around gratia::data_slice
+  # needing an explicit level
+  if (is.factor(object[["data"]][["day_of_week"]])) {
+    # Use a placeholder value to satisy gratia bc it can't
+    # reliably pick a factor level without erroring
+    args["day_of_week"] <- gratia::ref_level(object[["data"]][["day_of_week"]])
+  }
+
+  newdata <- do.call(what = gratia::data_slice, args = args)
   newdata[".row"] <- seq_along(timesteps)
   newdata["reference_date"] <- desired_dates
 
+  # And re-add day of week correctly for case where it's needed
+  # All other situations will ignore day of week in drawing samples
   if (parameter == "obs_cases") {
     if (!rlang::is_false(day_of_week)) {
       dow <- extract_dow_for_predict(object, day_of_week, desired_dates, call)
