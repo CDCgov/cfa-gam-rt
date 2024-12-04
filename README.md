@@ -26,7 +26,7 @@ It has not yet been benchmarked relative to other approaches.
 The package can be installed from GitHub:
 
 ```r
-remotes::install_github("cdcgov/cfa-gam-rt@v0.2.0")
+remotes::install_github("cdcgov/cfa-gam-rt@v0.3.0")
 ```
 
 ## Use
@@ -41,12 +41,12 @@ library(RtGam)
 fit <- RtGam(
         cases = stochastic_sir_rt[["obs_cases"]],
         # Randomly chosen date
-        reference_date = stochastic_sir_rt[["date"]]
+        reference_date = stochastic_sir_rt[["reference_date"]]
        )
 print(fit)
 ```
 
-For more, see the Getting started vignette.
+For more, see the [Getting Started](https://cdcgov.github.io/cfa-gam-rt/articles/RtGam.html) vignette.
 
 ## Project Admin
 

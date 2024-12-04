@@ -137,8 +137,8 @@ plot(
 ## Model validation
 
 Comparing the posterior draws from the fitted model posterior to the simulated ground truth suggests that the model is able to recover $R_t$ from this timeseries.
-The model is able to identify and correctly time the sharp drop in $R_t$ in early March.
-However, we can see that the model has high uncertainty during initialization and struggles to adjust to the abrupt increase in $R_t$ in early April.
+The model is able to identify and correctly time the sharp drop in $R_t$ in early March and the rise in $R_t$ in early April.
+However, we can see that the model has high uncertainty during initialization and oversmooths the sharp decline in early March.
 
 ```{r plot Rt against data}
 plot(

@@ -28,7 +28,6 @@ benchmarking
 cdc
 chapman
 codecov
-convolved
 doi
 edf
 et
@@ -39,9 +38,9 @@ md
 medRxiv
 mgcv
 modelling
-nolint
 nowcast
 oversmoothing
+oversmooths
 pkgdown
 pmid
 poisson

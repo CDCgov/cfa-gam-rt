@@ -47,7 +47,7 @@
 #' <https://github.com/CDCgov/cfa-epinow2-pipeline/pull/91>
 #' <https://github.com/CDCgov/cfa-epinow2-pipeline/pull/17>
 #' @references Gostic, Katelyn M., et al. "Practical considerations for measuring the
-#'   effective reproductive number, R t." PLoS computational biology 16.12
+#'   effective reproductive number, Rt." PLoS computational biology 16.12
 #'   (2020): e1008409.
 "stochastic_sir_rt"
 
@@ -71,7 +71,7 @@
 #' @format `sir_gt_pmf` A numeric vector of length 26 that sums to one within
 #'   numerical tolerance
 #' @references Gostic, Katelyn M., et al. "Practical considerations for measuring the
-#'   effective reproductive number, R t." PLoS computational biology 16.12
+#'   effective reproductive number, Rt." PLoS computational biology 16.12
 #'   (2020): e1008409.
 # nolint end: line_length_linter
 "sir_gt_pmf"
