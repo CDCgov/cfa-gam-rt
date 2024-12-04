@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">RtGam</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -232,9 +232,9 @@ mass function (see more with <code><a href="../reference/sir_gt_pmf.html">?sir_g
 </h2>
 <p>Comparing the posterior draws from the fitted model posterior to the
 simulated ground truth suggests that the model is able to recover <span class="math inline">\(R_t\)</span> from this timeseries. The model is
-able to identify and correctly time the sharp drop in <span class="math inline">\(R_t\)</span> in early March. However, we can see
-that the model has high uncertainty during initialization and struggles
-to adjust to the abrupt increase in <span class="math inline">\(R_t\)</span> in early April.</p>
+able to identify and correctly time the sharp drop in <span class="math inline">\(R_t\)</span> in early March and the rise in <span class="math inline">\(R_t\)</span> in early April. However, we can see
+that the model has high uncertainty during initialization and
+oversmooths the sharp decline in early March.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">fit</span>,</span>
@@ -263,7 +263,7 @@ for updates.</em></p>
 Gostic, Katelyn M, Lauren McGough, Edward B Baskerville, Sam Abbott,
 Keya Joshi, Christine Tedijanto, Rebecca Kahn, et al. 2020.
 <span>“Practical Considerations for Measuring the Effective Reproductive
-Number, r t.”</span> <em>PLoS Computational Biology</em> 16 (12):
+Number, Rt.”</span> <em>PLoS Computational Biology</em> 16 (12):
 e1008409.
 </div>
 </div>

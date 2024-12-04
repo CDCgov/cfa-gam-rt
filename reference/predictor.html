@@ -11,7 +11,7 @@ different model parameters."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">RtGam</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -202,23 +202,23 @@ steps.</p></li>
 convolution.</p></li>
 </ul><p>Samples are drawn from the posterior distribution of the fitted model using
 the <code>gratia</code> package. The model estimates basis function coefficients on the
-smooth terms \(\hat \beta\) and smoothing parameter(s) \(\lambda\). The
-coefficients have the joint posterior distribution
-$$\beta | \lambda \sim N(\hat \beta, \mathbf{V}_{\hat \beta})$$
-where \(\mathbf{V}_{\hat \beta}\) is the smoothing-parameter uncertainty
+smooth terms \(\widehat{\beta}\) and smoothing parameter(s) \(\lambda\). The
+coefficients have the approximate joint posterior distribution
+$$\beta | \lambda \sim N(\widehat{\beta}, \mathbf{V}_{\widehat{\beta}})$$
+where \(\mathbf{V}_{\widehat{\beta}}\) is the smoothing-parameter uncertainty
 corrected covariance matrix of the basis function coefficients. We draw
-samples from \(\mathbf{V}_{\hat \beta}\) and multiply them by the dates of
+samples from this approximate posterior and multiply them by the dates of
 interest to generate posterior draws. If estimating <code>"Rt"</code> or <code>"r"</code>
-the day-of-week effect is excluded (i.e., set to zero).</p>
+the day-of-week effect is excluded (i.e., set to zero). Further processing
+of these draws to generate parameters of interest is described below.</p>
 <p>For the intrinsic growth rate, we draw one day before and one day after every
 day of interest. We difference these two days within the smooth to get growth
-in
-the period and divide by two to generate the discrete centered derivative.</p>
+in the period and divide by two to generate the discrete centered derivative.</p>
 <p>For the Rt we map the estimated values on the linear predictor scale back to
 the response scale and shift the estimated cases by the mean delay to get
 the estimated incident infections (\(I\)). We use the incident infections
 and the generation interval probability mass function (\(w\)) to estimate
-Rt via the Cori method: $$I_t / \sum_{s = 1}^t{I_{t - s} w_s}$$</p>
+Rt via the Cori method: \(I_t / \sum_{s = 1}^{t} I_{t - s} w_s\)</p>
 <p>For observed incident cases, we apply the estimated negative binomial
 observation error to the posterior expected incident cases to generate
 posterior predicted incident cases.</p>
@@ -226,15 +226,17 @@ posterior predicted incident cases.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Miller, David L. "Bayesian views of generalized additive
-modelling." arXiv preprint arXiv:1902.01330 (2019).
+modelling." arXiv preprint arXiv:1902.01330 (2021). <br><br>
 Gostic, Katelyn M., et al. "Practical considerations for measuring the
-effective reproductive number, R t." PLoS computational biology 16.12
-(2020): e1008409.
+effective reproductive number, Rt." PLoS computational biology 16.12
+(2020): e1008409. <br><br>
 Simpson, Gavin L. "Gratia: An R package for exploring generalized additive
-models." arXiv preprint arXiv:2406.19082 (2024).
+models." arXiv preprint arXiv:2406.19082 (2024). <br><br>
 Cori A, Ferguson NM, Fraser C, Cauchemez S. A New Framework and Software to
 Estimate Time-Varying Reproduction Numbers During Epidemics. Am J Epidemiol.
-2013;178(9):1505–12. pmid:24043437</p>
+2013;178(9):1505–12. pmid:24043437 <br><br>
+Wood, Simon N. Generalized additive models: an introduction with R. chapman
+and hall/CRC, 2017.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
