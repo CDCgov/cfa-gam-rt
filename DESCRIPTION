@@ -48,7 +48,5 @@ Imports:
 Depends:
     R (>= 3.50)
 LazyData: true
-Additional_repositories:
-    https://epinowcast.r-universe.dev
 Language: en-US
 VignetteBuilder: knitr
