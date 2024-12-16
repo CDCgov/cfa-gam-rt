@@ -14,6 +14,7 @@ This release introduces support for modeling and correcting day-of-week effects 
 ## Features
 * Add day of week effect to simulated timeseries (#91)
 * Estimate day-of-week effects as a random effect in the fitted model and correct for them in growth rate estimation (#89)
+* Allow additional user-specified ggplot2 geoms to be added to the returned object from `plot()`
 
 # RtGam v0.2.0
 
