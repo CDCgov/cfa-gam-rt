@@ -4,6 +4,9 @@
 
 * Set up dev and release versions of pkgdown site (#101)
 
+## Bugs
+* Fix spurious diagnostic warnings when using a day-of-week effect (#104)
+
 # RtGam v0.3.0
 
 This release introduces support for modeling and correcting day-of-week effects in case reporting. It allows for default day-of-week detection or user-specified custom day-of-week levels, such as for holidays.

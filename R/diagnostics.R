@@ -57,26 +57,27 @@ calculate_diagnostics <- function(fit) {
   max_lag <- min(7, round(nrow(fit$model) / 7))
   rho <- stats::acf(fit$residuals, plot = FALSE, lag.max = max_lag)[[1]][, , 1]
 
+  is_smooth <- which(!is.na(k_check[, 4]))
   list(
     model_converged = converged,
-    k_prime = k_check[1],
-    k_edf = k_check[2],
-    k_index = k_check[3],
-    k_p_value = k_check[4],
-    k_to_edf_ratio = k_check[2] / k_check[1],
+    k_prime = max(k_check[is_smooth, 1]),
+    k_edf = max(k_check[is_smooth, 2]),
+    k_index = max(k_check[is_smooth, 3]),
+    k_p_value = min(k_check[is_smooth, 4]),
+    k_to_edf_ratio = max(k_check[is_smooth, 2] / k_check[is_smooth, 1]),
     residual_autocorrelation = rho[2:length(rho)]
   )
 }
 
 issue_diagnostic_warnings <- function(diagnostics) {
-  if (!diagnostics[["model_converged"]]) {
+  if (!diagnostics[["model_converged"]][[1]]) {
     cli::cli_alert_danger(
       c("Model failed to converge. Inference is not reliable.")
     )
   }
   if (diagnostics[["k_to_edf_ratio"]] > 0.9) {
     cli::cli_bullets(c(
-      "x" = "Effective degrees of freedom is near the supplied upper bound",
+      "x" = "Effective degrees of freedom for one or more smooths near max",
       "!" = "Consider increasing {.arg k}",
       "*" = "Actual: {.val {round(diagnostics[['k_edf']], 3)}}",
       "*" = "Upper bound: {.val {diagnostics[['k_prime']]}}"

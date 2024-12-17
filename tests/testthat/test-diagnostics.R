@@ -155,7 +155,7 @@ test_that("Warnings are issued for diagnostic failures", {
   # Wrapping in suppressMessages to catch all of multi-line warnings
   suppressMessages(expect_condition(
     issue_diagnostic_warnings(k_to_edf_ratio_high),
-    regexp = "Effective degrees of freedom is near the supplied upper bound"
+    regexp = "Effective degrees of freedom for one or more smooths near max"
   ))
   suppressMessages(expect_condition(
     issue_diagnostic_warnings(k_p_value_low),
