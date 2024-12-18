@@ -1,8 +1,8 @@
 # RtGam v0.4.0
 
 ## Features
-
 * Set up dev and release versions of pkgdown site (#101)
+* Allow additional user-specified ggplot2 geoms to be added to the returned object from `plot()`
 
 ## Bugs
 * Fix spurious diagnostic warnings when using a day-of-week effect (#104)
