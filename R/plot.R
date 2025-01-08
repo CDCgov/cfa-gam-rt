@@ -28,6 +28,11 @@
 #'   mean_delay = 0,
 #'   gi_pmf = sir_gt_pmf
 #' )
+#'
+#' # Add ggplot2 elements to a plot object
+#' library(ggplot2)
+#' plot(fit) +
+#'   labs(title = "An RtGam plot")
 #' @export
 plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.05, ...) {
   preds <- predict.RtGam(x, parameter = parameter, ...)
