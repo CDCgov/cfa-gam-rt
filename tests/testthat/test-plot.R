@@ -17,3 +17,13 @@ test_that("Plots look the same", {
   p <- plot(fit, horizon = 10)
   vdiffr::expect_doppelganger("forecast", p)
 })
+
+test_that("Can add ggplot2 elements to a plot", {
+  library(ggplot2)
+  fit <- readRDS(test_path("data", "stochastic_sir_fit.rds"))
+
+  p <- plot(fit) +
+    geom_hline(aes(yintercept = 1))
+
+  vdiffr::expect_doppelganger("Added ggplot2 object", p)
+})
