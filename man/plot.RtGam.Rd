@@ -44,4 +44,9 @@ plot(fit,
   mean_delay = 0,
   gi_pmf = sir_gt_pmf
 )
+
+# Add ggplot2 elements to a plot object
+library(ggplot2)
+plot(fit) +
+  labs(title = "An RtGam plot")
 }

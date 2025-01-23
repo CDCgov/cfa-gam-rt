@@ -37,17 +37,16 @@
 plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.05, ...) {
   preds <- predict.RtGam(x, parameter = parameter, ...)
 
-  # Hack to get around lint warnings for NSE
-  reference_date <- cases <- .response <- .draw <- NULL
-
   if (parameter == "obs_cases") {
     p <- ggplot2::ggplot() +
       ggplot2::geom_point(
-        ggplot2::aes(reference_date, cases),
+        ggplot2::aes(.data$reference_date, .data$cases),
         data = x[["data"]]
       ) +
       ggplot2::geom_line(
-        ggplot2::aes(reference_date, .response, group = .draw),
+        ggplot2::aes(
+          .data$reference_date, .data$.response, group = .data$.draw
+        ),
         alpha = alpha,
         data = preds
       ) +
@@ -62,7 +61,9 @@ plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.05, ...) {
         data = preds
       ) +
       ggplot2::geom_line(
-        ggplot2::aes(reference_date, .response, group = .draw),
+        ggplot2::aes(
+          .data$reference_date, .data$.response, group = .data$.draw
+        ),
         alpha = alpha,
         data = preds
       ) +
@@ -77,7 +78,9 @@ plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.05, ...) {
         data = preds
       ) +
       ggplot2::geom_line(
-        ggplot2::aes(reference_date, .response, group = .draw),
+        ggplot2::aes(
+          .data$reference_date, .data$.response, group = .data$.draw
+        ),
         alpha = alpha,
         data = preds
       ) +

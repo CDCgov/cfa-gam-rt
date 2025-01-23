@@ -6,6 +6,7 @@
 
 ## Bugs
 * Fix spurious diagnostic warnings when using a day-of-week effect (#104)
+* Use `.data` pronoun for NSE (#107)
 
 # RtGam v0.3.0
 

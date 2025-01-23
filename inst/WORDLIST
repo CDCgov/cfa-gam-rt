@@ -13,8 +13,10 @@ Justfile
 MERCHANTABILITY
 Mellor
 NOTEs
+NSE
 Norovirus
 Nowcasting
+ORCID
 PLoS
 PMF
 README
@@ -32,6 +34,7 @@ dev
 doi
 edf
 et
+gam
 geoms
 ggplot
 http

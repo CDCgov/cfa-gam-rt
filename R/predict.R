@@ -569,7 +569,10 @@ compute_delta <- function(fit) {
     min_supplied_date = min_date,
     max_supplied_date = fit[["max_date"]]
   )
-  return(timesteps[2] - timesteps[1])
+
+  delta <- timesteps[2] - timesteps[1]
+
+  delta
 }
 
 #' Convolve by draw. In the future, additional groups could be detected and
