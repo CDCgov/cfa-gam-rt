@@ -9,3 +9,5 @@
 ^data-raw$
 ^docs$
 ^pkgdown$
+^.*\.Rproj$
+^\.Rproj\.user$
