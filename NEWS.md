@@ -10,6 +10,7 @@
 
 ## Developer tooling
 * Add R installation to the pre-commit workflow, fixing the failures caused by the upgrade to the default Ubuntu runner (#112)
+* Relax the line length linter to 100 characters, from the default of 90 (#111)
 
 # RtGam v0.3.0
 
