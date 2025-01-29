@@ -5,7 +5,7 @@
 \alias{RtGam-package}
 \title{RtGam: Estimating Rt with Generalized Additive Models}
 \description{
-An opinionated implementation of a generalized additive modeling (GAMs) approach to estimate epidemic dynamics. This flexible semi-parametric method allows fitting to arbitrary incidence timeseries, with a natural Bayesian interpretation. Underlying inference methods are implemented via the `{mgcv}` package, which is optimized to produce quick, robust model fits and has well-developed diagnostic methods. These methods are employed here with a focus on _real-time_ use cases. The package is meant for drop-in use in an emerging outbreak, complementing MCMC-based inference methods.
+An opinionated implementation of a generalized additive modeling (GAMs) approach to estimate epidemic dynamics. This flexible semi-parametric method allows fitting to arbitrary incidence timeseries, with a natural Bayesian interpretation. Underlying inference methods are implemented via the \pkg{mgcv} package, which is optimized to produce quick, robust model fits and has well-developed diagnostic methods. These methods are employed here with a focus on _real-time_ use cases. The package is meant for drop-in use in an emerging outbreak, complementing MCMC-based inference methods.
 }
 \seealso{
 Useful links:

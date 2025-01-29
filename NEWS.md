@@ -8,6 +8,9 @@
 * Fix spurious diagnostic warnings when using a day-of-week effect (#104)
 * Use `.data` pronoun for NSE (#107)
 
+## Developer tooling
+* Add R installation to the pre-commit workflow, fixing the failures caused by the upgrade to the default Ubuntu runner (#112)
+
 # RtGam v0.3.0
 
 This release introduces support for modeling and correcting day-of-week effects in case reporting. It allows for default day-of-week detection or user-specified custom day-of-week levels, such as for holidays.
