@@ -3,7 +3,7 @@
 repos:
 # R
 -   repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.4.2
+    rev: v0.4.3.9003
     hooks:
     -   id: style-files
         args: [--style_pkg=styler, --style_fun=tidyverse_style,
@@ -18,7 +18,7 @@ repos:
     -   id: no-debug-statement
     -   id: deps-in-desc
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
     -   id: check-added-large-files
         args: ['--maxkb=200']
@@ -49,7 +49,7 @@ repos:
 #####
 # Secrets
 -   repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
+    rev: v1.5.0
     hooks:
     -   id: detect-secrets
         args: ['--baseline', '.secrets.baseline']

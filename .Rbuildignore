@@ -1,7 +1,9 @@
+^.*\.Rproj$
 ^.lintr$
 ^.secrets.baseline$
 ^Justfile$
 ^LICENSE$
+^\.Rproj\.user$
 ^\.github$
 ^\.pre-commit-config\.yaml$
 ^_pkgdown\.yml$
@@ -9,5 +11,3 @@
 ^data-raw$
 ^docs$
 ^pkgdown$
-^.*\.Rproj$
-^\.Rproj\.user$
