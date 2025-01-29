@@ -45,7 +45,8 @@ plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.05, ...) {
       ) +
       ggplot2::geom_line(
         ggplot2::aes(
-          .data$reference_date, .data$.response, group = .data$.draw
+          .data$reference_date, .data$.response,
+          group = .data$.draw
         ),
         alpha = alpha,
         data = preds
@@ -62,7 +63,8 @@ plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.05, ...) {
       ) +
       ggplot2::geom_line(
         ggplot2::aes(
-          .data$reference_date, .data$.response, group = .data$.draw
+          .data$reference_date, .data$.response,
+          group = .data$.draw
         ),
         alpha = alpha,
         data = preds
@@ -79,7 +81,8 @@ plot.RtGam <- function(x, parameter = "obs_cases", alpha = 0.05, ...) {
       ) +
       ggplot2::geom_line(
         ggplot2::aes(
-          .data$reference_date, .data$.response, group = .data$.draw
+          .data$reference_date, .data$.response,
+          group = .data$.draw
         ),
         alpha = alpha,
         data = preds

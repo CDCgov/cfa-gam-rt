@@ -9,7 +9,7 @@
 * Use `.data` pronoun for NSE (#107)
 
 ## Developer tooling
-* Add R installation to the pre-commit workflow, fixing the failures caused by the upgrade to the default Ubunut runner (#112)
+* Add R installation to the pre-commit workflow, fixing the failures caused by the upgrade to the default Ubuntu runner (#112)
 
 # RtGam v0.3.0
 
