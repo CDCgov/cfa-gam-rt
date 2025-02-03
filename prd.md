@@ -67,6 +67,8 @@ Target building modeling pipeline in parallel with package development in March.
 ## Success Criteria
 - Convergence: Model runs reliably and can fit in a reasonable amount of time
     - It isn't derailed by difficult to nowcast moments like the holidays
+    - Measured as the number of week-unit combinations with model convergence
+    - Runtime measured as mins per estimate
 - Performance: Match up to 80% of current production performance on high-quality timeseries with fewer non-estimable timeseries and faster runtimes.
 - Implemented and running in parallel to production by May '25 and into production for the '25-'26 respiratory virus season.
 
