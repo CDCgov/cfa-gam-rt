@@ -38,18 +38,22 @@ simulate_sir <- function(
     seed = 12345,
     date0 = as.Date("2023-01-01"),
     day_of_week = FALSE) {
-  S <- integer(length(Rt))
-  I <- integer(length(Rt))
-  R <- integer(length(Rt))
-  beta <- double(length(Rt))
-  incidence <- integer(length(Rt))
+  # We don't see new incidence on the last day of the simulation
+  n_inc <- length(Rt)
+  n_sim <- n_inc + 1
+
+  S <- integer(n_sim)
+  I <- integer(n_sim)
+  R <- integer(n_sim)
+  beta <- double(n_inc)
+  incidence <- integer(n_inc)
 
   S[1] <- S0
   I[1] <- I0
   R[1] <- R0
   N <- S0 + I0 + R0
 
-  for (t in 1:(length(beta) - 1)) {
+  for (t in 1:n_inc) {
     # Catch case where S is zero causing beta to be NA
     if (S[t] == 0) {
       beta[t] <- 0
@@ -77,8 +81,9 @@ simulate_sir <- function(
     }
 
     # Incidence is the number of new cases, I is the prevalence
-    incidence[t + 1] <- -dSdt
+    incidence[t] <- -dSdt
   }
+
 
   true_cases_full <- convolve(incidence, rev(delay_pmf), type = "open")
   # TODO: Add day of week
@@ -86,22 +91,32 @@ simulate_sir <- function(
   true_cases <- true_cases_full[length(delay_pmf):length(true_cases_full)]
   withr::with_seed(seed, {
     obs_cases <- rnbinom(
-      n = length(Rt),
+      n = length(true_cases),
       mu = true_cases,
       size = k
     )
   })
 
-  return(list(
-    S = S,
-    I = I,
-    R = R,
-    incidence = incidence,
-    beta = beta,
-    true_cases = true_cases,
-    true_rt = Rt,
-    obs_cases = obs_cases,
-    reference_date = date0 + length(delay_pmf):length(true_cases_full),
-    rt_date = date0 + 0:(length(Rt) - 1)
-  ))
+  # Observation events are shifted over by the length of the delay distribution
+  # because of the dropped, biased values in the convolution
+  sim_scale_dates <- date0 + 0:(n_sim - 1)
+  incidence_scale_dates <- date0 + 0:(n_inc - 1)
+  observation_scale_dates <- date0 + (length(delay_pmf)):(length(true_cases_full))
+
+  data.frame(
+    reference_date = c(
+      rep(sim_scale_dates, 3),
+      rep(incidence_scale_dates, 2),
+      rep(observation_scale_dates, 2)
+    ),
+    parameter = c(
+      rep(c("S", "I", "R"), each = n_sim),
+      rep(c("true_rt", "incident_infections"), each = n_inc),
+      rep(
+        c("true_incident_cases", "observed_incident_cases"),
+        each = length(observation_scale_dates)
+      )
+    ),
+    value = c(S, I, R, Rt, incidence, true_cases, obs_cases)
+  )
 }
