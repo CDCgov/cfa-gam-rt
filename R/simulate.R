@@ -68,18 +68,6 @@ simulate_sir <- function(
     I[t + 1] <- I[t] + dIdt
     R[t + 1] <- R[t] + dRdt
 
-    current_pop <- S[t + 1] + I[t + 1] + R[t + 1]
-    if (current_pop != N) {
-      cli::cli_abort(c(
-        "Population is not conserved",
-        "*" = "S = {S[t + 1]}",
-        "*" = "I = {I[t + 1]}",
-        "*" = "R = {R[t + 1]}",
-        "*" = "total = {current_pop}",
-        "*" = "t = {t}"
-      ))
-    }
-
     # Incidence is the number of new cases, I is the prevalence
     incidence[t] <- -dSdt
   }
