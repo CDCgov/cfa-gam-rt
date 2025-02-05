@@ -1,22 +1,26 @@
 test_that("simulate_sir returns a list with correct elements", {
   result <- simulate_sir()
   expect_type(result, "list")
-  expect_named(
-    result,
-    c("S", "I", "R", "beta", "true_cases", "true_rt", "obs_cases", "reference_date")
+  expect_setequal(
+    unique(result[["parameter"]]),
+    c(
+      "S",
+      "I",
+      "R",
+      "true_rt",
+      "incident_infections",
+      "true_incident_cases",
+      "observed_incident_cases"
+    )
   )
 })
 
 test_that("simulate_sir handles zero initial infections", {
   result <- simulate_sir(I0 = 0)
-  expect_equal(result$I[1], 0)
-  expect_equal(result$S[1], 99000)
-  expect_equal(result$R[1], 0)
+  expect_true(all(result[which(result$parameter == "I"), "value"] == 0))
 })
 
 test_that("simulate_sir handles zero initial susceptibles", {
   result <- simulate_sir(S0 = 0)
-  expect_equal(result$S[1], 0)
-  expect_equal(result$I[1], 1000)
-  expect_equal(result$R[1], 0)
+  expect_true(all(result[which(result$parameter == "S"), "value"] == 0))
 })

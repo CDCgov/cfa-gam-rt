@@ -85,12 +85,12 @@ simulate_sir <- function(
   }
 
 
-  true_cases_full <- convolve(incidence, rev(delay_pmf), type = "open")
+  true_cases_full <- stats::convolve(incidence, rev(delay_pmf), type = "open")
   # TODO: Add day of week
   # Drop initial values biased by missing entries in the convolution
   true_cases <- true_cases_full[length(delay_pmf):length(true_cases_full)]
   withr::with_seed(seed, {
-    obs_cases <- rnbinom(
+    obs_cases <- stats::rnbinom(
       n = length(true_cases),
       mu = true_cases,
       size = k
