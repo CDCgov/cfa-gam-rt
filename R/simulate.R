@@ -103,7 +103,7 @@ simulate_sir <- function(
   incidence_scale_dates <- date0 + 0:(n_inc - 1)
   observation_scale_dates <- date0 + (length(delay_pmf)):(length(true_cases_full))
 
-  data.frame(
+  result <- data.frame(
     reference_date = c(
       rep(sim_scale_dates, 3),
       rep(incidence_scale_dates, 2),
@@ -119,4 +119,6 @@ simulate_sir <- function(
     ),
     value = c(S, I, R, Rt, incidence, true_cases, obs_cases)
   )
+
+  return(result)
 }
