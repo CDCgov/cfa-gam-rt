@@ -3,7 +3,7 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   RtGam: RtGam.html
-last_built: 2025-01-29T22:14Z
+last_built: 2025-02-05T21:12Z
 urls:
   reference: https://cdcgov.github.io/cfa-gam-rt/reference
   article: https://cdcgov.github.io/cfa-gam-rt/articles
