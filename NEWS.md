@@ -1,6 +1,7 @@
 # RtGam v0.4.0
 
 ## Features
+* Add a flexible baseline data simulator for model testing (#113)
 * Set up dev and release versions of pkgdown site (#101)
 * Allow additional user-specified ggplot2 geoms to be added to the returned object from `plot()`
 
