@@ -22,10 +22,10 @@ test_that("Penalty heuristic fails for bad inputs", {
 })
 
 test_that("Penalty heuristic works for good inputs", {
-  # n for n \le 21
+  # n for n \le 23
   expect_equal(penalty_dim_heuristic(1), 1L)
   expect_equal(penalty_dim_heuristic(20), 1L)
 
-  expect_equal(penalty_dim_heuristic(21), 2L)
-  expect_equal(penalty_dim_heuristic(50), 3L)
+  expect_equal(penalty_dim_heuristic(56), 2L)
+  expect_equal(penalty_dim_heuristic(120), 3L)
 })
