@@ -256,10 +256,12 @@ smooth_dim_heuristic <- function(n, period = 12) {
   check_vector_length(length(period), "period", min = 1, max = 1)
 
   if (n < period) {
-    n
+    dim <- n
   } else {
-    as.integer(ceiling(sqrt(period * n)))
+    dim <- as.integer(ceiling(sqrt(period * n)))
   }
+
+  return(dim)
 }
 
 #' Propose penalty basis dimension from the number of distinct dates
@@ -344,5 +346,5 @@ penalty_dim_heuristic <- function(n, period = 56) {
   check_elements_above_min(period, "period", min = length(n))
   check_vector_length(length(period), "period", min = 1, max = 1)
 
-  as.integer(floor(n / period) + 1)
+  return(as.integer(floor(n / period) + 1))
 }
