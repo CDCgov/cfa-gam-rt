@@ -127,9 +127,9 @@ dimension.</p>
 <span><span class="co">#&gt; Fitted RtGam model object (gam)</span></span>
 <span><span class="co">#&gt; ===============================</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Model type: Adaptive (m = 3)</span></span>
-<span><span class="co">#&gt; Specified maximum smoothing basis dimension: 25 </span></span>
-<span><span class="co">#&gt; Family: Negative Binomial(12.248) </span></span>
+<span><span class="co">#&gt; Model type: Adaptive (m = 2)</span></span>
+<span><span class="co">#&gt; Specified maximum smoothing basis dimension: 27 </span></span>
+<span><span class="co">#&gt; Family: Negative Binomial(12.448) </span></span>
 <span><span class="co">#&gt; Link function: log</span></span>
 <span><span class="co">#&gt; Using day-of-week effects</span></span>
 <span><span class="co">#&gt; ===============================</span></span>
@@ -158,8 +158,8 @@ dimensions are set and when to change them.</p>
 <span><span class="co">#&gt; ===============================</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Model type: Non-adaptive (m = 1)</span></span>
-<span><span class="co">#&gt; Specified maximum smoothing basis dimension: 25 </span></span>
-<span><span class="co">#&gt; Family: Negative Binomial(12.703) </span></span>
+<span><span class="co">#&gt; Specified maximum smoothing basis dimension: 27 </span></span>
+<span><span class="co">#&gt; Family: Negative Binomial(12.707) </span></span>
 <span><span class="co">#&gt; Link function: log</span></span>
 <span><span class="co">#&gt; Using day-of-week effects</span></span>
 <span><span class="co">#&gt; ===============================</span></span>
@@ -184,12 +184,12 @@ timeseries of posterior predicted cases.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   reference_date .response .draw</span></span>
-<span><span class="co">#&gt; 1     2023-02-10       616     1</span></span>
-<span><span class="co">#&gt; 2     2023-02-10       285    86</span></span>
-<span><span class="co">#&gt; 3     2023-02-10       902    84</span></span>
-<span><span class="co">#&gt; 4     2023-02-10       688    82</span></span>
-<span><span class="co">#&gt; 5     2023-02-10       348    80</span></span>
-<span><span class="co">#&gt; 6     2023-02-10       522    24</span></span></code></pre></div>
+<span><span class="co">#&gt; 1     2023-02-10       700     1</span></span>
+<span><span class="co">#&gt; 2     2023-02-10       505    86</span></span>
+<span><span class="co">#&gt; 3     2023-02-10      1000    84</span></span>
+<span><span class="co">#&gt; 4     2023-02-10       460    82</span></span>
+<span><span class="co">#&gt; 5     2023-02-10       400    80</span></span>
+<span><span class="co">#&gt; 6     2023-02-10       428    24</span></span></code></pre></div>
 <p>Calling <code>plot</code> on the fitted model object also draws
 posterior samples and plots them against the provided timeseries of
 cases.</p>

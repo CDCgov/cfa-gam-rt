@@ -73,7 +73,7 @@ minimum of 2 or a maximum of the number of data points.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">smooth_dim_heuristic</span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">smooth_dim_heuristic</span><span class="op">(</span><span class="va">n</span>, period <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -82,6 +82,11 @@ minimum of 2 or a maximum of the number of data points.</p>
 
 <dl><dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
 <dd><p>An integer, the dimension of the data.</p></dd>
+
+
+<dt id="arg-period">period<a class="anchor" aria-label="anchor" href="#arg-period"></a></dt>
+<dd><p>An integer, the scaling factor used by the dimensionality
+heuristic. See <code>Implementation details</code> for discussion. Defaults to 12.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -145,9 +150,9 @@ increased runtime.</p>
     </div>
     <div class="section level2">
     <h2 id="implementation-details">Implementation details<a class="anchor" aria-label="anchor" href="#implementation-details"></a></h2>
-    <p>The algorithm to pick <code>k</code> is a piecewise function. When \(n \le 10\), then
-the returned value is \(n\). When \(n &gt; 10\), then the returned value is
-\( \lceil \sqrt{10n} \rceil \). This approach is loosely inspired by Ward
+    <p>The algorithm to pick <code>k</code> is a piecewise function. When \(n \le 12\), then
+the returned value is \(n\). When \(n &gt; 12\), then the returned value is
+\( \lceil \sqrt{12n} \rceil \). This approach is loosely inspired by Ward
 et al., 2021. As in Ward et al. the degrees of freedom of the spline (1) is
 set to a reasonably high value to avoid oversmoothing and (2) scales with the
 dimension of the data to accommodate changing trends over time.</p>
