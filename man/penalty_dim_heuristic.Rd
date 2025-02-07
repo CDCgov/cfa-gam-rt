@@ -59,7 +59,7 @@ increased computational cost.
 }
 
 \section{Implementation details}{
-The algorithm to pick \code{m} is \eqn{\lfloor \frac{n}{21} \rfloor + 1} where
+The algorithm to pick \code{m} is \eqn{\lfloor \frac{n}{56} \rfloor + 1} where
 \eqn{n \in \mathbb{W}} is the number of observed dates. This algorithm
 assumes that over a 21-day period, epidemic dynamics remain roughly similarly
 wiggly. Sharp jumps or drops requiring a very wiggly trend would remain
