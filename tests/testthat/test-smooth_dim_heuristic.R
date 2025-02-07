@@ -22,11 +22,11 @@ test_that("Smooth heuristic fails for bad inputs", {
 })
 
 test_that("Smooth heuristic works for good inputs", {
-  # n for n \le 10
+  # n for n \le 12
   expect_equal(1L, smooth_dim_heuristic(1))
-  expect_equal(10L, smooth_dim_heuristic(10))
-  # ceil(sqrt(10 * n)) for n > 10
-  # sqrt(10 * 11) \approx 10.48 -- checks that we're using ceil()
+  expect_equal(12L, smooth_dim_heuristic(12))
+  # ceil(sqrt(12 * n)) for n > 12
+  # sqrt(12 * 11) \approx 11.48 -- checks that we're using ceil()
   expect_equal(11L, smooth_dim_heuristic(11))
-  expect_equal(32L, smooth_dim_heuristic(100))
+  expect_equal(35L, smooth_dim_heuristic(100))
 })

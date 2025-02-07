@@ -4,10 +4,13 @@
 \alias{penalty_dim_heuristic}
 \title{Propose penalty basis dimension from the number of distinct dates}
 \usage{
-penalty_dim_heuristic(n)
+penalty_dim_heuristic(n, period = 56)
 }
 \arguments{
 \item{n}{An integer, the number of dates with an associated case observation.}
+
+\item{period}{An integer, the scaling factor used by the dimensionality
+heuristic. See \verb{Implementation details} for discussion. Defaults to 56.}
 }
 \value{
 An integer, the proposed penalty basis dimension to be used by the
@@ -59,11 +62,11 @@ increased computational cost.
 }
 
 \section{Implementation details}{
-The algorithm to pick \code{m} is \eqn{\lfloor \frac{n}{21} \rfloor + 1} where
+The algorithm to pick \code{m} is \eqn{\lfloor \frac{n}{56} \rfloor + 1} where
 \eqn{n \in \mathbb{W}} is the number of observed dates. This algorithm
-assumes that over a 21-day period, epidemic dynamics remain roughly similarly
+assumes that over an 8-week period, epidemic dynamics remain roughly similarly
 wiggly. Sharp jumps or drops requiring a very wiggly trend would remain
-similarly plausible over much of the 21-day band.
+similarly plausible over much of the 8 week band.
 }
 
 \examples{

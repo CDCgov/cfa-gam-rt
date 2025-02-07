@@ -207,9 +207,9 @@ RtGam <- function(cases,
 #'
 #' # Implementation details
 #'
-#' The algorithm to pick `k` is a piecewise function. When \eqn{n \le 10}, then
-#' the returned value is \eqn{n}. When \eqn{n > 10}, then the returned value is
-#' \eqn{ \lceil \sqrt{10n} \rceil }. This approach is loosely inspired by Ward
+#' The algorithm to pick `k` is a piecewise function. When \eqn{n \le 12}, then
+#' the returned value is \eqn{n}. When \eqn{n > 12}, then the returned value is
+#' \eqn{ \lceil \sqrt{12n} \rceil }. This approach is loosely inspired by Ward
 #' et al., 2021. As in Ward et al. the degrees of freedom of the spline (1) is
 #' set to a reasonably high value to avoid oversmoothing and (2) scales with the
 #' dimension of the data to accommodate changing trends over time.
@@ -224,6 +224,8 @@ RtGam <- function(cases,
 #' fits are very slow.
 #'
 #' @param n An integer, the dimension of the data.
+#' @param period An integer, the scaling factor used by the dimensionality
+#'  heuristic. See `Implementation details` for discussion. Defaults to 12.
 #' @return An integer, the proposed _total_ smooth basis dimensionality
 #'   available to the [RtGam] model.
 #' @references Ward, Thomas, et al. "Growth, reproduction numbers and factors
@@ -237,7 +239,7 @@ RtGam <- function(cases,
 #' @examples
 #' cases <- 1:10
 #' k <- smooth_dim_heuristic(length(cases))
-smooth_dim_heuristic <- function(n) {
+smooth_dim_heuristic <- function(n, period = 12) {
   # Input checks
   rlang::check_required(n, "n", call = rlang::caller_env())
   check_vector(n)
@@ -246,11 +248,20 @@ smooth_dim_heuristic <- function(n) {
   check_elements_above_min(n, "n", min = 1)
   check_vector_length(length(n), "n", min = 1, max = 1)
 
-  if (n < 10) {
-    n
+  rlang::check_required(n, "n", call = rlang::caller_env())
+  check_vector(period)
+  check_integer(period)
+  check_no_missingness(period)
+  check_elements_above_min(period, "period", min = 1)
+  check_vector_length(length(period), "period", min = 1, max = 1)
+
+  if (n < period) {
+    dim <- n
   } else {
-    as.integer(ceiling(sqrt(10 * n)))
+    dim <- as.integer(ceiling(sqrt(period * n)))
   }
+
+  return(dim)
 }
 
 #' Propose penalty basis dimension from the number of distinct dates
@@ -299,13 +310,15 @@ smooth_dim_heuristic <- function(n) {
 #'
 #' # Implementation details
 #'
-#' The algorithm to pick `m` is \eqn{\lfloor \frac{n}{21} \rfloor + 1} where
+#' The algorithm to pick `m` is \eqn{\lfloor \frac{n}{56} \rfloor + 1} where
 #' \eqn{n \in \mathbb{W}} is the number of observed dates. This algorithm
-#' assumes that over a 21-day period, epidemic dynamics remain roughly similarly
+#' assumes that over an 8-week period, epidemic dynamics remain roughly similarly
 #' wiggly. Sharp jumps or drops requiring a very wiggly trend would remain
-#' similarly plausible over much of the 21-day band.
+#' similarly plausible over much of the 8 week band.
 #'
 #' @param n An integer, the number of dates with an associated case observation.
+#' @param period An integer, the scaling factor used by the dimensionality
+#'  heuristic. See `Implementation details` for discussion. Defaults to 56.
 #' @return An integer, the proposed penalty basis dimension to be used by the
 #'   global trend.
 #' @seealso [RtGam()] for the use-case and additional documentation as well as
@@ -317,7 +330,7 @@ smooth_dim_heuristic <- function(n) {
 #' reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
 #' m <- penalty_dim_heuristic(length(reference_date))
 #'
-penalty_dim_heuristic <- function(n) {
+penalty_dim_heuristic <- function(n, period = 56) {
   # Input checks
   rlang::check_required(n, "n", call = rlang::caller_env())
   check_vector(n)
@@ -326,5 +339,12 @@ penalty_dim_heuristic <- function(n) {
   check_elements_above_min(n, "n", min = 1)
   check_vector_length(length(n), "n", min = 1, max = 1)
 
-  as.integer(floor(n / 21) + 1)
+  rlang::check_required(n, "n", call = rlang::caller_env())
+  check_vector(period)
+  check_integer(period)
+  check_no_missingness(period)
+  check_elements_above_min(period, "period", min = length(n))
+  check_vector_length(length(period), "period", min = 1, max = 1)
+
+  return(as.integer(floor(n / period) + 1))
 }

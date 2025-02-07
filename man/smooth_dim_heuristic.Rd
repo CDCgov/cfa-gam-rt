@@ -4,10 +4,13 @@
 \alias{smooth_dim_heuristic}
 \title{Propose total smoothing basis dimension from the number of data points}
 \usage{
-smooth_dim_heuristic(n)
+smooth_dim_heuristic(n, period = 12)
 }
 \arguments{
 \item{n}{An integer, the dimension of the data.}
+
+\item{period}{An integer, the scaling factor used by the dimensionality
+heuristic. See \verb{Implementation details} for discussion. Defaults to 12.}
 }
 \value{
 An integer, the proposed \emph{total} smooth basis dimensionality
@@ -75,9 +78,9 @@ increased runtime.
 }
 
 \section{Implementation details}{
-The algorithm to pick \code{k} is a piecewise function. When \eqn{n \le 10}, then
-the returned value is \eqn{n}. When \eqn{n > 10}, then the returned value is
-\eqn{ \lceil \sqrt{10n} \rceil }. This approach is loosely inspired by Ward
+The algorithm to pick \code{k} is a piecewise function. When \eqn{n \le 12}, then
+the returned value is \eqn{n}. When \eqn{n > 12}, then the returned value is
+\eqn{ \lceil \sqrt{12n} \rceil }. This approach is loosely inspired by Ward
 et al., 2021. As in Ward et al. the degrees of freedom of the spline (1) is
 set to a reasonably high value to avoid oversmoothing and (2) scales with the
 dimension of the data to accommodate changing trends over time.
