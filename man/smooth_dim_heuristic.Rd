@@ -4,10 +4,13 @@
 \alias{smooth_dim_heuristic}
 \title{Propose total smoothing basis dimension from the number of data points}
 \usage{
-smooth_dim_heuristic(n)
+smooth_dim_heuristic(n, period = 12)
 }
 \arguments{
 \item{n}{An integer, the dimension of the data.}
+
+\item{period}{An integer, the scaling factor used by the dimensionality
+heuristic. See \verb{Implementation details} for discussion. Defaults to 12.}
 }
 \value{
 An integer, the proposed \emph{total} smooth basis dimensionality

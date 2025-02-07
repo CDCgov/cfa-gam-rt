@@ -224,6 +224,8 @@ RtGam <- function(cases,
 #' fits are very slow.
 #'
 #' @param n An integer, the dimension of the data.
+#' @param period An integer, the scaling factor used by the dimensionality
+#'  heuristic. See `Implementation details` for discussion. Defaults to 12.
 #' @return An integer, the proposed _total_ smooth basis dimensionality
 #'   available to the [RtGam] model.
 #' @references Ward, Thomas, et al. "Growth, reproduction numbers and factors
@@ -237,7 +239,7 @@ RtGam <- function(cases,
 #' @examples
 #' cases <- 1:10
 #' k <- smooth_dim_heuristic(length(cases))
-smooth_dim_heuristic <- function(n) {
+smooth_dim_heuristic <- function(n, period = 12) {
   # Input checks
   rlang::check_required(n, "n", call = rlang::caller_env())
   check_vector(n)
@@ -246,10 +248,17 @@ smooth_dim_heuristic <- function(n) {
   check_elements_above_min(n, "n", min = 1)
   check_vector_length(length(n), "n", min = 1, max = 1)
 
-  if (n < 12) {
+  rlang::check_required(n, "n", call = rlang::caller_env())
+  check_vector(period)
+  check_integer(period)
+  check_no_missingness(period)
+  check_elements_above_min(period, "period", min = 1)
+  check_vector_length(length(period), "period", min = 1, max = 1)
+
+  if (n < period) {
     n
   } else {
-    as.integer(ceiling(sqrt(12 * n)))
+    as.integer(ceiling(sqrt(period * n)))
   }
 }
 
@@ -301,11 +310,13 @@ smooth_dim_heuristic <- function(n) {
 #'
 #' The algorithm to pick `m` is \eqn{\lfloor \frac{n}{56} \rfloor + 1} where
 #' \eqn{n \in \mathbb{W}} is the number of observed dates. This algorithm
-#' assumes that over a 21-day period, epidemic dynamics remain roughly similarly
+#' assumes that over an 8-week period, epidemic dynamics remain roughly similarly
 #' wiggly. Sharp jumps or drops requiring a very wiggly trend would remain
-#' similarly plausible over much of the 21-day band.
+#' similarly plausible over much of the 8 week band.
 #'
 #' @param n An integer, the number of dates with an associated case observation.
+#' @param period An integer, the scaling factor used by the dimensionality
+#'  heuristic. See `Implementation details` for discussion. Defaults to 56.
 #' @return An integer, the proposed penalty basis dimension to be used by the
 #'   global trend.
 #' @seealso [RtGam()] for the use-case and additional documentation as well as
@@ -317,7 +328,7 @@ smooth_dim_heuristic <- function(n) {
 #' reference_date <- as.Date(c("2023-01-01", "2023-01-02", "2023-01-03"))
 #' m <- penalty_dim_heuristic(length(reference_date))
 #'
-penalty_dim_heuristic <- function(n) {
+penalty_dim_heuristic <- function(n, period = 56) {
   # Input checks
   rlang::check_required(n, "n", call = rlang::caller_env())
   check_vector(n)
@@ -326,5 +337,12 @@ penalty_dim_heuristic <- function(n) {
   check_elements_above_min(n, "n", min = 1)
   check_vector_length(length(n), "n", min = 1, max = 1)
 
-  as.integer(floor(n / 56) + 1)
+  rlang::check_required(n, "n", call = rlang::caller_env())
+  check_vector(period)
+  check_integer(period)
+  check_no_missingness(period)
+  check_elements_above_min(period, "period", min = length(n))
+  check_vector_length(length(period), "period", min = 1, max = 1)
+
+  as.integer(floor(n / period) + 1)
 }
