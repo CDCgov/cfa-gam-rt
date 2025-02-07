@@ -4,6 +4,7 @@
 * Add a flexible baseline data simulator for model testing (#113)
 * Set up dev and release versions of pkgdown site (#101)
 * Allow additional user-specified ggplot2 geoms to be added to the returned object from `plot()`
+* Improve defaults for penalty and smooth dimensionalities (#114)
 
 ## Bugs
 * Fix spurious diagnostic warnings when using a day-of-week effect (#104)
