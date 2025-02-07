@@ -207,9 +207,9 @@ RtGam <- function(cases,
 #'
 #' # Implementation details
 #'
-#' The algorithm to pick `k` is a piecewise function. When \eqn{n \le 10}, then
-#' the returned value is \eqn{n}. When \eqn{n > 10}, then the returned value is
-#' \eqn{ \lceil \sqrt{10n} \rceil }. This approach is loosely inspired by Ward
+#' The algorithm to pick `k` is a piecewise function. When \eqn{n \le 12}, then
+#' the returned value is \eqn{n}. When \eqn{n > 12}, then the returned value is
+#' \eqn{ \lceil \sqrt{12n} \rceil }. This approach is loosely inspired by Ward
 #' et al., 2021. As in Ward et al. the degrees of freedom of the spline (1) is
 #' set to a reasonably high value to avoid oversmoothing and (2) scales with the
 #' dimension of the data to accommodate changing trends over time.
@@ -246,10 +246,10 @@ smooth_dim_heuristic <- function(n) {
   check_elements_above_min(n, "n", min = 1)
   check_vector_length(length(n), "n", min = 1, max = 1)
 
-  if (n < 10) {
+  if (n < 12) {
     n
   } else {
-    as.integer(ceiling(sqrt(10 * n)))
+    as.integer(ceiling(sqrt(12 * n)))
   }
 }
 
@@ -299,7 +299,7 @@ smooth_dim_heuristic <- function(n) {
 #'
 #' # Implementation details
 #'
-#' The algorithm to pick `m` is \eqn{\lfloor \frac{n}{21} \rfloor + 1} where
+#' The algorithm to pick `m` is \eqn{\lfloor \frac{n}{56} \rfloor + 1} where
 #' \eqn{n \in \mathbb{W}} is the number of observed dates. This algorithm
 #' assumes that over a 21-day period, epidemic dynamics remain roughly similarly
 #' wiggly. Sharp jumps or drops requiring a very wiggly trend would remain
@@ -326,5 +326,5 @@ penalty_dim_heuristic <- function(n) {
   check_elements_above_min(n, "n", min = 1)
   check_vector_length(length(n), "n", min = 1, max = 1)
 
-  as.integer(floor(n / 21) + 1)
+  as.integer(floor(n / 56) + 1)
 }
