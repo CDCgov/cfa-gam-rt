@@ -17,7 +17,8 @@ library(ggplot2); theme_set(theme_bw())
 library(mgcv)
 library(glmmTMB)
 library(RTMB)
-source("convolve_funs.R")
+library(broom.mixed) ## for augment etc.
+source(here::here("RTMB-convolve","convolve_funs.R"))
 ```
 
 
@@ -40,13 +41,13 @@ also, maybe, true growth rate? (maybe adjust code to
 return true_Rt and true_rt/true_growth? Back-calculating
 r from R seems mildly tedious
 
-```{r}
+```{r sim0}
 dd <- sim0 |>
   filter(parameter == "observed_incident_cases") |>
   select(date = reference_date, rdate, value)
 ```
 
-```{r}
+```{r plot-sim}
 plot(value ~ rdate, dd)
 ```
 
@@ -55,65 +56,69 @@ using REML because most (?) reliable for estimating degree of smoothing
 bump `k` up from default ...
 
 
-```{r}
+```{r fit-gam}
 m1 <- gam(value ~ s(rdate, k = 20), family = "nb", data = dd, method = "REML")
 plot(m1)
 ```
 
 Confirming that glmmTMB can fit the same (unshifted/unconvolved) model
 
-```{r}
+Have to start glmmTMB with a larger-than-default SD for the spline
+term ... otherwise collapses (could check profile etc etc). (Default `theta` (= log-SD for spline term)
+start value is 0, bump it up to 3 ...)
+
+```{r fit-glmmTMB}
 m2 <- glmmTMB(value ~ s(rdate, k = 20), family = nbinom2, data = dd,
-              REML = TRUE)
-m2$obj$env$parList()$theta
+              REML = TRUE, start = list(theta = 3))
 ```
 
-Have to start glmmTMB with a larger-than-default SD for the spline
-term ... otherwise collapses (could check profile etc etc)
 
-```{r}
-m2B <- update(m2, start = list(theta = 3))
-plot(predict(m2B))
+```{r plot2}
+plot(predict(m2))
 lines(predict(m1), col = 2)
 ```
 
 (`predict.gam` returns an odd named structure, have to mangle it to compare)
-```{r}
-stopifnot(all.equal(unname(c(predict(m1))), predict(m2B), tolerance = 1e-6))
+```{r check-equal}
+stopifnot(all.equal(unname(c(predict(m1))), predict(m2), tolerance = 1e-6))
 ```
 
 Now use the glmmTMB model structure to fit a model with convolution instead
 
-Create TMB-data object
+### Create TMB-data object
+
 (glmmTMB handles calls to `smoothCon`, `smooth2random(sm, vnames = "", type = 2)`;
 might eventually want to disentangle/extract that code)
 
-```{r}
-m2C <- update(m2B, doFit = FALSE)
-data.tmb <- c(m2C$data.tmb, list(delay_pmf = delay_pmf))
-pars0 <- nz_elements(m2C$parameters)
+This could be done more compactly with `update(..., doFit=FALSE)` but clearer in 
+this case to let things be self-contained.
+
+```{r setup-convolve}
+m3 <- glmmTMB(value ~ s(rdate, k = 20), family = nbinom2, data = dd,
+              REML = TRUE, start = list(theta = 3), doFit = FALSE)
+data.tmb <- c(m3$data.tmb, list(delay_pmf = delay_pmf))
+pars0 <- nz_elements(m3$parameters)
 ```
 
 Base-R, AD versions are identical if no random effects/Laplace approx:
 
-```{r}
+```{r compare-nll}
 nll_convolve(pars0)
-```
-
-```{r}
 ff <- MakeADFun(nll_convolve, pars0)
 ff$fn()
-
+## no longer the same if we add LA
 ff2 <- MakeADFun(nll_convolve, pars0, random = "b", silent = TRUE)
 ff2$fn()
+```
 
+```{r fit-convolve}
 fit <- with(ff2, nlminb(par, fn, gr))
 plot(ff2$report()$mu)
 ```
 
 Get predictions and CIs
 
-```{r}
+```{r calc-preds}
 obs_tvec <- unique(dd$rdate)
 pp <- predict(m1, se.fit = TRUE)
 mgcv_res <- tibble(parameter = "mgcv",
@@ -135,7 +140,6 @@ RTMB_res <- RTMB::sdreport(ff2) |>
     upr = Estimate + 1.96*`Std. Error`) |>
   mutate(across(c(value, lwr, upr), exp))
 
-
 res1 <- sim0 |>
   filter(parameter == "incident_infections") |>
   bind_rows(RTMB_res, mgcv_res)
@@ -143,7 +147,7 @@ res1 <- sim0 |>
 
 In this case mean-shifting and convolution do about equally well
 
-```{r}
+```{r plot-preds}
 ggplot(res1, aes(rdate, value)) + geom_line(aes(colour = parameter)) +
   geom_ribbon(aes(fill = parameter, ymin = lwr, ymax = upr),
               colour = NA, alpha = 0.2) +
@@ -151,10 +155,28 @@ ggplot(res1, aes(rdate, value)) + geom_line(aes(colour = parameter)) +
 ## (warning from NA values in true infections)
 ```
 
+## Testing encapsulated machinery
+
+```{r encapsulate}
+m3 <- fit_RTMB_convolve(value ~ s(rdate, k = 20),
+                        family = nbinom2, data = dd,
+                        start = list(theta = 3),
+                        delay_pmf = delay_pmf)
+a3 <- augment(m3)
+ggplot(a3, aes(rdate, value, colour = param)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = lwr, ymax = upr, fill = param),
+              colour = NA, alpha = 0.3)
+```
+
 ## To do 
 
+* double-check what we're assuming in first example -- are we reporting estimated delayed vals or estimated original vals?
+* further encapsulation (sims + fits with specified delay-pmf, automatic plots/comparisons to mgcv fit)
+* more extreme tests
 * work out how to do stuff with factor/by smooths (whatever RtGam is currently using ...) -- see what breaks (should be transferrable back to glmmTMB ...)
 * will need extra machinery for prediction
 * computational cost?
 * fragility?
 * end effects?
+* bam?????

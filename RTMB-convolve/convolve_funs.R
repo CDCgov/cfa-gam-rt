@@ -1,3 +1,8 @@
+pkgs <- c("glmmTMB", "broom.mixed", "RTMB")
+for (p in pkgs) {
+  if (!require(p, character.only = TRUE)) stop(sprintf("need %s package installed", p))
+}
+
 ## machinery from simulate_sir
 do_convolve <- function(x, delay_pmf) {
   x_full <- stats::convolve(x, rev(delay_pmf), type = "open")
@@ -24,11 +29,13 @@ nll_convolve <- function(pars) {
   ## drop(as.matrix(...)) -- need to convert back from Matrix object
   eta <- drop(as.matrix(X %*% beta + Z %*% b))
   ## could use logspace addition but probably overkill
-  ## FIXME: do we need to log/exp as many times as we do?
-  etac <- log(do_convolve2(exp(eta), delay_pmf))
-  ## exponentiate & rename for report:
-  mu <- exp(etac)
+  ## eta, mu = report cases
+  ## etac, muc = delay-convolved cases
+  mu <- exp(eta)
+  muc <- do_convolve2(mu, delay_pmf)
+  etac <- log(muc)
   REPORT(mu)
+  ADREPORT(eta)
   ADREPORT(etac)
   ## use dnbinom_robust (log-parameter version of dnbinom from TMB):
   ## https://kaskr.github.io/adcomp/group__R__style__distribution.html#gaa23e3ede4669d941b0b54314ed42a75c
@@ -45,3 +52,46 @@ nll_convolve <- function(pars) {
   }
   return(nll0)
 }
+
+fit_RTMB_convolve <- function(form, family, data, REML = TRUE,
+                              start = list(),
+                              delay_pmf) {
+  ## FIXME: if all theta parameters will be covariances we could just start them all at 3 instead of 0 by default ...
+  if (length(start)==0) warning("start parameter values may be unreliable. Consider bumping up log-SD (theta) start values")
+  ## FIXME: repeat less without being arcane? (do.call, or replacing head of call?
+  m <- glmmTMB::glmmTMB(form = form, family = family, data = data, REML = REML, start = start, doFit = FALSE)
+  data.tmb <- c(m$data.tmb, list(delay_pmf = delay_pmf))
+  pars0 <- nz_elements(m$parameters)
+  ff <- MakeADFun(nll_convolve, pars0, random = "b", silent = TRUE)
+  fit <- with(ff, nlminb(par, fn, gr))
+  class(ff) <- "TMB"  ## for S3 methods
+  res <- list(fit = fit, obj = ff, data = data.tmb, start = pars0)
+  class(res) <- "convolve_fit"
+  return(res)
+}
+
+get_num <- function(x) {
+  n <- stringr::str_extract(x, "[0-9]+$")
+  num <- ifelse(is.na(n), 0, as.numeric(n))
+}
+
+augment.convolve_fit <- function(x, conf.int = TRUE, conf.level = 0.95, ...) {
+  qq <- qnorm((1+conf.level)/2)
+  RTMB::sdreport(x$obj) |>
+    summary() |>
+    as.data.frame() |>
+    tibble::rownames_to_column("param") |>
+    filter(grepl("^eta", param)) |>
+    ## tidyr::separate_wider_delim is too awkward here
+    transmute(
+      rdate = get_num(param),
+      ## extract and rename (because we're going to exponentiate below)
+      param = gsub("\\.[0-9]+", "", param) |>
+        gsub(pattern = "eta", replacement = "mu"),
+      value = Estimate,
+      lwr = Estimate - qq*`Std. Error`,
+      upr = Estimate + qq*`Std. Error`) |>
+    mutate(across(c(value, lwr, upr), exp))
+}
+  
+  
