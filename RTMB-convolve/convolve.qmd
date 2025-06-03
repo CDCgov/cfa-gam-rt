@@ -1,0 +1,160 @@
+---
+title: "RTMB-convolution fitting of case reports"
+date: today
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
+    embed-resources: true
+---
+
+Relevant [GH issue](https://github.com/CDCgov/cfa-gam-rt/issues/88)
+
+```{r pkgs, message = FALSE}
+library(RtGam)
+library(dplyr)
+library(ggplot2); theme_set(theme_bw())
+library(mgcv)
+library(glmmTMB)
+library(RTMB)
+source("convolve_funs.R")
+```
+
+
+Use default from `simulate_sir()` for now:
+
+```{r defaults}
+delay_pmf <- (1:4)/10
+delay_mean <- sum(seq_along(delay_pmf)*delay_pmf)
+```
+
+Simulate with neg bin etc (accept defaults)
+```{r sim1}
+set.seed(101)
+sim0 <- simulate_sir() |>
+  mutate(rdate = as.numeric(reference_date - min(reference_date)))
+```
+
+Will want to compare true_rt, true_incident_cases
+also, maybe, true growth rate? (maybe adjust code to
+return true_Rt and true_rt/true_growth? Back-calculating
+r from R seems mildly tedious
+
+```{r}
+dd <- sim0 |>
+  filter(parameter == "observed_incident_cases") |>
+  select(date = reference_date, rdate, value)
+```
+
+```{r}
+plot(value ~ rdate, dd)
+```
+
+Regular fit (ignore delays)
+using REML because most (?) reliable for estimating degree of smoothing
+bump `k` up from default ...
+
+
+```{r}
+m1 <- gam(value ~ s(rdate, k = 20), family = "nb", data = dd, method = "REML")
+plot(m1)
+```
+
+Confirming that glmmTMB can fit the same (unshifted/unconvolved) model
+
+```{r}
+m2 <- glmmTMB(value ~ s(rdate, k = 20), family = nbinom2, data = dd,
+              REML = TRUE)
+m2$obj$env$parList()$theta
+```
+
+Have to start glmmTMB with a larger-than-default SD for the spline
+term ... otherwise collapses (could check profile etc etc)
+
+```{r}
+m2B <- update(m2, start = list(theta = 3))
+plot(predict(m2B))
+lines(predict(m1), col = 2)
+```
+
+(`predict.gam` returns an odd named structure, have to mangle it to compare)
+```{r}
+stopifnot(all.equal(unname(c(predict(m1))), predict(m2B), tolerance = 1e-6))
+```
+
+Now use the glmmTMB model structure to fit a model with convolution instead
+
+Create TMB-data object
+(glmmTMB handles calls to `smoothCon`, `smooth2random(sm, vnames = "", type = 2)`;
+might eventually want to disentangle/extract that code)
+
+```{r}
+m2C <- update(m2B, doFit = FALSE)
+data.tmb <- c(m2C$data.tmb, list(delay_pmf = delay_pmf))
+pars0 <- nz_elements(m2C$parameters)
+```
+
+Base-R, AD versions are identical if no random effects/Laplace approx:
+
+```{r}
+nll_convolve(pars0)
+```
+
+```{r}
+ff <- MakeADFun(nll_convolve, pars0)
+ff$fn()
+
+ff2 <- MakeADFun(nll_convolve, pars0, random = "b", silent = TRUE)
+ff2$fn()
+
+fit <- with(ff2, nlminb(par, fn, gr))
+plot(ff2$report()$mu)
+```
+
+Get predictions and CIs
+
+```{r}
+obs_tvec <- unique(dd$rdate)
+pp <- predict(m1, se.fit = TRUE)
+mgcv_res <- tibble(parameter = "mgcv",
+                   rdate = obs_tvec-delay_mean,
+                   value = exp(pp$fit),
+                   lwr = exp(pp$fit - 1.96*pp$se.fit),
+                   upr = exp(pp$fit + 1.96*pp$se.fit))
+
+RTMB_res <- RTMB::sdreport(ff2) |>
+  summary() |>
+  as.data.frame() |>
+  tibble::rownames_to_column("param") |>
+  filter(grepl("^etac", param)) |>
+  transmute(
+    parameter = "RTMB",
+    rdate = 0:99,
+    value = Estimate,
+    lwr = Estimate - 1.96*`Std. Error`,
+    upr = Estimate + 1.96*`Std. Error`) |>
+  mutate(across(c(value, lwr, upr), exp))
+
+
+res1 <- sim0 |>
+  filter(parameter == "incident_infections") |>
+  bind_rows(RTMB_res, mgcv_res)
+```
+
+In this case mean-shifting and convolution do about equally well
+
+```{r}
+ggplot(res1, aes(rdate, value)) + geom_line(aes(colour = parameter)) +
+  geom_ribbon(aes(fill = parameter, ymin = lwr, ymax = upr),
+              colour = NA, alpha = 0.2) +
+  labs(x = "date", y = "incidence")
+## (warning from NA values in true infections)
+```
+
+## To do 
+
+* work out how to do stuff with factor/by smooths (whatever RtGam is currently using ...) -- see what breaks (should be transferrable back to glmmTMB ...)
+* will need extra machinery for prediction
+* computational cost?
+* fragility?
+* end effects?
