@@ -32,7 +32,13 @@ Suggests:
     vdiffr,
     knitr,
     rmarkdown,
-    pkgload
+    pkgload,
+    ## for convolution machinery/documents
+    dplyr,
+    glmmTMB,
+    RTMB,
+    broom.mixed,
+    here
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
