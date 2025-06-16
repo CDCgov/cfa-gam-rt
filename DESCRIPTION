@@ -33,7 +33,6 @@ Suggests:
     knitr,
     rmarkdown,
     pkgload,
-    ## for convolution machinery/documents
     dplyr,
     glmmTMB,
     RTMB,
