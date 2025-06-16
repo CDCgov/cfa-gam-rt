@@ -208,7 +208,7 @@ simfit <- function(delay_pmf , nt = 100, theta = 3, seed = 101, k = 20) {
                                      parameter = "gam_fit_unshifted",
                                      value = exp(c(fit)),
                                      lwr = exp(c(fit)-1.96*c(se.fit)),
-                                     upr = exp(c(fit)-1.96*c(se.fit))))
+                                     upr = exp(c(fit)+1.96*c(se.fit))))
   sum_pmf <- sum(delay_pmf)
   if (!isTRUE(all.equal(sum_pmf, 1.0))) warning("sum of pmf != 1 (%1.2g)", sum_pmf)
   mean_delay <- sum(seq_along(delay_pmf)*delay_pmf)
@@ -244,8 +244,10 @@ pmf1 <- c(rep(0.1, 10))
 ss1 <- simfit(delay_pmf = pmf1, seed = 103, k = 50)
 ## here gam-fit-shifted is indistinguishable from true incident infections
 incvals <- c("incident_infections", "gam_fit_shifted", "mu")
-ggfit0 %+% ss1
-print(ggfit0 %+% filter(ss1, parameter %in% incvals))
+## ggfit0 %+% ss1
+print(ggfit0 %+% filter(ss1, parameter %in% incvals) +
+      geom_ribbon(aes(ymin = lwr, ymax = upr, fill = parameter), colour = NA, alpha = 0.3))
+  ## facet_wrap(~parameter))
 ```
 
 ## To do 
