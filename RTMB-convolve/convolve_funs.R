@@ -43,7 +43,8 @@ nll_convolve <- function(pars) {
   ADREPORT(eta)
   ADREPORT(etac)
   ## use dnbinom_robust (log-parameter version of dnbinom from TMB):
-  ## https://kaskr.github.io/adcomp/group__R__style__distribution.html#gaa23e3ede4669d941b0b54314ed42a75c
+  ## https://kaskr.github.io/adcomp/group__R__style__distribution.html# \
+  ## gaa23e3ede4669d941b0b54314ed42a75c
   ## copied from glmmTMB: parameters are log(mu), log(var-mu)
   ## betadisp = log(phi).  var = mu + mu^2/phi -> var - mu = mu^2*phi
   ## -> log(var-mu) = 2*log(mu) - log(phi)
@@ -61,10 +62,13 @@ nll_convolve <- function(pars) {
 fit_RTMB_convolve <- function(form, family, data, REML = TRUE,
                               start = list(),
                               delay_pmf) {
-  ## FIXME: if all theta parameters will be covariances we could just start them all at 3 instead of 0 by default ...
-  if (length(start)==0) warning("start parameter values may be unreliable. Consider bumping up log-SD (theta) start values")
+  ## FIXME: if all theta parameters will be covariances we could just start them all at 3
+  ##   instead of 0 by default ...
+  if (length(start)==0)
+    warning("default starting values may be unreliable. Increase log-SD (theta) start values?")
   ## FIXME: repeat less without being arcane? (do.call, or replacing head of call?
-  m <- glmmTMB::glmmTMB(form = form, family = family, data = data, REML = REML, start = start, doFit = FALSE)
+  m <- glmmTMB::glmmTMB(form = form, family = family, data = data,
+                        REML = REML, start = start, doFit = FALSE)
   data.tmb <- c(m$data.tmb, list(delay_pmf = delay_pmf))
   pars0 <- nz_elements(m$parameters)
   assign("data.tmb", data.tmb, environment(nll_convolve))
