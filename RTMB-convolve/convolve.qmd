@@ -19,20 +19,21 @@ Rendered output (GFM) is [here](outputs/convolve.md)
 ```{r pkgs, message = FALSE}
 library(RtGam)
 library(dplyr)
-library(ggplot2); theme_set(theme_bw())
+library(ggplot2)
+theme_set(theme_bw())
 library(mgcv)
 library(glmmTMB)
 library(RTMB)
 library(broom.mixed) ## for augment etc.
-source(here::here("RTMB-convolve","convolve_funs.R"))
+source(here::here("RTMB-convolve", "convolve_funs.R"))
 ```
 
 
 Use default from `simulate_sir()` for now:
 
 ```{r defaults}
-delay_pmf <- (1:4)/10
-delay_mean <- sum(seq_along(delay_pmf)*delay_pmf)
+delay_pmf <- (1:4) / 10
+delay_mean <- sum(seq_along(delay_pmf) * delay_pmf)
 ```
 
 Simulate with neg bin etc (accept defaults)
@@ -71,8 +72,10 @@ term ... otherwise collapses (could check profile etc etc). (Default `theta` (= 
 start value is 0, bump it up to 3 ...)
 
 ```{r fit-glmmTMB}
-m2 <- glmmTMB(value ~ s(rdate, k = 20), family = nbinom2, data = dd,
-              REML = TRUE, start = list(theta = 3))
+m2 <- glmmTMB(value ~ s(rdate, k = 20),
+  family = nbinom2, data = dd,
+  REML = TRUE, start = list(theta = 3)
+)
 ```
 
 
@@ -93,12 +96,14 @@ Now use the glmmTMB model structure to fit a model with convolution instead
 (glmmTMB handles calls to `smoothCon`, `smooth2random(sm, vnames = "", type = 2)`;
 might eventually want to disentangle/extract that code)
 
-This could be done more compactly with `update(..., doFit=FALSE)` but clearer in 
+This could be done more compactly with `update(..., doFit=FALSE)` but clearer in
 this case to let things be self-contained.
 
 ```{r setup-convolve}
-m3 <- glmmTMB(value ~ s(rdate, k = 20), family = nbinom2, data = dd,
-              REML = TRUE, start = list(theta = 3), doFit = FALSE)
+m3 <- glmmTMB(value ~ s(rdate, k = 20),
+  family = nbinom2, data = dd,
+  REML = TRUE, start = list(theta = 3), doFit = FALSE
+)
 data.tmb <- c(m3$data.tmb, list(delay_pmf = delay_pmf))
 pars0 <- nz_elements(m3$parameters)
 ```
@@ -124,11 +129,13 @@ Get predictions and CIs
 ```{r calc-preds}
 obs_tvec <- unique(dd$rdate)
 pp <- predict(m1, se.fit = TRUE)
-mgcv_res <- tibble(parameter = "mgcv",
-                   rdate = obs_tvec-delay_mean,
-                   value = exp(pp$fit),
-                   lwr = exp(pp$fit - 1.96*pp$se.fit),
-                   upr = exp(pp$fit + 1.96*pp$se.fit))
+mgcv_res <- tibble(
+  parameter = "mgcv",
+  rdate = obs_tvec - delay_mean,
+  value = exp(pp$fit),
+  lwr = exp(pp$fit - 1.96 * pp$se.fit),
+  upr = exp(pp$fit + 1.96 * pp$se.fit)
+)
 
 RTMB_res <- RTMB::sdreport(ff2) |>
   summary() |>
@@ -139,8 +146,9 @@ RTMB_res <- RTMB::sdreport(ff2) |>
     parameter = "RTMB",
     rdate = 0:99,
     value = Estimate,
-    lwr = Estimate - 1.96*`Std. Error`,
-    upr = Estimate + 1.96*`Std. Error`) |>
+    lwr = Estimate - 1.96 * `Std. Error`,
+    upr = Estimate + 1.96 * `Std. Error`
+  ) |>
   mutate(across(c(value, lwr, upr), exp))
 
 res1 <- sim0 |>
@@ -151,9 +159,11 @@ res1 <- sim0 |>
 In this case mean-shifting and convolution do about equally well
 
 ```{r plot-preds}
-ggplot(res1, aes(rdate, value)) + geom_line(aes(colour = parameter)) +
+ggplot(res1, aes(rdate, value)) +
+  geom_line(aes(colour = parameter)) +
   geom_ribbon(aes(fill = parameter, ymin = lwr, ymax = upr),
-              colour = NA, alpha = 0.2) +
+    colour = NA, alpha = 0.2
+  ) +
   labs(x = "date", y = "incidence")
 ## (warning from NA values in true infections)
 ```
@@ -162,14 +172,16 @@ ggplot(res1, aes(rdate, value)) + geom_line(aes(colour = parameter)) +
 
 ```{r encapsulate}
 m3 <- fit_RTMB_convolve(value ~ s(rdate, k = 20),
-                        family = nbinom2, data = dd,
-                        start = list(theta = 3),
-                        delay_pmf = delay_pmf)
+  family = nbinom2, data = dd,
+  start = list(theta = 3),
+  delay_pmf = delay_pmf
+)
 a3 <- augment(m3)
 ggplot(a3, aes(rdate, value, colour = parameter)) +
   geom_line() +
   geom_ribbon(aes(ymin = lwr, ymax = upr, fill = parameter),
-              colour = NA, alpha = 0.3)
+    colour = NA, alpha = 0.3
+  )
 ```
 
 Will want to compare true_rt, true_incident_cases
@@ -186,7 +198,8 @@ pmf0 <- c(rep(0, 10), 1)
 ss <- simfit(delay_pmf = pmf0, seed = 103, k = 50)
 ## here gam-fit-shifted is indistinguishable from true incident infections
 ggfit0 <- ggplot(ss, aes(rdate, value, colour = parameter)) +
-  geom_line() + geom_point(aes(shape=parameter)) +
+  geom_line() +
+  geom_point(aes(shape = parameter)) +
   geom_ribbon(aes(ymin = lwr, ymax = upr, fill = parameter), colour = NA, alpha = 0.3)
 print(ggfit0)
 ```
@@ -201,7 +214,7 @@ Now a more extreme delay distribution ...
 pmf1 <- rep(0.1, 10)
 titlefun <- function(pmf) sprintf("delay cv = %1.1f", delay_cv(pmf))
 ss1 <- simfit(delay_pmf = pmf1, seed = 103, k = 50)
-print(ggfit0 %+% filter(ss1, parameter %in% incvals) + labs(title=titlefun(pmf1)))
+print(ggfit0 %+% filter(ss1, parameter %in% incvals) + labs(title = titlefun(pmf1)))
 ```
 
 Even more extreme ...
@@ -210,10 +223,10 @@ Even more extreme ...
 pmf2 <- c(0.5, rep(0, 8), 0.5)
 ss2 <- simfit(delay_pmf = pmf2, seed = 103, k = 50)
 ## here gam-fit-shifted is indistinguishable from true incident infections
-print(ggfit0 %+% filter(ss2, parameter %in% incvals) + labs(title=titlefun(pmf2)))
+print(ggfit0 %+% filter(ss2, parameter %in% incvals) + labs(title = titlefun(pmf2)))
 ```
 
-## To do 
+## To do
 
 * is there intuition/math for why taking the convolution into account
 * work out how to do stuff with factor/by smooths (whatever RtGam is currently using ...) -- see what breaks (should be transferrable back to glmmTMB ...)

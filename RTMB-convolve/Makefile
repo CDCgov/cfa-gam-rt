@@ -5,7 +5,7 @@ outputs/convolve.md: convolve.qmd convolve_funs.R
 	mv $(notdir $@) outputs
 	cp -r $(notdir $(basename $@))_files/* $(basename $@)_files
 
-convolve.html: 
+convolve.html:
 	quarto render $<
 
 view-out: outputs/convolve.md
