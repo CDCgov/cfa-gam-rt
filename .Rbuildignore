@@ -1,3 +1,4 @@
+RTMB-convolve
 ^.*\.Rproj$
 ^.lintr$
 ^.secrets.baseline$
@@ -11,4 +12,3 @@
 ^data-raw$
 ^docs$
 ^pkgdown$
-RTMB-convolve
