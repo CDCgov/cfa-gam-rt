@@ -34,6 +34,8 @@ Suggests:
     rmarkdown,
     pkgload,
     dplyr,
+    stringr,
+    tibble,
     glmmTMB,
     RTMB,
     broom.mixed,
