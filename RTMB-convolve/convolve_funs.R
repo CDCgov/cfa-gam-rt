@@ -101,5 +101,62 @@ augment.convolve_fit <- function(x, conf.int = TRUE, conf.level = 0.95, ...) {
     mutate(across(c(value, lwr, upr), exp))
 }
 
+#' @param delay_pmf prob mass function for delays (sum == 1.0)
+#' @param nt number of time steps
+#' @param theta_start starting value for log-SD of spline variance
+#' @param seed RNG seed
+#' @param k df for spline
+simfit <- function(delay_pmf , nt = 100, theta_start = 3, seed = 101, k = 20) {
+  Rt <- 0.5 * sin(seq_len(nt)/10 * pi) + 1  ## default Rt
+  sim0 <- simulate_sir(Rt = Rt, delay_pmf = delay_pmf, seed = seed) |>
+    dplyr::mutate(rdate = as.numeric(reference_date - min(reference_date)))
+  ## sim0 has parameter in {"S","I","R","true_rt","incident_infections","true_incident_cases",
+  ## "observed_incident_cases"
+  ##
+  ## get observed incident cases
+  dd0 <- sim0 |>
+    dplyr::filter(parameter == "observed_incident_cases") |>
+    dplyr::select(date = reference_date, rdate, value)
+  ## fancy evaluation to evaluate k here
+  ## (need to coerce it *back* into a formula ...)
+  form <- as.formula(bquote(value ~ s(rdate, k = .(k))))
+  m <- fit_RTMB_convolve(form,
+                         family = nbinom2, data = dd0,
+                         start = list(theta = theta_start),
+                         delay_pmf = delay_pmf)
 
+  ## careful with matching up rdates (reference dates)
+  ## augment() assumes starting with zero
+  aa <- augment(m) |>
+    dplyr::full_join(x = distinct(select(sim0, rdate)), by = "rdate")
   
+  gam_fit <- gam(value ~ s(rdate, k = k), family = "nb", data = dd0, method = "REML",
+                 na.action = na.exclude) ## na.exclude includes initial rdates
+  gam_pred0 <- predict(gam_fit, type = "link", se.fit = TRUE)
+  gam_pred <- with(gam_pred0, tibble(rdate = dd0$rdate,
+                                     parameter = "gam_fit_unshifted",
+                                     value = exp(c(fit)),
+                                     lwr = exp(c(fit)-1.96*c(se.fit)),
+                                     upr = exp(c(fit)+1.96*c(se.fit))))
+  sum_pmf <- sum(delay_pmf)
+  if (!isTRUE(all.equal(sum_pmf, 1.0))) warning("sum of pmf != 1 (%1.2g)", sum_pmf)
+  mean_delay <- sum(seq_along(delay_pmf)*delay_pmf)
+  gam_pred_shifted <- gam_pred |>
+    mutate(parameter = "gam_fit_shifted",
+           across(c(value, lwr, upr), ~ dplyr::lead(., round(mean_delay), default = NA)))
+  ## do we want incident_infections?
+  aa <- dplyr::bind_rows(filter(sim0,
+                                parameter %in%
+                                c("incident_infections", "observed_incident_cases", "true_incident_cases")),
+                         ## double-check augment(), why do we have 10 NA rows at the end?
+                         na.omit(aa),
+                         gam_pred,
+                         gam_pred_shifted)
+  class(aa) <- c("RTMB_simfit", class(aa))
+  return(aa)
+}
+
+delay_cv <- function(pmf) {
+  inds <- seq_along(pmf)
+  sqrt(sum(inds^2*pmf))/sum(inds*pmf)
+}
