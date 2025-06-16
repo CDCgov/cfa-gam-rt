@@ -4,6 +4,8 @@ for (p in pkgs) {
 }
 
 ## machinery from simulate_sir
+#' @param x numeric vector
+#' @param delay_pmf probability mass function of the delay distribution
 do_convolve <- function(x, delay_pmf) {
   x_full <- stats::convolve(x, rev(delay_pmf), type = "open")
   x_full[length(delay_pmf):length(x_full)]
@@ -11,6 +13,7 @@ do_convolve <- function(x, delay_pmf) {
 
 ## brute-force convolution (FFT-based solution makes RTMB unhappy ...)
 ## AFAICT TMB does not have a native/atomic 'filter' or 'convolution' f'n
+# params same as above
 do_convolve2 <- function(x, delay_pmf) {
   d <- rev(delay_pmf)
   x_res <- d[1]*x
@@ -24,6 +27,8 @@ nz_elements <- function(x) {
   x[lengths(x) > 0 ]
 }
 
+#' @param pars list of parameters (beta, b, theta)
+#' data.tmb should contain: X, Z, delay_pmf, yobs, terms
 nll_convolve <- function(pars) {
   getAll(pars, data.tmb)
   ## drop(as.matrix(...)) -- need to convert back from Matrix object
@@ -62,6 +67,7 @@ fit_RTMB_convolve <- function(form, family, data, REML = TRUE,
   m <- glmmTMB::glmmTMB(form = form, family = family, data = data, REML = REML, start = start, doFit = FALSE)
   data.tmb <- c(m$data.tmb, list(delay_pmf = delay_pmf))
   pars0 <- nz_elements(m$parameters)
+  assign("data.tmb", data.tmb, environment(nll_convolve))
   ff <- MakeADFun(nll_convolve, pars0, random = "b", silent = TRUE)
   fit <- with(ff, nlminb(par, fn, gr))
   class(ff) <- "TMB"  ## for S3 methods
@@ -80,18 +86,20 @@ augment.convolve_fit <- function(x, conf.int = TRUE, conf.level = 0.95, ...) {
   RTMB::sdreport(x$obj) |>
     summary() |>
     as.data.frame() |>
-    tibble::rownames_to_column("param") |>
-    filter(grepl("^eta", param)) |>
+    tibble::rownames_to_column("parameter") |>
+    as_tibble() |>
+    filter(grepl("^eta", parameter)) |>
     ## tidyr::separate_wider_delim is too awkward here
     transmute(
-      rdate = get_num(param),
+      rdate = get_num(parameter),
       ## extract and rename (because we're going to exponentiate below)
-      param = gsub("\\.[0-9]+", "", param) |>
+      parameter = gsub("\\.[0-9]+", "", parameter) |>
         gsub(pattern = "eta", replacement = "mu"),
       value = Estimate,
       lwr = Estimate - qq*`Std. Error`,
       upr = Estimate + qq*`Std. Error`) |>
     mutate(across(c(value, lwr, upr), exp))
 }
-  
+
+
   

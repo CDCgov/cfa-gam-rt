@@ -381,3 +381,6 @@ docs/site/
 #Manifest.toml
 docs
 inst/doc
+
+*#
+*\.*#

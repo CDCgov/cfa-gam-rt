@@ -163,10 +163,89 @@ m3 <- fit_RTMB_convolve(value ~ s(rdate, k = 20),
                         start = list(theta = 3),
                         delay_pmf = delay_pmf)
 a3 <- augment(m3)
-ggplot(a3, aes(rdate, value, colour = param)) +
+ggplot(a3, aes(rdate, value, colour = parameter)) +
   geom_line() +
-  geom_ribbon(aes(ymin = lwr, ymax = upr, fill = param),
+  geom_ribbon(aes(ymin = lwr, ymax = upr, fill = parameter),
               colour = NA, alpha = 0.3)
+```
+
+Will want to compare true_rt, true_incident_cases
+also, maybe, true growth rate? (maybe adjust code to
+return true_Rt and true_rt/true_growth? Back-calculating
+r from R seems mildly tedious
+
+## Further encapsulation
+
+```{r sim-and-fit}
+simfit <- function(delay_pmf , nt = 100, theta = 3, seed = 101, k = 20) {
+  Rt <- 0.5 * sin(seq_len(nt)/10 * pi) + 1  ## default Rt
+  sim0 <- simulate_sir(Rt = Rt, delay_pmf = delay_pmf, seed = seed) |>
+    dplyr::mutate(rdate = as.numeric(reference_date - min(reference_date)))
+  ## sim0 has parameter in {"S","I","R","true_rt","incident_infections","true_incident_cases",
+  ## "observed_incident_cases"
+  ##
+  ## get observed incident cases
+  dd0 <- sim0 |>
+    dplyr::filter(parameter == "observed_incident_cases") |>
+    dplyr::select(date = reference_date, rdate, value)
+  ## fancy evaluation to evaluate k here
+  ## (need to coerce it *back* into a formula ...)
+  form <- as.formula(bquote(value ~ s(rdate, k = .(k))))
+  m <- fit_RTMB_convolve(form,
+                         family = nbinom2, data = dd0,
+                         start = list(theta = 3),
+                         delay_pmf = delay_pmf)
+
+  ## careful with matching up rdates (reference dates)
+  ## augment() assumes starting with zero
+  aa <- augment(m) |>
+    dplyr::full_join(x = distinct(select(sim0, rdate)), by = "rdate")
+  
+  gam_fit <- gam(value ~ s(rdate, k = k), family = "nb", data = dd0, method = "REML",
+                 na.action = na.exclude) ## na.exclude includes initial rdates
+  gam_pred0 <- predict(gam_fit, type = "link", se.fit = TRUE)
+  gam_pred <- with(gam_pred0, tibble(rdate = dd0$rdate,
+                                     parameter = "gam_fit_unshifted",
+                                     value = exp(c(fit)),
+                                     lwr = exp(c(fit)-1.96*c(se.fit)),
+                                     upr = exp(c(fit)-1.96*c(se.fit))))
+  sum_pmf <- sum(delay_pmf)
+  if (!isTRUE(all.equal(sum_pmf, 1.0))) warning("sum of pmf != 1 (%1.2g)", sum_pmf)
+  mean_delay <- sum(seq_along(delay_pmf)*delay_pmf)
+  gam_pred_shifted <- gam_pred |>
+    mutate(parameter = "gam_fit_shifted",
+           across(c(value, lwr, upr), ~ dplyr::lead(., round(mean_delay), default = NA)))
+  ## do we want incident_infections?
+  aa <- dplyr::bind_rows(filter(sim0,
+                                parameter %in%
+                                c("incident_infections", "observed_incident_cases", "true_incident_cases")),
+                         ## double-check augment(), why do we have 10 NA rows at the end?
+                         na.omit(aa),
+                         gam_pred,
+                         gam_pred_shifted)
+  class(aa) <- c("RTMB_simfit", class(aa))
+  return(aa)
+}
+```
+
+(Needed to bump up to `k=50`)
+```{r simfit0}
+pmf0 <- c(rep(0, 10), 1)
+ss <- simfit(delay_pmf = pmf0, seed = 103, k = 50)
+## here gam-fit-shifted is indistinguishable from true incident infections
+ggfit0 <- ggplot(ss, aes(rdate, value, colour = parameter)) +
+  geom_line() + geom_point(aes(shape=parameter)) ## + facet_wrap(~parameter)
+print(ggfit0)
+```
+
+Now a more extreme delay distribution ...
+```{r simfit1}
+pmf1 <- c(rep(0.1, 10))
+ss1 <- simfit(delay_pmf = pmf1, seed = 103, k = 50)
+## here gam-fit-shifted is indistinguishable from true incident infections
+incvals <- c("incident_infections", "gam_fit_shifted", "mu")
+ggfit0 %+% ss1
+print(ggfit0 %+% filter(ss1, parameter %in% incvals))
 ```
 
 ## To do 
