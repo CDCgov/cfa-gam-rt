@@ -12,6 +12,7 @@ suppressPackageStartupMessages({
   library(gamtools)
   library(sf)
   library(dplyr)
+  library(patchwork)
 })
 ```
 
@@ -59,7 +60,7 @@ create_sf_grid <- function(height, width){
 
 geometry <- create_sf_grid(height = 4, width = 4)
 
-state_fips_code <- "01"
+state_fips_code <- "99"
 county_fips_code <- paste0("00", 1:length(geometry))
 
 sf <- sf::st_sf(geometry) |>
@@ -75,6 +76,17 @@ ggplot(sf) +
 ## 3.
 
 ```{r}
+plot_matrix <- function(M, limits = NULL) {
+  ggplot(
+    reshape2::melt(M),
+    aes(x = .data$Var1, y = .data$Var2, fill = .data$value)
+  ) +
+    labs(x = "", y = "", fill = "Value") +
+    geom_tile() +
+    scale_fill_viridis_c(limits = limits) +
+    theme_void()
+}
+
 space_cov <- function(d, range, sill) {
   sill * exp(-d / range)
 }
@@ -82,6 +94,33 @@ space_cov <- function(d, range, sill) {
 time_cov <- function(lag, rho) {
   rho^lag
 }
+
+reference_date <- seq.Date(
+  from = as.Date("2025-01-01"),
+  by = "week",
+  length.out = 10
+)
+
+time_dist <- dist(reference_date) |> as.matrix()
+time_cov <- time_cov(time_dist, rho = 0.9)
+
+space_dist <- sf::st_distance(sf::st_centroid(sf)) |>
+  as.matrix()
+
+space_cov <- space_cov(
+  space_dist,
+  range = as.numeric(mean(space_dist)), sill = 1
+)
+
+space_time_corr <- kronecker(space_cov, time_cov)
+
+time_corr <- plot_matrix(time_cov, limits = c(0, 1)) + labs(title = "Temporal", fill = "Correlation")
+space_corr <- plot_matrix(space_cov, limits = c(0, 1)) + labs(title = "Spatial", fill = "Correlation")
+space_time_corr <- plot_matrix(space_time_corr, limits = c(0, 1)) + labs(title = "Spatio-temporal", fill = "Correlation")
+
+time_corr + space_corr
+
+space_time_corr
 ```
 
 ## 4.
