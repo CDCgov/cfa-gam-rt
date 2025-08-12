@@ -20,7 +20,8 @@ Plan:
 
 1. Understand `simulate_sir` function
 1. Create fake counties spatial structure
-1. Simulate $R_t$ in the fake counties using some kind of correlation structure
+1. Simulate correlation structures for the fake counties
+1. Create time series of $R_t$ with some spatio-temporal structure
 1. Apply `simulate_sir` to each county
 1. Extract data and format for input to `gamtools::prep_model_df`
 1. Run model with `gamtools::run_model()`
@@ -112,11 +113,11 @@ space_cov <- space_cov(
   range = as.numeric(mean(space_dist)), sill = 1
 )
 
-space_time_corr <- kronecker(space_cov, time_cov)
+space_time_cov <- kronecker(space_cov, time_cov)
 
 time_corr <- plot_matrix(time_cov, limits = c(0, 1)) + labs(title = "Temporal", fill = "Correlation")
 space_corr <- plot_matrix(space_cov, limits = c(0, 1)) + labs(title = "Spatial", fill = "Correlation")
-space_time_corr <- plot_matrix(space_time_corr, limits = c(0, 1)) + labs(title = "Spatio-temporal", fill = "Correlation")
+space_time_corr <- plot_matrix(space_time_cov, limits = c(0, 1)) + labs(title = "Spatio-temporal", fill = "Correlation")
 
 time_corr + space_corr
 
@@ -124,6 +125,38 @@ space_time_corr
 ```
 
 ## 4.
+
+We will use a model like
+$$
+R_t = \mu_t + u_s + v_{st},
+$$
+where:
+
+* $\mu_t$ is a smooth temporal trend
+* $u_s$ is a spatially varying intercept
+* $w_{st}$ is a spatio-temporal interaction
+
+```{r}
+n <- length(reference_date)
+mu <- 0.5 * sin(seq_len(n) / 5 * pi) + 1
+
+u <- MASS::mvrnorm(
+  n = 1,
+  mu = rep(0, nrow(space_cov)),
+  Sigma = space_cov
+)
+
+v <- MASS::mvrnorm(
+  n = 1,
+  mu = rep(0, nrow(space_time_cov)),
+  Sigma = space_time_cov
+)
+
+tidyr::expand_grid(
+  reference_date = reference_date,
+  fips = paste0(state_fips_code, county_fips_code)
+)
+```
 
 ## 5.
 
