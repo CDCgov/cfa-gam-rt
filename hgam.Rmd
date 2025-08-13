@@ -205,4 +205,24 @@ mu_plot / u_plot / v_plot
 
 ## 5.
 
+```{r}
+rt_example <- rt_df |>
+  filter(fips == "99001") |>
+  arrange(reference_date) |>
+  pull(rt)
+
+simulate_sir(
+  Rt = rt_example,
+  S0 = 99000,
+  I0 = 1000,
+  R0 = 0,
+  gamma = 0.5,
+  delay_pmf = c(0.1, 0.2, 0.3, 0.4),
+  k = 10,
+  seed = 12345,
+  date0 = as.Date("2023-01-01"),
+  day_of_week = FALSE
+)
+```
+
 ## 6.
