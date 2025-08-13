@@ -63,9 +63,10 @@ geometry <- create_sf_grid(height = 4, width = 4)
 
 state_fips_code <- "99"
 county_fips_code <- paste0("00", 1:length(geometry))
+fips <- paste0(state_fips_code, county_fips_code)
 
 sf <- sf::st_sf(geometry) |>
-  mutate(fips = paste0(state_fips_code, county_fips_code))
+  mutate(fips = fips)
 
 ggplot(sf) +
   geom_sf() +
@@ -99,7 +100,7 @@ time_cov <- function(lag, rho) {
 reference_date <- seq.Date(
   from = as.Date("2025-01-01"),
   by = "week",
-  length.out = 10
+  length.out = 20
 )
 
 time_dist <- dist(reference_date) |> as.matrix()
@@ -138,24 +139,68 @@ where:
 
 ```{r}
 n <- length(reference_date)
-mu <- 0.5 * sin(seq_len(n) / 5 * pi) + 1
 
+mu <- 0.5 * sin(seq_len(n) / 5 * pi)
+
+mu_df <- data.frame(
+  reference_date = reference_date,
+  mu = mu
+)
+
+u_sd <- 0.1
 u <- MASS::mvrnorm(
   n = 1,
   mu = rep(0, nrow(space_cov)),
-  Sigma = space_cov
+  Sigma = u_sd * space_cov
 )
 
+u_df <- data.frame(
+  fips = factor(fips, levels = fips),
+  u = u
+)
+
+v_sd <- 0.05
 v <- MASS::mvrnorm(
   n = 1,
   mu = rep(0, nrow(space_time_cov)),
-  Sigma = space_time_cov
+  Sigma = v_sd * space_time_cov
 )
 
-tidyr::expand_grid(
+rt_df <- tidyr::expand_grid(
   reference_date = reference_date,
-  fips = paste0(state_fips_code, county_fips_code)
-)
+  fips = factor(fips, levels = fips)
+) |>
+  left_join(
+    mu_df,
+    by = "reference_date"
+  ) |>
+  left_join(
+    u_df,
+    by = "fips"
+  ) |>
+  dplyr::mutate(
+    v = v,
+    rt = exp(mu + u + v)
+  )
+
+ggplot(rt_df, aes(x = reference_date, y = rt, col = fips)) +
+  geom_line() +
+  theme_minimal() +
+  facet_wrap(. ~ fips, scales = "free_y")
+
+mu_plot <- ggplot(mu_df, aes(x = reference_date, y = mu)) +
+  geom_line() +
+  labs(title = "Temporal effect")
+
+u_plot <- ggplot(u_df, aes(x = fips, y = u)) +
+  geom_point() +
+  labs(title = "Spatial effect")
+
+v_plot <- ggplot(rt_df, aes(x = reference_date, y = v, col = fips)) +
+  geom_line() +
+  labs(title = "Spatio-temporal effect")
+
+mu_plot / u_plot / v_plot
 ```
 
 ## 5.
