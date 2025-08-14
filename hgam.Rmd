@@ -286,8 +286,19 @@ head(df)
 
 ```{r}
 prep <- df |>
-  mutate(api_version = NA) |>
+  mutate(
+    api_version = NA,
+    count_total = 1e+05,
+  ) |>
   gamtools::prep_model_df(report_date = max(df$report_date), nowcast_days = 3)
+```
+
+## 7.
+
+```{r}
+fit <- gamtools::fit_model(
+  df = prep, network = "none"
+)
 ```
 
 ## Alternative approach
