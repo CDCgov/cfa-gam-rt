@@ -19,6 +19,7 @@ suppressPackageStartupMessages({
 Plan:
 
 1. Understand `simulate_sir` function
+1. Extend `simulate_sir` to generate reporting triangle data
 1. Create fake counties spatial structure
 1. Simulate correlation structures for the fake counties
 1. Create time series of $R_t$ with some spatio-temporal structure
@@ -52,6 +53,45 @@ ggplot(sir, aes(x = reference_date, y = value, col = parameter)) +
 
 ## 2.
 
+The `simulate_sir()` function currently doesn't generate reporting triangle data.
+Here I will extend it to do so:
+
+```{r}
+sir$parameter |> unique()
+
+reporting_delay_pmf <- c(0.6, 0.2, 0.1, 0.05, 0.05)
+
+create_reporting_triangle <- function(sir, reporting_delay_pmf) {
+  L <- length(reporting_delay_pmf)
+
+  cases_df <- filter(sir, parameter == "observed_incident_cases")
+
+  cases_df |>
+    rowwise() |>
+    mutate(
+      delay = list(0:(L - 1)),
+      report_date = list(reference_date + 0:(L - 1)),
+      cumulative_observed_cases = list(cumsum(rmultinom(n = 1, size = value, prob = reporting_delay_pmf))),
+    ) |>
+    tidyr::unnest(c(delay, report_date, cumulative_observed_cases)) |>
+    select(reference_date, report_date, delay, cumulative_observed_cases)
+}
+
+reporting_triangle <- create_reporting_triangle(sir, reporting_delay_pmf)
+
+ggplot(reporting_triangle, aes(x = reference_date, y = cumulative_observed_cases, col = as.factor(delay))) +
+  geom_point() +
+  scale_color_viridis_d() +
+  labs(
+    x = "Reference date",
+    y = "Cumulative observed cases",
+    col = "Delay"
+  ) +
+  theme_minimal()
+```
+
+## 3.
+
 ```{r}
 create_sf_grid <- function(height, width){
   sfc <- sf::st_sfc(sf::st_polygon(list(rbind(c(0, 0), c(width, 0), c(width, height), c(0, 0)))))
@@ -75,7 +115,7 @@ ggplot(sf) +
   labs(title = "Mocked counties")
 ```
 
-## 3.
+## 4.
 
 ```{r}
 plot_matrix <- function(M, limits = NULL) {
@@ -125,7 +165,7 @@ time_corr + space_corr
 space_time_corr
 ```
 
-## 4.
+## 5.
 
 We will use a model like
 $$
@@ -203,34 +243,52 @@ v_plot <- ggplot(rt_df, aes(x = reference_date, y = v, col = fips)) +
 mu_plot / u_plot / v_plot
 ```
 
-## 5.
+## 6.
 
 ```{r}
-rt_example <- rt_df |>
-  filter(fips == "99001") |>
-  arrange(reference_date) |>
-  pull(rt)
+sir_reporting_fips <- function(fips) {
+  rt <- rt_df |>
+    filter(fips == .env$fips) |>
+    arrange(reference_date) |>
+    pull(rt)
+  
+  sir <- simulate_sir(
+    Rt = rt,
+    S0 = 99000,
+    I0 = 1000,
+    R0 = 0,
+    gamma = 0.5,
+    delay_pmf = c(0.1, 0.2, 0.3, 0.4),
+    k = 10,
+    seed = 12345,
+    date0 = as.Date("2023-01-01"),
+    day_of_week = FALSE
+  )
+  
+  reporting_delay_pmf <- 
+  
+  reporting_triangle <- create_reporting_triangle(
+    sir,
+    reporting_delay_pmf = c(0.6, 0.2, 0.1, 0.05, 0.05)
+  ) |>
+    mutate(fips_code = .env$fips, .before = "reference_date") |>
+    rename(count_target = cumulative_observed_cases)
+  
+  return(reporting_triangle)
+}
 
-sir <- simulate_sir(
-  Rt = rt_example,
-  S0 = 99000,
-  I0 = 1000,
-  R0 = 0,
-  gamma = 0.5,
-  delay_pmf = c(0.1, 0.2, 0.3, 0.4),
-  k = 10,
-  seed = 12345,
-  date0 = as.Date("2023-01-01"),
-  day_of_week = FALSE
-) |>
-  filter(parameter %in% c("incident_infections", "observed_incidence_infections"))
+df <- purrr::map_dfr(fips, sir_reporting_fips)
 
-sir
-
+head(df)
 ```
 
 ## 6.
 
+```{r}
+prep <- df |>
+  mutate(api_version = NA) |>
+  gamtools::prep_model_df(report_date = max(df$report_date), nowcast_days = 3)
+```
 
 ## Alternative approach
 
