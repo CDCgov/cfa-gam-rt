@@ -14,6 +14,8 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(patchwork)
 })
+
+set.seed(1)
 ```
 
 Plan:
@@ -139,8 +141,8 @@ time_cov <- function(lag, rho) {
 
 reference_date <- seq.Date(
   from = as.Date("2025-01-01"),
-  by = "week",
-  length.out = 20
+  by = "day",
+  length.out = 60
 )
 
 time_dist <- dist(reference_date) |> as.matrix()
@@ -230,17 +232,24 @@ ggplot(rt_df, aes(x = reference_date, y = rt, col = fips)) +
 
 mu_plot <- ggplot(mu_df, aes(x = reference_date, y = mu)) +
   geom_line() +
-  labs(title = "Temporal effect")
+  labs(title = "Temporal effect") +
+  theme_minimal()
 
 u_plot <- ggplot(u_df, aes(x = fips, y = u)) +
   geom_point() +
-  labs(title = "Spatial effect")
+  labs(title = "Spatial effect") +
+  theme_minimal()
 
 v_plot <- ggplot(rt_df, aes(x = reference_date, y = v, col = fips)) +
   geom_line() +
-  labs(title = "Spatio-temporal effect")
+  labs(title = "Spatio-temporal effect") +
+  theme_minimal() +
+  theme(
+    legend.position = "right"
+  )
 
-mu_plot / u_plot / v_plot
+mu_plot / u_plot
+v_plot
 ```
 
 ## 6.
@@ -265,11 +274,9 @@ sir_reporting_fips <- function(fips) {
     day_of_week = FALSE
   )
   
-  reporting_delay_pmf <- 
-  
   reporting_triangle <- create_reporting_triangle(
     sir,
-    reporting_delay_pmf = c(0.6, 0.2, 0.1, 0.05, 0.05)
+    reporting_delay_pmf = c(0.6, 0.2, 0.1, 0.05, 0.025, 0.025)
   ) |>
     mutate(fips_code = .env$fips, .before = "reference_date") |>
     rename(count_target = cumulative_observed_cases)
@@ -278,8 +285,6 @@ sir_reporting_fips <- function(fips) {
 }
 
 df <- purrr::map_dfr(fips, sir_reporting_fips)
-
-head(df)
 ```
 
 ## 6.
@@ -290,18 +295,30 @@ prep <- df |>
     api_version = NA,
     count_total = 1e+05,
   ) |>
-  gamtools::prep_model_df(report_date = max(df$report_date), nowcast_days = 3)
+  gamtools::prep_model_df(report_date = max(df$report_date), nowcast_days = 4)
 ```
 
 ## 7.
 
 ```{r}
+n_distinct(prep$ts)
+
+per_fips_delay <- prep |>
+  group_by(fips_code) |>
+  summarise(n_delay = n_distinct(effective_delay), .groups = "drop")
+
+min_delay_per_fips <- min(per_fips_delay$n_delay)
+
+n_pair_fips_ts <- n_distinct(interaction(prep$fips_code, prep$ts, drop = TRUE))
+
 fit <- gamtools::fit_model(
   df = prep, network = "none"
 )
+
+summary(fit)
 ```
 
-## Alternative approach
+## Alternative approach {-}
 
 Alternative is to come from simulating data to go straight into the HGAM code:
 
