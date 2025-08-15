@@ -107,7 +107,7 @@ create_sf_grid <- function(height, width){
 geometry <- create_sf_grid(height = 4, width = 4)
 
 state_fips_code <- "99"
-county_fips_code <- paste0("00", 1:length(geometry))
+county_fips_code <- stringr::str_pad(seq_along(geometry), width = 3, pad = "0")
 fips <- paste0(state_fips_code, county_fips_code)
 
 sf <- sf::st_sf(geometry) |>
