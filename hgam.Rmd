@@ -300,6 +300,18 @@ prep <- df |>
     count_total = 1e+05,
   ) |>
   gamtools::prep_model_df(report_date = max(df$report_date), nowcast_days = 4)
+
+
+ggplot(prep, aes(x = reference_date, y = count_target, col = as.factor(delay))) +
+  geom_point() +
+  scale_color_viridis_d() +
+  facet_wrap(~fips_code, scales = "free") +
+  labs(
+    x = "Reference date",
+    y = "Cumulative observed cases",
+    col = "Delay"
+  ) +
+  theme_minimal()
 ```
 
 ## 7.
