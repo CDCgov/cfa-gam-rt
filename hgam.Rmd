@@ -185,14 +185,15 @@ where:
 ```{r}
 n <- length(reference_date)
 
-mu <- 0.5 * sin(seq_len(n) / 5 * pi) - 0.1
+x <- seq_len(n)
+mu <- sin(x / (2 * pi)) + 0.5 * sin(x / (4 * pi))
 
 mu_df <- data.frame(
   reference_date = reference_date,
   mu = mu
 )
 
-u_sd <- 0.1
+u_sd <- 0.3
 u <- MASS::mvrnorm(
   n = 1,
   mu = rep(0, nrow(space_cov)),
@@ -204,7 +205,7 @@ u_df <- data.frame(
   u = u
 )
 
-v_sd <- 0.2
+v_sd <- 0.3
 v <- MASS::mvrnorm(
   n = 1,
   mu = rep(0, nrow(space_time_cov)),
@@ -215,14 +216,8 @@ rt_df <- tidyr::expand_grid(
   reference_date = reference_date,
   fips = factor(fips, levels = fips)
 ) |>
-  left_join(
-    mu_df,
-    by = "reference_date"
-  ) |>
-  left_join(
-    u_df,
-    by = "fips"
-  ) |>
+  left_join(mu_df, by = "reference_date") |>
+  left_join(u_df, by = "fips") |>
   dplyr::mutate(
     v = v,
     rt = log(1 + exp(mu + u + v))
