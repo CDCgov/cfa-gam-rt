@@ -158,25 +158,29 @@ reference_date <- seq.Date(
 )
 
 time_dist <- dist(reference_date) |> as.matrix()
-time_cov <- time_cov(time_dist, rho = 0.9)
+time_cov <- time_cov(time_dist, rho = 0.975)
 
 space_dist <- sf::st_distance(sf::st_centroid(sf)) |>
   as.matrix()
 
 space_cov <- space_cov(
   space_dist,
-  range = as.numeric(mean(space_dist)), sill = 1
+  range = 1.5 * as.numeric(mean(space_dist)),
+  sill = 1
 )
 
-space_time_cov <- kronecker(space_cov, time_cov)
+# Choose to do independent by space
+space_time_cov <- kronecker(diag(nrow(space_dist)), time_cov)
 
-time_corr <- plot_matrix(time_cov, limits = c(0, 1)) + labs(title = "Temporal", fill = "Correlation")
-space_corr <- plot_matrix(space_cov, limits = c(0, 1)) + labs(title = "Spatial", fill = "Correlation")
-space_time_corr <- plot_matrix(space_time_cov, limits = c(0, 1)) + labs(title = "Spatio-temporal", fill = "Correlation")
+plot_matrix(time_cov, limits = c(0, 1)) + labs(title = "Temporal", fill = "Correlation")
+```
 
-time_corr + space_corr
+```{r}
+plot_matrix(space_cov, limits = c(0, 1)) + labs(title = "Spatial", fill = "Correlation")
+```
 
-space_time_corr
+```{r}
+plot_matrix(space_time_cov, limits = c(0, 1)) + labs(title = "Spatio-temporal", fill = "Correlation")
 ```
 
 ## 5.
@@ -196,14 +200,30 @@ n <- length(reference_date)
 
 x <- seq_len(n)
 mu <- 0.35 * (sin(x / (2 * pi)) + sin(x / (4 * pi))) + 0.75 + 0.0075 * x
-
 mu_df <- data.frame(reference_date = reference_date, mu = mu)
 
+ggplot(mu_df, aes(x = reference_date, y = mu)) +
+  geom_line() +
+  labs(title = "Temporal effect") +
+  theme_minimal()
+```
+
+```{r}
 u_sd <- 0.15
 u <- MASS::mvrnorm(n = 1, mu = rep(0, nrow(space_cov)), Sigma = u_sd * space_cov)
+u_df <- data.frame(fips = factor(fips, levels = fips), u = u) |>
+  left_join(
+    sf,
+    by = "fips"
+  )
 
-u_df <- data.frame(fips = factor(fips, levels = fips), u = u)
+ggplot(u_df, aes(fill = u, geometry = geometry)) +
+  geom_sf() +
+  geom_sf_text(aes(label = fips)) +
+  scale_fill_viridis_c()
+```
 
+```{r}
 v_sd <- 0.15
 v <- MASS::mvrnorm(n = 1, mu = rep(0, nrow(space_time_cov)), Sigma = v_sd * space_time_cov)
 
@@ -218,27 +238,6 @@ rt_df <- tidyr::expand_grid(
     rt = log(1 + exp(mu + u + v))
   )
 
-ggplot(rt_df, aes(x = reference_date, y = rt, col = fips)) +
-  geom_line() +
-  theme_minimal() +
-  facet_wrap(. ~ fips, scales = "free_y")
-```
-
-```{r}
-ggplot(mu_df, aes(x = reference_date, y = mu)) +
-  geom_line() +
-  labs(title = "Temporal effect") +
-  theme_minimal()
-```
-
-```{r}
-ggplot(u_df, aes(x = fips, y = u)) +
-  geom_point() +
-  labs(title = "Spatial effect") +
-  theme_minimal()
-```
-
-```{r}
 ggplot(rt_df, aes(x = reference_date, y = v, col = fips)) +
   geom_line() +
   labs(title = "Spatio-temporal effect") +
@@ -246,6 +245,13 @@ ggplot(rt_df, aes(x = reference_date, y = v, col = fips)) +
   theme(
     legend.position = "right"
   )
+```
+
+```{r}
+ggplot(rt_df, aes(x = reference_date, y = rt, col = fips)) +
+  geom_line() +
+  theme_minimal() +
+  facet_wrap(. ~ fips, scales = "free_y")
 ```
 
 ## 6.
