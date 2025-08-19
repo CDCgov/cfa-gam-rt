@@ -18,6 +18,15 @@ suppressPackageStartupMessages({
 })
 
 set.seed(1)
+
+theme_set(theme_minimal())
+theme_update(
+  panel.grid.minor = element_blank(),
+  legend.position = "bottom"
+)
+
+options(ggplot2.discrete.colour = list(RColorBrewer::brewer.pal(4, "Dark2")))
+options(ggplot2.discrete.fill = list(RColorBrewer::brewer.pal(4, "Dark2")))
 ```
 
 Plan:
@@ -186,31 +195,17 @@ where:
 n <- length(reference_date)
 
 x <- seq_len(n)
-mu <- sin(x / (2 * pi)) + 0.5 * sin(x / (4 * pi))
+mu <- 0.35 * (sin(x / (2 * pi)) + sin(x / (4 * pi))) + 0.75 + 0.0075 * x
 
-mu_df <- data.frame(
-  reference_date = reference_date,
-  mu = mu
-)
+mu_df <- data.frame(reference_date = reference_date, mu = mu)
 
-u_sd <- 0.3
-u <- MASS::mvrnorm(
-  n = 1,
-  mu = rep(0, nrow(space_cov)),
-  Sigma = u_sd * space_cov
-)
+u_sd <- 0.15
+u <- MASS::mvrnorm(n = 1, mu = rep(0, nrow(space_cov)), Sigma = u_sd * space_cov)
 
-u_df <- data.frame(
-  fips = factor(fips, levels = fips),
-  u = u
-)
+u_df <- data.frame(fips = factor(fips, levels = fips), u = u)
 
-v_sd <- 0.3
-v <- MASS::mvrnorm(
-  n = 1,
-  mu = rep(0, nrow(space_time_cov)),
-  Sigma = v_sd * space_time_cov
-)
+v_sd <- 0.15
+v <- MASS::mvrnorm(n = 1, mu = rep(0, nrow(space_time_cov)), Sigma = v_sd * space_time_cov)
 
 rt_df <- tidyr::expand_grid(
   reference_date = reference_date,
@@ -223,35 +218,39 @@ rt_df <- tidyr::expand_grid(
     rt = log(1 + exp(mu + u + v))
   )
 
-rt_plot <- ggplot(rt_df, aes(x = reference_date, y = rt, col = fips)) +
+ggplot(rt_df, aes(x = reference_date, y = rt, col = fips)) +
   geom_line() +
   theme_minimal() +
   facet_wrap(. ~ fips, scales = "free_y")
+```
 
-mu_plot <- ggplot(mu_df, aes(x = reference_date, y = mu)) +
+```{r}
+ggplot(mu_df, aes(x = reference_date, y = mu)) +
   geom_line() +
   labs(title = "Temporal effect") +
   theme_minimal()
+```
 
-u_plot <- ggplot(u_df, aes(x = fips, y = u)) +
+```{r}
+ggplot(u_df, aes(x = fips, y = u)) +
   geom_point() +
   labs(title = "Spatial effect") +
   theme_minimal()
+```
 
-v_plot <- ggplot(rt_df, aes(x = reference_date, y = v, col = fips)) +
+```{r}
+ggplot(rt_df, aes(x = reference_date, y = v, col = fips)) +
   geom_line() +
   labs(title = "Spatio-temporal effect") +
   theme_minimal() +
   theme(
     legend.position = "right"
   )
-
-rt_plot
-mu_plot / u_plot
-v_plot
 ```
 
 ## 6.
+
+This function simulates an SIR model in each county and generates the reporting triangle data:
 
 ```{r}
 sir_reporting_fips <- function(fips) {
@@ -262,10 +261,10 @@ sir_reporting_fips <- function(fips) {
   
   sir <- simulate_sir(
     Rt = rt,
-    S0 = 99000,
+    S0 = 8000,
     I0 = 1000,
-    R0 = 0,
-    gamma = 0.5,
+    R0 = 1000,
+    gamma = 0.25,
     delay_pmf = c(0.1, 0.2, 0.3, 0.4),
     k = 10,
     seed = 12345,
@@ -273,29 +272,51 @@ sir_reporting_fips <- function(fips) {
     day_of_week = FALSE
   )
   
+  delay <- c(0.6, 0.2, 0.1, 0.05, 0.025, 0.025)
+  
   reporting_triangle <- create_reporting_triangle(
     sir,
-    reporting_delay_pmf = c(0.6, 0.2, 0.1, 0.05, 0.025, 0.025)
+    reporting_delay_pmf = delay
   ) |>
     mutate(fips_code = .env$fips, .before = "reference_date") |>
+    mutate(
+      state_fips_code = stringr::str_sub(fips_code, 1, 2),
+      county_fips_code = stringr::str_sub(fips_code, 3, 5)
+    ) |>
     rename(count_target = cumulative_observed_cases)
   
   return(reporting_triangle)
 }
 
 df <- purrr::map_dfr(fips, sir_reporting_fips)
+
+ggplot(df, aes(x = reference_date, y = count_target, col = as.factor(delay))) +
+  geom_point() +
+  scale_color_viridis_d() +
+  facet_wrap(~fips_code, scales = "free") +
+  labs(
+    x = "Reference date",
+    y = "Cumulative observed cases",
+    col = "Delay"
+  ) +
+  theme_minimal()
 ```
 
 ## 6.
 
 ```{r}
-prep <- df |>
+df <- df |>
   mutate(
     api_version = NA,
-    count_total = 1e+05,
-  ) |>
-  gamtools::prep_model_df(report_date = max(df$report_date), nowcast_days = 4)
+    count_total = 10000,
+    geo_value = NA,
+    disease = "COVID-19",
+    model = "gam",
+    ts = as.integer(reference_date - min(reference_date))
+  )
 
+prep <- df |>
+  gamtools::prep_model_df(report_date = max(df$report_date), nowcast_days = 4)
 
 ggplot(prep, aes(x = reference_date, y = count_target, col = as.factor(delay))) +
   geom_point() +
@@ -332,14 +353,55 @@ summary(fit)
 ## 8.
 
 ```{r}
-pred <- prep |>
-  mutate(geo_value = NA) |>
+pred_prep <- prep |>
   prep_prediction_df(
     nowcast_days = 4,
+  )
+
+pred <- add_posterior_predictions(pred_prep, fit)
+
+pred |>
+  filter(
+    effective_delay == 6,
+    .draw <= 20,
+    fips_code == "99001"
   ) |>
-  add_posterior_predictions(fit)
+  ggplot(aes(x = reference_date, y = .response)) +
+  geom_point()
+
+summary <- summarize_posterior_preds(pred)
+
+ggplot(summary, aes(x = reference_date)) +
+  geom_ribbon(aes(ymin = lower_95, ymax = upper_95), fill = "darkblue", alpha = 0.5) +
+  geom_ribbon(aes(ymin = lower_50, ymax = upper_50), fill = "blue", alpha = 0.5) +
+  geom_line(aes(y = median)) +
+  facet_wrap(~fips_code, scales = "free")
 ```
 
+$R_t$ values:
+
+```{r}
+delay <- c(0.6, 0.2, 0.1, 0.05, 0.025, 0.025)
+gi <- c(0.1, 0.2, 0.3, 0.4)
+
+expectations_rt <- df |>
+  prep_rt_df(
+    nowcast_days = 0,
+    expected_delay = sum(delay * 0:(length(delay) - 1)),
+    gi_len = length(gi)
+  ) |>
+  mutate(count_denominator = 10000) |>
+  add_posterior_expectations(fit)
+
+rt <- expectations_rt |>
+  add_posterior_rt(fit, gi_pmf = gi, col_name = "fips_code")
+
+rt_summary <- summarize_posterior_rt(rt)
+
+ggplot(rt_summary, aes(x = reference_date)) +
+  geom_line(aes(y = median)) +
+  facet_wrap(~fips_code, scales = "free")
+```
 
 ## Alternative approach {-}
 
