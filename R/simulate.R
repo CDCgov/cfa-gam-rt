@@ -55,25 +55,26 @@ simulate_sir <- function(
 
   for (t in 1:n_inc) {
     # Catch case where S is zero causing beta to be NA
-    if (S[t] == 0) {
-      beta[t] <- 0
-    } else {
-      beta[t] <- Rt[t] * gamma * N / S[t]
-    }
-    dSdt <- -max(as.integer(beta[t] * S[t] * I[t] / N), 0L)
-    dRdt <- max(as.integer(I[t] * gamma), 0)
-    dIdt <- -dSdt - dRdt
+    beta[t] <- ifelse(S[t] == 0L, 0L, Rt[t] * gamma * N / S[t])
 
-    S[t + 1] <- S[t] + dSdt
-    I[t + 1] <- I[t] + dIdt
-    R[t + 1] <- R[t] + dRdt
+    proposed_infections <- max(as.integer(beta[t] * S[t] * I[t] / N), 0L)
+    proposed_recoveries <- max(as.integer(I[t] * gamma), 0L)
+
+    # Cap by available counts to avoid negative compartments
+    new_infections <- min(S[t], proposed_infections)
+    new_recoveries <- min(I[t], proposed_recoveries)
+
+    S[t + 1] <- S[t] - new_infections
+    I[t + 1] <- I[t] + new_infections - new_recoveries
+    R[t + 1] <- R[t] + new_recoveries
 
     # Incidence is the number of new cases, I is the prevalence
-    incidence[t] <- -dSdt
+    incidence[t] <- new_infections
   }
 
-
   true_cases_full <- stats::convolve(incidence, rev(delay_pmf), type = "open")
+  true_cases_full <- pmax(true_cases_full, 0)
+
   # TODO: Add day of week
   # Drop initial values biased by missing entries in the convolution
   true_cases <- true_cases_full[length(delay_pmf):length(true_cases_full)]
