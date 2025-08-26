@@ -277,7 +277,7 @@ sir_reporting_fips <- function(fips) {
     delay_pmf = c(0.1, 0.2, 0.3, 0.4),
     k = 10,
     seed = 12345,
-    date0 = as.Date("2023-01-01"),
+    date0 = as.Date("2025-01-01"),
     day_of_week = FALSE
   )
 
@@ -311,7 +311,7 @@ ggplot(df, aes(x = reference_date, y = count_target, col = as.factor(delay))) +
   theme_minimal()
 ```
 
-## 6.
+## 7.
 
 ```{r}
 df <- df |>
@@ -342,7 +342,7 @@ ggplot(prep, aes(x = reference_date, y = count_target, col = as.factor(delay))) 
 prep$reference_date |> unique()
 ```
 
-## 7.
+## 8.
 
 ```{r}
 n_distinct(prep$ts)
@@ -362,7 +362,7 @@ fit <- gamtools::fit_model(
 summary(fit)
 ```
 
-## 8.
+## 9.
 
 ```{r}
 pred_prep <- prep |>
@@ -370,24 +370,7 @@ pred_prep <- prep |>
     nowcast_days = 4,
   )
 
-pred <- add_posterior_predictions(pred_prep, fit)
-
-pred |>
-  filter(
-    effective_delay == 6,
-    .draw <= 20,
-    fips_code == "99001"
-  ) |>
-  ggplot(aes(x = reference_date, y = .response)) +
-  geom_point()
-
 summary <- summarize_posterior_preds(pred)
-
-ggplot(summary, aes(x = reference_date)) +
-  geom_ribbon(aes(ymin = lower_95, ymax = upper_95), fill = "darkblue", alpha = 0.5) +
-  geom_ribbon(aes(ymin = lower_50, ymax = upper_50), fill = "blue", alpha = 0.5) +
-  geom_line(aes(y = median)) +
-  facet_wrap(~fips_code, scales = "free")
 ```
 
 $R_t$ values:
@@ -409,8 +392,35 @@ rt <- expectations_rt |>
   add_posterior_rt(fit, gi_pmf = gi, col_name = "fips_code")
 
 rt_summary <- summarize_posterior_rt(rt)
+```
+
+## 10.
+
+```{r}
+df_retrospective <- df |>
+  group_by(reference_date) |>
+  filter(delay == max(delay))
+
+ggplot(summary, aes(x = reference_date)) +
+  geom_ribbon(aes(ymin = lower_95, ymax = upper_95), fill = "#deebf7") +
+  geom_ribbon(aes(ymin = lower_50, ymax = upper_50), fill = "#9ecae1") +
+  geom_line(aes(y = median), col = "#08519c") +
+  geom_point(data = df_retrospective, aes(x = reference_date, y = count_target), shape = 1) +
+  facet_wrap(~fips_code, scales = "free")
+
+ggsave("forecast.png", h = 10, w = 12, bg = "white")
+```
+
+```{r}
+rt_df_corrected <- rt_df |>
+  mutate(fips_code = fips)
 
 ggplot(rt_summary, aes(x = reference_date)) +
-  geom_line(aes(y = median)) +
+  geom_ribbon(aes(ymin = lower_95, ymax = upper_95), fill = "#fee5d9") +
+  geom_ribbon(aes(ymin = lower_50, ymax = upper_50), fill = "#fcae91") +
+  geom_line(aes(y = median), col = "#cb181d") +
+  geom_line(data = rt_df_corrected, aes(y = rt)) +
   facet_wrap(~fips_code, scales = "free")
+
+ggsave("rt.png", h = 10, w = 12, bg = "white")
 ```
