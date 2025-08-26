@@ -1,3 +1,7 @@
+# RtGam (experimental)
+
+* testing estimation with delay-convolutions via RTMB (not integrated into main package yet)
+
 # RtGam v0.4.0
 
 ## Features

@@ -1,0 +1,4 @@
+*~
+\.#*
+!outputs/**/*.png
+package-lock.json

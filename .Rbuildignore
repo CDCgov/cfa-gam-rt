@@ -1,3 +1,4 @@
+RTMB-convolve
 ^.*\.Rproj$
 ^.lintr$
 ^.secrets.baseline$
