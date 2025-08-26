@@ -24,3 +24,9 @@ test_that("simulate_sir handles zero initial susceptibles", {
   result <- simulate_sir(S0 = 0)
   expect_true(all(result[which(result$parameter == "S"), "value"] == 0))
 })
+
+test_that("simulate_sir handles exhausting susceptibles", {
+  result <- simulate_sir(Rt = rep(2, 20), S0 = 999, I0 = 1, R0 = 0)
+  expect_true(all(result[which(result$parameter == "Rt"), "value"] == 2))
+  expect_true(all(result[which(result$parameter == "S"), "value"] >= 0))
+})
