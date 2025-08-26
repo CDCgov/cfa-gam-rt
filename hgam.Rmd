@@ -8,6 +8,8 @@ output: html_document
 ```{r}
 knitr::opts_chunk$set(error = TRUE)
 
+# devtools::install_github("CDCgov/cfa-gam-rt", ref = "cap-sus-fix")
+
 suppressPackageStartupMessages({
   library(RtGam)
   library(ggplot2)
@@ -187,7 +189,7 @@ plot_matrix(space_time_cov, limits = c(0, 1)) + labs(title = "Spatio-temporal", 
 
 We will use a model like
 $$
-R_t = \mu_t + u_s + v_{st},
+R_t \sim \mu_t + u_s + v_{st},
 $$
 where:
 
@@ -199,7 +201,7 @@ where:
 n <- length(reference_date)
 
 x <- seq_len(n)
-mu <- 0.35 * (sin(x / (2 * pi)) + sin(x / (4 * pi))) + 0.75 + 0.0075 * x
+mu <- 0.35 * (sin(x / (2 * pi)) + sin(x / (4 * pi))) + 0.65 + 0.0075 * x
 mu_df <- data.frame(reference_date = reference_date, mu = mu)
 
 ggplot(mu_df, aes(x = reference_date, y = mu)) +
@@ -209,7 +211,7 @@ ggplot(mu_df, aes(x = reference_date, y = mu)) +
 ```
 
 ```{r}
-u_sd <- 0.15
+u_sd <- 0.2
 u <- MASS::mvrnorm(n = 1, mu = rep(0, nrow(space_cov)), Sigma = u_sd * space_cov)
 u_df <- data.frame(fips = factor(fips, levels = fips), u = u) |>
   left_join(
@@ -224,7 +226,7 @@ ggplot(u_df, aes(fill = u, geometry = geometry)) +
 ```
 
 ```{r}
-v_sd <- 0.05
+v_sd <- 0.2
 v <- MASS::mvrnorm(n = 1, mu = rep(0, nrow(space_time_cov)), Sigma = v_sd * space_time_cov)
 
 rt_df <- tidyr::expand_grid(
@@ -235,7 +237,8 @@ rt_df <- tidyr::expand_grid(
   left_join(u_df, by = "fips") |>
   dplyr::mutate(
     v = v,
-    rt = log(1 + exp(mu + u + v))
+    lp = mu + u + v,
+    rt = 1 + 0.5 * tanh(lp)
   )
 
 ggplot(rt_df, aes(x = reference_date, y = v, col = fips)) +
@@ -267,7 +270,7 @@ sir_reporting_fips <- function(fips) {
 
   sir <- simulate_sir(
     Rt = rt,
-    S0 = 8000,
+    S0 = 99000,
     I0 = 1000,
     R0 = 1000,
     gamma = 0.25,
@@ -302,7 +305,7 @@ ggplot(df, aes(x = reference_date, y = count_target, col = as.factor(delay))) +
   facet_wrap(~fips_code, scales = "free") +
   labs(
     x = "Reference date",
-    y = "Cumulative observed cases",
+    y = "Cumulative observed daily cases",
     col = "Delay"
   ) +
   theme_minimal()
@@ -314,7 +317,7 @@ ggplot(df, aes(x = reference_date, y = count_target, col = as.factor(delay))) +
 df <- df |>
   mutate(
     api_version = NA,
-    count_total = 10000,
+    count_total = 1,
     geo_value = NA,
     disease = "COVID-19",
     model = "gam",
@@ -322,7 +325,7 @@ df <- df |>
   )
 
 prep <- df |>
-  gamtools::prep_model_df(report_date = max(df$report_date), nowcast_days = 4)
+  gamtools::prep_model_df(report_date = max(df$report_date), nowcast_days = 8)
 
 ggplot(prep, aes(x = reference_date, y = count_target, col = as.factor(delay))) +
   geom_point() +
@@ -334,6 +337,9 @@ ggplot(prep, aes(x = reference_date, y = count_target, col = as.factor(delay))) 
     col = "Delay"
   ) +
   theme_minimal()
+
+# Some dates are not included because of the approach
+prep$reference_date |> unique()
 ```
 
 ## 7.
@@ -396,7 +402,7 @@ expectations_rt <- df |>
     expected_delay = sum(delay * 0:(length(delay) - 1)),
     gi_len = length(gi)
   ) |>
-  mutate(count_denominator = 10000) |>
+  mutate(count_denominator = 1) |>
   add_posterior_expectations(fit)
 
 rt <- expectations_rt |>
@@ -407,32 +413,4 @@ rt_summary <- summarize_posterior_rt(rt)
 ggplot(rt_summary, aes(x = reference_date)) +
   geom_line(aes(y = median)) +
   facet_wrap(~fips_code, scales = "free")
-```
-
-## Alternative approach {-}
-
-Alternative is to come from simulating data to go straight into the HGAM code:
-
-```{r}
-fake_reporting_triangle <- function(
-    fips = c("01001", "01003", "01005"),
-    nowcast_days = 6,
-    end_date = as.Date("2025-07-07")) {
-  tidyr::expand_grid(
-    report_date = seq(end_date - nowcast_days * 7, end_date, by = "week"),
-    delay = 0:nowcast_days,
-    fips_code = fips
-  ) |>
-    mutate(
-      reference_date = report_date - delay,
-      count_target = 10 + delay + as.integer(factor(fips_code)),
-      count_ddi = 8 + delay + as.integer(factor(fips_code)),
-      count_total = 15 + delay + as.integer(factor(fips_code)),
-      api_version = "v1"
-    )
-}
-
-tri <- fake_reporting_triangle()
-prep <- gamtools::prep_model_df(tri, report_date = max(tri$report_date), nowcast_days = 6, denominator = "count_total")
-fit_none <- gamtools::fit_model(df = prep, network = "none")
 ```
