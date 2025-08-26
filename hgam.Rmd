@@ -158,7 +158,7 @@ reference_date <- seq.Date(
 )
 
 time_dist <- dist(reference_date) |> as.matrix()
-time_cov <- time_cov(time_dist, rho = 0.975)
+time_cov <- time_cov(time_dist, rho = 0.985)
 
 space_dist <- sf::st_distance(sf::st_centroid(sf)) |>
   as.matrix()
@@ -224,12 +224,12 @@ ggplot(u_df, aes(fill = u, geometry = geometry)) +
 ```
 
 ```{r}
-v_sd <- 0.15
+v_sd <- 0.05
 v <- MASS::mvrnorm(n = 1, mu = rep(0, nrow(space_time_cov)), Sigma = v_sd * space_time_cov)
 
 rt_df <- tidyr::expand_grid(
-  reference_date = reference_date,
-  fips = factor(fips, levels = fips)
+  fips = factor(fips, levels = fips),
+  reference_date = reference_date
 ) |>
   left_join(mu_df, by = "reference_date") |>
   left_join(u_df, by = "fips") |>
