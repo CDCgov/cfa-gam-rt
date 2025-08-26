@@ -46,7 +46,7 @@ Plan:
 
 ```{r}
 sir <- simulate_sir(
-  Rt = 0.5 * sin(seq_len(100)/10 * pi) + 1,
+  Rt = 0.5 * sin(seq_len(100) / 10 * pi) + 1,
   S0 = 99000,
   I0 = 1000,
   R0 = 0,
@@ -107,7 +107,7 @@ ggplot(reporting_triangle, aes(x = reference_date, y = cumulative_observed_cases
 ## 3.
 
 ```{r}
-create_sf_grid <- function(height, width){
+create_sf_grid <- function(height, width) {
   sfc <- sf::st_sfc(sf::st_polygon(list(rbind(c(0, 0), c(width, 0), c(width, height), c(0, 0)))))
   grid <- sf::st_make_grid(sfc, cellsize = 1, square = TRUE)
   return(grid)
@@ -264,7 +264,7 @@ sir_reporting_fips <- function(fips) {
     filter(fips == .env$fips) |>
     arrange(reference_date) |>
     pull(rt)
-  
+
   sir <- simulate_sir(
     Rt = rt,
     S0 = 8000,
@@ -277,9 +277,9 @@ sir_reporting_fips <- function(fips) {
     date0 = as.Date("2023-01-01"),
     day_of_week = FALSE
   )
-  
+
   delay <- c(0.6, 0.2, 0.1, 0.05, 0.025, 0.025)
-  
+
   reporting_triangle <- create_reporting_triangle(
     sir,
     reporting_delay_pmf = delay
@@ -290,7 +290,7 @@ sir_reporting_fips <- function(fips) {
       county_fips_code = stringr::str_sub(fips_code, 3, 5)
     ) |>
     rename(count_target = cumulative_observed_cases)
-  
+
   return(reporting_triangle)
 }
 
@@ -417,8 +417,7 @@ Alternative is to come from simulating data to go straight into the HGAM code:
 fake_reporting_triangle <- function(
     fips = c("01001", "01003", "01005"),
     nowcast_days = 6,
-    end_date = as.Date("2025-07-07")
-) {
+    end_date = as.Date("2025-07-07")) {
   tidyr::expand_grid(
     report_date = seq(end_date - nowcast_days * 7, end_date, by = "week"),
     delay = 0:nowcast_days,
