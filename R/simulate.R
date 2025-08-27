@@ -73,6 +73,7 @@ simulate_sir <- function(
   }
 
   true_cases_full <- stats::convolve(incidence, rev(delay_pmf), type = "open")
+  # Guard against tiny negative values due to numerical imprecision
   true_cases_full <- pmax(true_cases_full, 0)
 
   # TODO: Add day of week
