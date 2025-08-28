@@ -6,6 +6,8 @@ output: html_document
 ---
 
 ```{r}
+knitr::opts_chunk$set(error = TRUE)
+
 suppressPackageStartupMessages({
   library(RtGam)
   library(ggplot2)
@@ -66,7 +68,8 @@ reporting_delay_pmf <- c(0.6, 0.2, 0.1, 0.05, 0.05)
 create_reporting_triangle <- function(sir, reporting_delay_pmf) {
   L <- length(reporting_delay_pmf)
 
-  cases_df <- filter(sir, parameter == "observed_incident_cases")
+  cases_df <- filter(sir, parameter == "observed_incident_cases") |>
+    mutate(value = tidyr::replace_na(value, 0))
 
   cases_df |>
     rowwise() |>
@@ -182,7 +185,7 @@ where:
 ```{r}
 n <- length(reference_date)
 
-mu <- 0.5 * sin(seq_len(n) / 5 * pi)
+mu <- 0.5 * sin(seq_len(n) / 5 * pi) - 0.1
 
 mu_df <- data.frame(
   reference_date = reference_date,
@@ -201,7 +204,7 @@ u_df <- data.frame(
   u = u
 )
 
-v_sd <- 0.05
+v_sd <- 0.2
 v <- MASS::mvrnorm(
   n = 1,
   mu = rep(0, nrow(space_time_cov)),
@@ -222,10 +225,10 @@ rt_df <- tidyr::expand_grid(
   ) |>
   dplyr::mutate(
     v = v,
-    rt = exp(mu + u + v)
+    rt = log(1 + exp(mu + u + v))
   )
 
-ggplot(rt_df, aes(x = reference_date, y = rt, col = fips)) +
+rt_plot <- ggplot(rt_df, aes(x = reference_date, y = rt, col = fips)) +
   geom_line() +
   theme_minimal() +
   facet_wrap(. ~ fips, scales = "free_y")
@@ -248,6 +251,7 @@ v_plot <- ggplot(rt_df, aes(x = reference_date, y = v, col = fips)) +
     legend.position = "right"
   )
 
+rt_plot
 mu_plot / u_plot
 v_plot
 ```
@@ -318,6 +322,18 @@ fit <- gamtools::fit_model(
 summary(fit)
 ```
 
+## 8.
+
+```{r}
+pred <- prep |>
+  mutate(geo_value = NA) |>
+  prep_prediction_df(
+    nowcast_days = 4,
+  ) |>
+  add_posterior_predictions(fit)
+```
+
+
 ## Alternative approach {-}
 
 Alternative is to come from simulating data to go straight into the HGAM code:
@@ -345,5 +361,4 @@ fake_reporting_triangle <- function(
 tri <- fake_reporting_triangle()
 prep <- gamtools::prep_model_df(tri, report_date = max(tri$report_date), nowcast_days = 6, denominator = "count_total")
 fit_none <- gamtools::fit_model(df = prep, network = "none")
-str(fit_none)
 ```
