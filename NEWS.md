@@ -1,3 +1,7 @@
+# RtGam (experimental)
+
+* Add bug fix for susceptibles going negative in the simulator (#120)
+
 # RtGam v0.4.0
 
 ## Features
