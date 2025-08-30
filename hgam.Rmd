@@ -1,0 +1,440 @@
+---
+title: "Simulating and running HGAMs on spatio-temporal data"
+author: "Adam Howes"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+---
+
+```{r}
+knitr::opts_chunk$set(error = TRUE)
+
+suppressPackageStartupMessages({
+  library(RtGam)
+  library(ggplot2)
+  library(gamtools)
+  library(sf)
+  library(dplyr)
+  library(patchwork)
+})
+
+set.seed(1)
+
+theme_set(theme_minimal())
+theme_update(
+  panel.grid.minor = element_blank(),
+  legend.position = "bottom"
+)
+
+options(ggplot2.discrete.colour = list(RColorBrewer::brewer.pal(4, "Dark2")))
+options(ggplot2.discrete.fill = list(RColorBrewer::brewer.pal(4, "Dark2")))
+```
+
+**Background**:
+We have developed a hierarchical generalized additive model (HGAM) to estimate $R_t$ from reporting triangle data across multiple spatial locations.
+The model is implemented in the `gamtools` package and uses `mgcv` under the hood.
+We have tested the model on real data, but not yet on simulated data where the true value of $R_t$ is known.
+
+**Goal**:
+This work aims to simulate data with known spatio-temporal structure and $R_t$ values, then to fit the HGAM model.
+In doing so, we will validate the model and its implementation against a known ground truth.
+
+**Outputs**:
+Most directly, this work may be implemented using `testthat` into `gamtools` enabling unit testing of model components (e.g. `prepare_model_df()`) and integration testing of the model fitting pipeline.
+Additionally, this notebook could serve as a vignette demonstrating the use of the HGAM model: data simulation, data preparation, model fitting, output post-processing, and visualization.
+
+**Plan**:
+I plan to approach this work by:
+
+1. Understand `simulate_sir` function
+1. Extend `simulate_sir` to generate reporting triangle data
+1. Create fake counties spatial structure
+1. Simulate correlation structures for the fake counties
+1. Create time series of $R_t$ with some spatio-temporal structure
+1. Apply `simulate_sir` to each county
+1. Extract data and format for input to `gamtools::prep_model_df`
+1. Run model with `gamtools::run_model()`
+1. Visualise results
+1. Perform checks ready for e.g. `testthat` setting
+
+## 1.
+
+```{r}
+sir <- simulate_sir(
+  Rt = 0.5 * sin(seq_len(100) / 10 * pi) + 1,
+  S0 = 99000,
+  I0 = 1000,
+  R0 = 0,
+  gamma = 0.5,
+  delay_pmf = c(0.1, 0.2, 0.3, 0.4),
+  k = 10,
+  seed = 12345,
+  date0 = as.Date("2023-01-01"),
+  day_of_week = FALSE
+)
+
+ggplot(sir, aes(x = reference_date, y = value, col = parameter)) +
+  geom_line() +
+  theme_minimal() +
+  facet_wrap(~parameter, scales = "free")
+```
+
+## 2.
+
+The `simulate_sir()` function currently doesn't generate reporting triangle data.
+Here I will extend it to do so:
+
+```{r}
+sir$parameter |> unique()
+
+reporting_delay_pmf <- c(0.6, 0.2, 0.1, 0.05, 0.05)
+
+create_reporting_triangle <- function(sir, reporting_delay_pmf) {
+  L <- length(reporting_delay_pmf)
+
+  cases_df <- filter(sir, parameter == "observed_incident_cases") |>
+    mutate(value = tidyr::replace_na(value, 0))
+
+  cases_df |>
+    rowwise() |>
+    mutate(
+      delay = list(0:(L - 1)),
+      report_date = list(reference_date + 0:(L - 1)),
+      cumulative_observed_cases = list(cumsum(rmultinom(n = 1, size = value, prob = reporting_delay_pmf))),
+    ) |>
+    tidyr::unnest(c(delay, report_date, cumulative_observed_cases)) |>
+    select(reference_date, report_date, delay, cumulative_observed_cases)
+}
+
+reporting_triangle <- create_reporting_triangle(sir, reporting_delay_pmf)
+
+ggplot(reporting_triangle, aes(x = reference_date, y = cumulative_observed_cases, col = as.factor(delay))) +
+  geom_point() +
+  scale_color_viridis_d() +
+  labs(
+    x = "Reference date",
+    y = "Cumulative observed cases",
+    col = "Delay"
+  ) +
+  theme_minimal()
+```
+
+## 3.
+
+```{r}
+create_sf_grid <- function(height, width) {
+  sfc <- sf::st_sfc(sf::st_polygon(list(rbind(c(0, 0), c(width, 0), c(width, height), c(0, 0)))))
+  grid <- sf::st_make_grid(sfc, cellsize = 1, square = TRUE)
+  return(grid)
+}
+
+geometry <- create_sf_grid(height = 4, width = 4)
+
+state_fips_code <- "99"
+county_fips_code <- stringr::str_pad(seq_along(geometry), width = 3, pad = "0")
+fips <- paste0(state_fips_code, county_fips_code)
+
+sf <- sf::st_sf(geometry) |>
+  mutate(fips = fips)
+
+ggplot(sf) +
+  geom_sf() +
+  geom_sf_text(aes(label = fips)) +
+  theme_void() +
+  labs(title = "Mocked counties")
+```
+
+## 4.
+
+```{r}
+plot_matrix <- function(M, limits = NULL) {
+  ggplot(
+    reshape2::melt(M),
+    aes(x = .data$Var1, y = .data$Var2, fill = .data$value)
+  ) +
+    labs(x = "", y = "", fill = "Value") +
+    geom_tile() +
+    scale_fill_viridis_c(limits = limits) +
+    theme_void()
+}
+
+space_cov <- function(d, range, sill) {
+  sill * exp(-d / range)
+}
+
+time_cov <- function(lag, rho) {
+  rho^lag
+}
+
+reference_date <- seq.Date(
+  from = as.Date("2025-01-01"),
+  by = "day",
+  length.out = 60
+)
+
+time_dist <- dist(reference_date) |> as.matrix()
+time_cov <- time_cov(time_dist, rho = 0.985)
+
+space_dist <- sf::st_distance(sf::st_centroid(sf)) |>
+  as.matrix()
+
+space_cov <- space_cov(
+  space_dist,
+  range = 1.5 * as.numeric(mean(space_dist)),
+  sill = 1
+)
+
+# Choose to do independent by space
+space_time_cov <- kronecker(diag(nrow(space_dist)), time_cov)
+
+plot_matrix(time_cov, limits = c(0, 1)) + labs(title = "Temporal", fill = "Correlation")
+```
+
+```{r}
+plot_matrix(space_cov, limits = c(0, 1)) + labs(title = "Spatial", fill = "Correlation")
+```
+
+```{r}
+plot_matrix(space_time_cov, limits = c(0, 1)) + labs(title = "Spatio-temporal", fill = "Correlation")
+```
+
+## 5.
+
+We will use a model like
+$$
+R_t \sim \mu_t + u_s + v_{st},
+$$
+where:
+
+* $\mu_t$ is a smooth temporal trend
+* $u_s$ is a spatially varying intercept
+* $w_{st}$ is a spatio-temporal interaction
+
+```{r}
+n <- length(reference_date)
+
+x <- seq_len(n)
+mu <- 0.35 * (sin(x / (2 * pi)) + sin(x / (4 * pi))) + 0.65 + 0.0075 * x
+mu_df <- data.frame(reference_date = reference_date, mu = mu)
+
+ggplot(mu_df, aes(x = reference_date, y = mu)) +
+  geom_line() +
+  labs(title = "Temporal effect") +
+  theme_minimal()
+```
+
+```{r}
+u_sd <- 0.2
+u <- MASS::mvrnorm(n = 1, mu = rep(0, nrow(space_cov)), Sigma = u_sd * space_cov)
+u_df <- data.frame(fips = factor(fips, levels = fips), u = u) |>
+  left_join(
+    sf,
+    by = "fips"
+  )
+
+ggplot(u_df, aes(fill = u, geometry = geometry)) +
+  geom_sf() +
+  geom_sf_text(aes(label = fips)) +
+  scale_fill_viridis_c()
+```
+
+```{r}
+v_sd <- 0.2
+v <- MASS::mvrnorm(n = 1, mu = rep(0, nrow(space_time_cov)), Sigma = v_sd * space_time_cov)
+
+rt_df <- tidyr::expand_grid(
+  fips = factor(fips, levels = fips),
+  reference_date = reference_date
+) |>
+  left_join(mu_df, by = "reference_date") |>
+  left_join(u_df, by = "fips") |>
+  dplyr::mutate(
+    v = v,
+    lp = mu + u + v,
+    rt = 1 + 0.5 * tanh(lp)
+  )
+
+ggplot(rt_df, aes(x = reference_date, y = v, col = fips)) +
+  geom_line() +
+  labs(title = "Spatio-temporal effect") +
+  theme_minimal() +
+  theme(
+    legend.position = "right"
+  )
+```
+
+```{r}
+ggplot(rt_df, aes(x = reference_date, y = rt, col = fips)) +
+  geom_line() +
+  theme_minimal() +
+  facet_wrap(. ~ fips, scales = "free_y")
+```
+
+## 6.
+
+This function simulates an SIR model in each county and generates the reporting triangle data:
+
+```{r}
+sir_reporting_fips <- function(fips) {
+  rt <- rt_df |>
+    filter(fips == .env$fips) |>
+    arrange(reference_date) |>
+    pull(rt)
+
+  sir <- simulate_sir(
+    Rt = rt,
+    S0 = 99000,
+    I0 = 1000,
+    R0 = 1000,
+    gamma = 0.25,
+    delay_pmf = c(0.1, 0.2, 0.3, 0.4),
+    k = 10,
+    seed = 12345,
+    date0 = as.Date("2025-01-01"),
+    day_of_week = FALSE
+  )
+
+  delay <- c(0.6, 0.2, 0.1, 0.05, 0.025, 0.025)
+
+  reporting_triangle <- create_reporting_triangle(
+    sir,
+    reporting_delay_pmf = delay
+  ) |>
+    mutate(fips_code = .env$fips, .before = "reference_date") |>
+    mutate(
+      state_fips_code = stringr::str_sub(fips_code, 1, 2),
+      county_fips_code = stringr::str_sub(fips_code, 3, 5)
+    ) |>
+    rename(count_target = cumulative_observed_cases)
+
+  return(reporting_triangle)
+}
+
+df <- purrr::map_dfr(fips, sir_reporting_fips)
+
+ggplot(df, aes(x = reference_date, y = count_target, col = as.factor(delay))) +
+  geom_point() +
+  scale_color_viridis_d() +
+  facet_wrap(~fips_code, scales = "free") +
+  labs(
+    x = "Reference date",
+    y = "Cumulative observed daily cases",
+    col = "Delay"
+  ) +
+  theme_minimal()
+```
+
+## 7.
+
+```{r}
+df <- df |>
+  mutate(
+    api_version = NA,
+    count_total = 1,
+    geo_value = NA,
+    disease = "COVID-19",
+    model = "gam",
+    ts = as.integer(reference_date - min(reference_date))
+  )
+
+prep <- df |>
+  gamtools::prep_model_df(report_date = max(df$report_date), nowcast_days = 8)
+
+ggplot(prep, aes(x = reference_date, y = count_target, col = as.factor(delay))) +
+  geom_point() +
+  scale_color_viridis_d() +
+  facet_wrap(~fips_code, scales = "free") +
+  labs(
+    x = "Reference date",
+    y = "Cumulative observed cases",
+    col = "Delay"
+  ) +
+  theme_minimal()
+
+# Some dates are not included because of the approach
+prep$reference_date |> unique()
+```
+
+## 8.
+
+```{r}
+n_distinct(prep$ts)
+
+per_fips_delay <- prep |>
+  group_by(fips_code) |>
+  summarise(n_delay = n_distinct(effective_delay), .groups = "drop")
+
+min_delay_per_fips <- min(per_fips_delay$n_delay)
+
+n_pair_fips_ts <- n_distinct(interaction(prep$fips_code, prep$ts, drop = TRUE))
+
+fit <- gamtools::fit_model(
+  df = prep, network = "none"
+)
+
+summary(fit)
+```
+
+## 9.
+
+```{r}
+pred_prep <- prep |>
+  prep_prediction_df(
+    nowcast_days = 4,
+  )
+
+summary <- summarize_posterior_preds(pred)
+```
+
+$R_t$ values:
+
+```{r}
+delay <- c(0.6, 0.2, 0.1, 0.05, 0.025, 0.025)
+gi <- c(0.1, 0.2, 0.3, 0.4)
+
+expectations_rt <- df |>
+  prep_rt_df(
+    nowcast_days = 0,
+    expected_delay = sum(delay * 0:(length(delay) - 1)),
+    gi_len = length(gi)
+  ) |>
+  mutate(count_denominator = 1) |>
+  add_posterior_expectations(fit)
+
+rt <- expectations_rt |>
+  add_posterior_rt(fit, gi_pmf = gi, col_name = "fips_code")
+
+rt_summary <- summarize_posterior_rt(rt)
+```
+
+## 10.
+
+```{r}
+df_retrospective <- df |>
+  group_by(reference_date) |>
+  filter(delay == max(delay))
+
+ggplot(summary, aes(x = reference_date)) +
+  geom_ribbon(aes(ymin = lower_95, ymax = upper_95), fill = "#deebf7") +
+  geom_ribbon(aes(ymin = lower_50, ymax = upper_50), fill = "#9ecae1") +
+  geom_line(aes(y = median), col = "#08519c") +
+  geom_point(data = df_retrospective, aes(x = reference_date, y = count_target), shape = 1) +
+  facet_wrap(~fips_code, scales = "free")
+
+ggsave("forecast.png", h = 10, w = 12, bg = "white")
+```
+
+```{r}
+rt_df_corrected <- rt_df |>
+  mutate(fips_code = fips)
+
+ggplot(rt_summary, aes(x = reference_date)) +
+  geom_ribbon(aes(ymin = lower_95, ymax = upper_95), fill = "#fee5d9") +
+  geom_ribbon(aes(ymin = lower_50, ymax = upper_50), fill = "#fcae91") +
+  geom_line(aes(y = median), col = "#cb181d") +
+  geom_line(data = rt_df_corrected, aes(y = rt)) +
+  facet_wrap(~fips_code, scales = "free")
+
+ggsave("rt.png", h = 10, w = 12, bg = "white")
+```
