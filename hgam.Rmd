@@ -60,6 +60,8 @@ I plan to approach this work by:
 
 ## 1.
 
+The `simulate_sir()` function generates a number of outputs in long format:
+
 ```{r}
 sir <- simulate_sir(
   Rt = 0.5 * sin(seq_len(100) / 10 * pi) + 1,
@@ -82,12 +84,11 @@ ggplot(sir, aes(x = reference_date, y = value, col = parameter)) +
 
 ## 2.
 
-The `simulate_sir()` function currently doesn't generate reporting triangle data.
-Here I will extend it to do so:
+It currently doesn't generate reporting triangle data.
+Here I will extend it to do so.
+For now assume the same `reporting_delay_pmf` for all data (with the same maximum length):
 
 ```{r}
-sir$parameter |> unique()
-
 reporting_delay_pmf <- c(0.6, 0.2, 0.1, 0.05, 0.05)
 
 create_reporting_triangle <- function(sir, reporting_delay_pmf) {
@@ -122,6 +123,8 @@ ggplot(reporting_triangle, aes(x = reference_date, y = cumulative_observed_cases
 
 ## 3.
 
+For the spatial structure, create a four-by-four grid of mock counties:
+
 ```{r}
 create_sf_grid <- function(height, width) {
   sfc <- sf::st_sfc(sf::st_polygon(list(rbind(c(0, 0), c(width, 0), c(width, height), c(0, 0)))))
@@ -146,6 +149,8 @@ ggplot(sf) +
 ```
 
 ## 4.
+
+I considered the following spatio-temporal covariance structures:
 
 ```{r}
 plot_matrix <- function(M, limits = NULL) {
@@ -209,7 +214,7 @@ where:
 
 * $\mu_t$ is a smooth temporal trend
 * $u_s$ is a spatially varying intercept
-* $w_{st}$ is a spatio-temporal interaction
+* $w_{st}$ is a spatio-temporal interaction (currently independent by space)
 
 ```{r}
 n <- length(reference_date)
@@ -273,7 +278,9 @@ ggplot(rt_df, aes(x = reference_date, y = rt, col = fips)) +
 
 ## 6.
 
-This function simulates an SIR model in each county and generates the reporting triangle data:
+This function simulates an SIR model in each county and generates the reporting triangle data.
+One of the features of the data is that the values of $R_t$ can be high enough that the susceptible population is depleted.
+This isn't very realistic for respiratory infections so it could be something we look to improve in future.
 
 ```{r}
 sir_reporting_fips <- function(fips) {
@@ -327,6 +334,11 @@ ggplot(df, aes(x = reference_date, y = count_target, col = as.factor(delay))) +
 
 ## 7.
 
+We now use the `prep_model_df()` function to prepare the data for input to the model fitting function.
+This function filters the data in a particular way, which it's important to be aware of.
+**Important** A limitation of the work here is that the final report date does not include all data.
+This could be something to fix.
+
 ```{r}
 df <- df |>
   mutate(
@@ -351,12 +363,18 @@ ggplot(prep, aes(x = reference_date, y = count_target, col = as.factor(delay))) 
     col = "Delay"
   ) +
   theme_minimal()
+```
 
-# Some dates are not included because of the approach
+Because of the filtering approach combined with not including all reference dates for the final report date, some reference dates are not included in the model currently:
+
+```{r}
 prep$reference_date |> unique()
 ```
 
 ## 8.
+
+We fit the model with `gamtools::fit_model`!
+The calls to `n_distinct` and `interaction` below were to check the data (as warnings are thrown about missing factor levels).
 
 ```{r}
 n_distinct(prep$ts)
@@ -378,11 +396,15 @@ summary(fit)
 
 ## 9.
 
+Predictions:
+
 ```{r}
 pred_prep <- prep |>
   prep_prediction_df(
     nowcast_days = 4,
   )
+
+pred <- add_posterior_predictions(pred_prep, fit)
 
 summary <- summarize_posterior_preds(pred)
 ```
@@ -410,6 +432,8 @@ rt_summary <- summarize_posterior_rt(rt)
 
 ## 10.
 
+The forecast recovery seems pretty reasonable, but can't handle the drop to zero (dupleted susceptibles):
+
 ```{r}
 df_retrospective <- df |>
   group_by(reference_date) |>
@@ -421,9 +445,9 @@ ggplot(summary, aes(x = reference_date)) +
   geom_line(aes(y = median), col = "#08519c") +
   geom_point(data = df_retrospective, aes(x = reference_date, y = count_target), shape = 1) +
   facet_wrap(~fips_code, scales = "free")
-
-ggsave("forecast.png", h = 10, w = 12, bg = "white")
 ```
+
+The $R_t$ recovery is more questionable, that the model cannot currently handle the shape of the true $R_t$ values (and it can't deal with the depletion of susceptibles either):
 
 ```{r}
 rt_df_corrected <- rt_df |>
@@ -435,6 +459,4 @@ ggplot(rt_summary, aes(x = reference_date)) +
   geom_line(aes(y = median), col = "#cb181d") +
   geom_line(data = rt_df_corrected, aes(y = rt)) +
   facet_wrap(~fips_code, scales = "free")
-
-ggsave("rt.png", h = 10, w = 12, bg = "white")
 ```
